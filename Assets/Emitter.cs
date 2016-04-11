@@ -22,8 +22,11 @@ public class Emitter : MonoBehaviour {
         float t = Time.fixedTime;
         
         if (t - lastEmitted >= 1/rate)
-        {   
-            /* Add particle to particleSystem */   
+        {
+            /* Add particle to particleSystem */
+            PE.Particle p = new PE.Particle();
+            
+            //ps.AddParticle(); 
             lastEmitted = t;
         }
         

@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 
+using PE;
+
 namespace PE
 {
 	public struct Particle
 	{
-		public Vector3 x;
-		public Vector3 v;
-		public Vector3 f;
+		public Vec3 x;
+		public Vec3 v;
+		public Vec3 f;
 		public double m;
 		public double age;
 	}

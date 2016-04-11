@@ -26,7 +26,7 @@ namespace PE
 			}
 		}
 
-		void AddParticle (Particle p)
+		public void AddParticle (Particle p)
 		{
 			particles.Add (p);
 		}

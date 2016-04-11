@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pe
+namespace PE
 {
 	public struct Vec3
 	{
@@ -52,6 +52,26 @@ namespace Pe
 		{
 			return new Vec3 (lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 		}
-	}
+
+        public static Vec3 operator* (double lhs, Vec3 rhs)
+        {
+            return new Vec3(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+        }
+
+        public static Vec3 operator* (Vec3 lhs, double rhs)
+        {
+            return rhs * lhs;
+        }
+
+        public static Vec3 operator/ (double lhs, Vec3 rhs)
+        {
+            return new Vec3(lhs / rhs.x, lhs / rhs.y, lhs / rhs.z);
+        }
+
+        public static Vec3 operator/ (Vec3 lhs, double rhs)
+        {
+            return rhs / lhs;
+        }
+    }
 }
 

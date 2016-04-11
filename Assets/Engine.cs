@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using PE;
+
 namespace PE
 {
 	public class Engine : MonoBehaviour
 	{
-		const Vector3 g = new Vector3 (0, -9.82, 0);
+		Vec3 g = new Vec3 (0, -9.82, 0);
 		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 
 		// Use this for initialization
@@ -37,10 +39,11 @@ namespace PE
 
 				for (int i = 0; i < particleSystems.Count; i++) {
 					for (int j = 0; j < particleSystems [i].particles.Count; j++) {
+                        double dt = Time.fixedDeltaTime;
 						var p = particleSystems [i].particles [j];
 						p.f = g;
-						p.v = p.v + Time.fixedDeltaTime * p.f / p.m;
-						p.x = p.x + Time.fixedDeltaTime * p.v;
+						p.v = p.v + dt * p.f / p.m;
+						p.x = p.x + dt * p.v;
 					}
 				}
 
