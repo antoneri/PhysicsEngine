@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using PE;
+
 public class Emitter : MonoBehaviour {
 
-    public Vector3 position = new Vector3(0,0,0);
     public float rate = 1.0f;
 
-    public GameObject particlePrefab;
+    //public GameObject particlePrefab;
 
     private PE.ParticleSystem ps;
 
@@ -15,19 +16,31 @@ public class Emitter : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         ps = new PE.ParticleSystem();
+        Engine.instance.addParticleSystem(ps);
 	}
 	
 	// Update is called once per frame
 	void Update () {
         float t = Time.fixedTime;
+
+        Vector3 pos = transform.position;
         
         if (t - lastEmitted >= 1/rate)
         {
             /* Add particle to particleSystem */
-            PE.Particle p = new PE.Particle();
-            
-            //ps.AddParticle(); 
+            PE.Particle p = new PE.Particle()
+            {
+                x = PE.UnityAdapter.PEVector(pos),
+                v = new Vec3(0.1, 0, 0),
+                f = new Vec3(0),
+                m = 0.0,
+                age = 0.0
+            };
+
+            ps.AddParticle(p); 
+
             lastEmitted = t;
+
         }
         
 	}

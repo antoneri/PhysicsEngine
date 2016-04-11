@@ -5,14 +5,13 @@ namespace PE
 {
 	public class ParticleSystem : MonoBehaviour
 	{
-		public List<Particle> particles;
+		public List<Particle> particles = new List<Particle> ();
 		public double MAX_AGE = 10;
 		public double E_tot;
 
 		// Use this for initialization
 		void Start ()
 		{
-			particles = new List<Particle> ();
 		}
 
 		// Update is called once per frame
@@ -22,7 +21,7 @@ namespace PE
 
 			E_tot = 0;
 			foreach (var p in particles) {
-				E_tot += 0.5 * p.m * Vector3.Dot (p.v, p.v); 
+				E_tot += 0.5 * p.m * Vec3.Dot (p.v, p.v); 
 			}
 		}
 

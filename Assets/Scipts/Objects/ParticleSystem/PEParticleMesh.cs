@@ -7,7 +7,7 @@ namespace PE
 	public class ParticleMesh : MonoBehaviour
 	{
 		public List<Particle> particles;
-		const float dx = 0.1;
+		const double dx = 0.1;
 
 		// Update is called once per frame
 		void Update ()
@@ -20,10 +20,10 @@ namespace PE
 
 			for (int i = 0; i < particles.Count; i++) {
 				var idx = 4 * i;
-				mesh.vertices [idx] = particles [i];
-				mesh.vertices [idx + 1] = new Vector3 (particles [i].x [0], particles [i].x [1] + dx, particles [i].x [2]);
-				mesh.vertices [idx + 2] = new Vector3 (particles [i].x [0] + dx, particles [i].x [1] + dx, particles [i].x [2]);
-				mesh.vertices [idx + 3] = new Vector3 (particles [i].x [0] + dx, particles [i].x [1], particles [i].x [2]);
+				mesh.vertices [idx] = PE.UnityAdapter.UnityVector(particles [i].x);
+				mesh.vertices [idx + 1] = PE.UnityAdapter.UnityVector(new Vec3(particles[i].x.x, particles[i].x.y + dx, particles[i].x.z));
+				mesh.vertices [idx + 2] = PE.UnityAdapter.UnityVector(new Vec3(particles[i].x.x + dx, particles[i].x.y + dx, particles[i].x.z));
+				mesh.vertices [idx + 3] = PE.UnityAdapter.UnityVector(new Vec3(particles[i].x.x + dx, particles[i].x.y, particles[i].x.z));
 			}
 
 			mesh.triangles = new int[6 * mesh.vertices.Length];

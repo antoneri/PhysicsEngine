@@ -4,9 +4,16 @@ namespace PE
 {
 	public struct Vec3
 	{
-		double x;
-		double y;
-		double z;
+		public double x;
+		public double y;
+		public double z;
+
+        public Vec3(double v)
+        {
+            x = v;
+            y = v;
+            z = v;
+        }
 
 		public Vec3 (double x, double y, double z)
 		{
@@ -15,26 +22,12 @@ namespace PE
 			this.z = z;
 		}
 
-		public double this [int key] {
+		public double this [int index] {
 			get {
-				switch (key) {
-				case 0:
-					return x;
-				case 1:
-					return y;
-				case 2:
-					return z;
-				}
+                return this[index];
 			}
 			set {
-				switch (key) {
-				case 0:
-					x = value;
-				case 1:
-					y = value;
-				case 2:
-					z = value;
-				}
+                this[index] = value;
 			}
 		}
 
@@ -72,6 +65,7 @@ namespace PE
         {
             return rhs / lhs;
         }
+        
     }
 }
 
