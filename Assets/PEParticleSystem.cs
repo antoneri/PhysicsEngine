@@ -7,7 +7,7 @@ namespace PE
 	{
 		public int N = 1000;
 		public double MAX_AGE = 10;
-		List<Particle> particles;
+		public List<Particle> particles;
 
 		// Use this for initialization
 		void Start ()
