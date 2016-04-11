@@ -5,7 +5,7 @@ public class cameraController : MonoBehaviour {
 
     private Vector3 lastMouse;
 
-    public float speed = 0.1f;
+    public float speed = 5.0f;
     public float sensitivity = 0.25f;
 
 	// Use this for initialization
@@ -32,10 +32,26 @@ public class cameraController : MonoBehaviour {
 
         }
 
-		float forward = Input.GetAxis ("Vertical");
-		float side = Input.GetAxis ("Horizontal");
+        float forward = 0; //Input.GetAxis ("Vertical");
+        float side = 0; // Input.GetAxis ("Horizontal");
         float up = 0f;
 
+        if (Input.GetKey(KeyCode.W))
+        {
+            forward = 1.0f;
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            forward = -1.0f;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            side = 1.0f;
+        }
+        else if (Input.GetKey(KeyCode.A))
+        {
+            side = -1.0f;
+        }
         if (Input.GetKey(KeyCode.E))
         {
             up = 1.0f;
