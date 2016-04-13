@@ -2,7 +2,7 @@
 
 namespace PE
 {
-	public struct Vec3
+	public class Vec3
 	{
 		public double x;
 		public double y;
@@ -36,6 +36,11 @@ namespace PE
 			return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 		}
 
+        public static double length(Vec3 v)
+        {
+            return Math.Sqrt(Math.Pow(v.x, 2) + Math.Pow(v.y, 2) + Math.Pow(v.z, 2));
+        }
+
 		public static Vec3 operator+ (Vec3 lhs, Vec3 rhs)
 		{
 			return new Vec3 (lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
@@ -56,16 +61,16 @@ namespace PE
             return rhs * lhs;
         }
 
-        public static Vec3 operator/ (double lhs, Vec3 rhs)
-        {
-            return new Vec3(lhs / rhs.x, lhs / rhs.y, lhs / rhs.z);
-        }
-
         public static Vec3 operator/ (Vec3 lhs, double rhs)
         {
-            return rhs / lhs;
+            return new Vec3(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
-        
+
+        public override string ToString()
+        {
+            return "[" + x + ", " + y + ", " + z + "]";
+        }
+
     }
 }
 

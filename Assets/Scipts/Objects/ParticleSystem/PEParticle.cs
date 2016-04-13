@@ -4,7 +4,7 @@ using PE;
 
 namespace PE
 {
-	public struct Particle
+	public class Particle
 	{
 		public Vec3 x;
 		public Vec3 v;

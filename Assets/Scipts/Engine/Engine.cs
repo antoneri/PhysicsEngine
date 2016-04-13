@@ -56,16 +56,15 @@ namespace PE
                 /*Accumulate external forces from e.g.gravity.*/
 
                 /*Accumulate dissipative forces, e.g.drag and viscous drag. */
-
+                double dt = Time.fixedDeltaTime;
                 for (int i = 0; i < particleSystems.Count; i++) {
-					for (int j = 0; j < particleSystems [i].particles.Count; j++) {
-                        double dt = Time.fixedDeltaTime;
-                        var p = particleSystems [i].particles [j];
+                    for (int j = 0; j < particleSystems [i].particles.Count; j++) {
+                        Particle p = particleSystems [i].particles [j];
 						p.f = g;
 						p.v = p.v + dt * p.f / p.m;
 						p.x = p.x + dt * p.v;
-					}
-				}
+                    }
+                }
 
 				/* Find contact sets with external boundaries, e.g.a plane.
 				Handle external boundary conditions by reflecting the
