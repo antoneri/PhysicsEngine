@@ -12,6 +12,7 @@ public class Emitter : MonoBehaviour
 
 	private float lastEmitted = 0;
 	private int nrOfParticles = 0;
+	private float startSize = 0.1f;
 
 	private System.Random random = new System.Random ();
 	private double PI2 = Math.PI / 2;
@@ -31,21 +32,19 @@ public class Emitter : MonoBehaviour
 		if (elapsed >= 1 / rate) {
 			var particlesToEmit = (int)Math.Ceiling (elapsed / (1 / rate));
 
-			foreach (var _ in Enumerable.Range(0, particlesToEmit)) {
+			for (var i = 0; i < particlesToEmit; i++) {
 				// Add a random perturbation to initial position and velocity
 				var r = random.NextDouble () * (2 - 1) + 1;
 				var initialVelocity = (PE.Vec3)transform.forward * r;
 
 				// Uniform distribution on a circle http://stackoverflow.com/a/5838991
-				var radius = 1;
+				var radius = 0.4;
 				var random1 = random.NextDouble ();
 				var random2 = random.NextDouble ();
 				var rx = random2 * radius * Math.Cos (PI2 * random1 / random2);
 				var ry = random2 * radius * Math.Sin (PI2 * random1 / random2); 
-
 				var initialPosition = (PE.Vec3)transform.position + ry * (PE.Vec3)transform.up + rx * (PE.Vec3)transform.right;
 
-				// Add particle to particleSystem
 				ps.AddParticle (initialPosition, initialVelocity);
 			}
 
@@ -57,21 +56,22 @@ public class Emitter : MonoBehaviour
 
 	private void UpdateUnityParticleSystem ()
 	{
-		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.ParticleCount];
+		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.Count];
 
-		for (int i = 0; i < ps.ParticleCount; i++) {
-			PE.Particle p = ps.particles [i];
+		var startColor = Color.black;
+		var endColor = Color.black;
+		endColor.a = 0;
 
+		for (int i = 0; i < ps.Count; i++) {
 			unityParticles [i] = new ParticleSystem.Particle () {
-				position = (Vector3)p.x - transform.position,
-				startColor = new Color (1, 0f, 0f),
-				startSize = 0.1f,
+				position = (Vector3)ps [i].x - transform.position,
+				startColor = Color.Lerp (startColor, endColor, (float)ps [i].age),
+				startSize = startSize,
 			};
 		}
 
-		nrOfParticles = ps.ParticleCount; // For debugging
+		nrOfParticles = ps.Count; // For debugging
 
 		GetComponent<ParticleSystem> ().SetParticles (unityParticles, unityParticles.Length);
-
 	}
 }
