@@ -9,7 +9,7 @@ public abstract class Collider
 
     public static bool Collides(Point po, Plane pl)
     {
-        return (Vec3.Dot(pl.normal, po.position) + pl.D) < 1;
+        return Math.Abs(Vec3.Dot(pl.normal, pl.position - po.position)) < 0.01;
     }
 
 }
@@ -30,12 +30,12 @@ public class Plane : Collider
 {
 
     public Vec3 normal;
-    public double D;
+    public Vec3 position;
 
-    public Plane(Vec3 normal, double D)
+    public Plane(Vec3 normal, Vec3 position)
     {
         this.normal = normal;
-        this.D = D;
+        this.position = position;
     }
 
 }

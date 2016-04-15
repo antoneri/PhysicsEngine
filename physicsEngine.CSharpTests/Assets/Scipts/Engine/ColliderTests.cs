@@ -12,13 +12,23 @@ namespace Tests
     public class ColliderTests
     {
         [TestMethod()]
-        public void CollidesTest()
+        public void Point_PlaneTest()
         {
-            Point p = new Point(new PE.Vec3(1, 0, 0));
-            Plane pl = new Plane(new PE.Vec3(1,0,0), 1.0);
+            Point p0 = new Point(new PE.Vec3(-2, 0, 0));
+            Plane pl0 = new Plane(new PE.Vec3(0,0,1), new PE.Vec3(0, 0, 0));
             
-            Console.Write(Vec3.Dot(pl.normal, p.position) + pl.D);
-            Assert.IsTrue(Collider.Collides(p, pl), (Vec3.Dot(pl.normal, p.position) + pl.D).ToString());
+            Assert.IsTrue(Collider.Collides(p0, pl0), (PE.Vec3.Dot(pl0.normal, pl0.position-p0.position).ToString()));
+
+            
+        }
+
+        [TestMethod()]
+        public void Point_PlaneTest1()
+        {
+            Point p1 = new Point(new PE.Vec3(1, 0, 2));
+            Plane pl1 = new Plane(new PE.Vec3(0, 0, 1), new PE.Vec3(0, 0, 1));
+
+            Assert.IsFalse(Collider.Collides(p1, pl1), (PE.Vec3.Dot(pl1.normal, pl1.position - p1.position).ToString()));
         }
     }
 }
