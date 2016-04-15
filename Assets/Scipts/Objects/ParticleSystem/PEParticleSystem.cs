@@ -9,7 +9,7 @@ namespace PE
 	{
 		public List<Particle> particles = new List<Particle> ();
 		public double MAX_AGE = 10.0;
-		public double MASS = 1e-3;
+		public double MASS = 1e-5;
 		public double E_tot;
 
 		// Update is called once per frame
