@@ -46,7 +46,7 @@ public class Emitter : MonoBehaviour {
         {
             PE.Particle p = ps.particles[i];
             ParticleSystem.Particle unityP = new ParticleSystem.Particle();
-            unityP.position = PE.UnityAdapter.UnityVector(p.x);
+            unityP.position =  PE.UnityAdapter.UnityVector(p.x) - transform.position;
             unityP.startColor = new Color(1, 0f, 0f);
             unityP.startSize = 0.5f;
 
