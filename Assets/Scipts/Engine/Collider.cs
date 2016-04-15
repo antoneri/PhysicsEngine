@@ -7,14 +7,9 @@ using PE;
 public abstract class Collider
 {
 
-    public abstract bool Collides(Collider x);
-
-    protected abstract bool Collides(Point p);
-    protected abstract bool Collides(Plane p);
-
-    protected bool Collides(Point po, Plane pl)
+    public static bool Collides(Point po, Plane pl)
     {
-        return (Vec3.Dot(pl.normal, po.position) + pl.D < 0.01);
+        return (Vec3.Dot(pl.normal, po.position) + pl.D) < 1;
     }
 
 }
@@ -29,20 +24,6 @@ public class Point : Collider
         this.position = position;
     }
 
-    public override bool Collides(Collider x)
-    {
-        return x.Collides(this);
-    }
-
-    protected override bool Collides(Plane p)
-    {
-        return Collides(this, p);
-    }
-
-    protected override bool Collides(Point p)
-    {
-        return false;
-    }
 }
 
 public class Plane : Collider
@@ -57,18 +38,4 @@ public class Plane : Collider
         this.D = D;
     }
 
-    public override bool Collides(Collider x)
-    {
-        return x.Collides(this);
-    }
-
-    protected override bool Collides(Plane p)
-    {
-        return false;
-    }
-
-    protected override bool Collides(Point p)
-    {
-        return Collides(p, this);
-    }
 }
