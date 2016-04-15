@@ -2,58 +2,56 @@
 using UnityEditor;
 using System.Collections;
 
-public class Emitter : MonoBehaviour {
+public class Emitter : MonoBehaviour
+{
 
-    public float rate = 1.0f;
+	public float rate = 1.0f;
 
-    //public GameObject particlePrefab;
+	//public GameObject particlePrefab;
 
-    private PE.ParticleSystem ps;
+	private PE.ParticleSystem ps;
 
-    private float lastEmitted = 0;
-    private int nrOfParticles = 0;
+	private float lastEmitted = 0;
+	private int nrOfParticles = 0;
     
 	// Use this for initialization
-	void Start () {
-        ps = new PE.ParticleSystem();
-        PE.Engine.instance.addParticleSystem(ps);
-    }
+	void Start ()
+	{
+		ps = new PE.ParticleSystem ();
+		PE.Engine.instance.addParticleSystem (ps);
+	}
 	
 	// Update is called once per frame
-	void Update () {
-        float t = Time.fixedTime;
+	void Update ()
+	{
+		float t = Time.fixedTime;
         
-        if (t - lastEmitted >= 1/rate)
-        {
-            /* Add particle to particleSystem */
-            PE.Particle p = new PE.Particle()
-            {
-                x = PE.UnityAdapter.PEVector(transform.position),
-                v = new PE.Vec3(1, 0, 0),
-                f = new PE.Vec3(0),
-                m = 1.0,
-                age = 0.0
-            };
-            ps.AddParticle(p);
-            lastEmitted = t;
-        }
+		if (t - lastEmitted >= 1 / rate) {
+			/* Add particle to particleSystem */
+			ps.AddParticle (PE.UnityAdapter.PEVector (transform.position), new PE.Vec3 (1, 0, 0));
+			lastEmitted = t;
+		}
 
-        ps.Update();
+		UpdateUnityParticleSystem ();
+	}
 
-        ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.particles.Count];
+	private void UpdateUnityParticleSystem ()
+	{
+		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.particles.Count];
 
-        for (int i = 0; i < ps.particles.Count; i++)
-        {
-            PE.Particle p = ps.particles[i];
-            ParticleSystem.Particle unityP = new ParticleSystem.Particle();
-            unityP.position =  PE.UnityAdapter.UnityVector(p.x) - transform.position;
-            unityP.startColor = new Color(1, 0f, 0f);
-            unityP.startSize = 0.5f;
+		for (int i = 0; i < ps.particles.Count; i++) {
+			PE.Particle p = ps.particles [i];
+			ParticleSystem.Particle unityP = new ParticleSystem.Particle ();
+			unityP.position = PE.UnityAdapter.UnityVector (p.x) - transform.position;
+			unityP.startColor = new Color (1, 0f, 0f);
+			unityP.startSize = 0.5f;
 
-            unityParticles[i] = unityP;
-        }
+			unityParticles [i] = unityP;
+		}
 
-        nrOfParticles = ps.particles.Count;
-        GetComponent<ParticleSystem>().SetParticles(unityParticles, unityParticles.Length);
-    }
+		nrOfParticles = ps.particles.Count; // For debugging
+
+		GetComponent<ParticleSystem> ().SetParticles (unityParticles, unityParticles.Length);
+
+	}
 }
