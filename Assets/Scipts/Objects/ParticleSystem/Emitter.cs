@@ -28,7 +28,7 @@ public class Emitter : MonoBehaviour
         
 		if (t - lastEmitted >= 1 / rate) {
 			/* Add particle to particleSystem */
-			ps.AddParticle (PE.UnityAdapter.PEVector (transform.position), new PE.Vec3 (1, 0, 0));
+			ps.AddParticle (transform.position, new PE.Vec3 (1, 0, 0));
 			lastEmitted = t;
 		}
 
@@ -41,12 +41,12 @@ public class Emitter : MonoBehaviour
 
 		for (int i = 0; i < ps.particles.Count; i++) {
 			PE.Particle p = ps.particles [i];
-			ParticleSystem.Particle unityP = new ParticleSystem.Particle ();
-			unityP.position = PE.UnityAdapter.UnityVector (p.x) - transform.position;
-			unityP.startColor = new Color (1, 0f, 0f);
-			unityP.startSize = 0.5f;
 
-			unityParticles [i] = unityP;
+			unityParticles [i] = new ParticleSystem.Particle () {
+				position = (Vector3)p.x - transform.position,
+				startColor = new Color (1, 0f, 0f),
+				startSize = 0.2f,
+			};
 		}
 
 		nrOfParticles = ps.particles.Count; // For debugging

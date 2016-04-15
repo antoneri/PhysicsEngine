@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 
 namespace PE
 {
@@ -29,6 +30,16 @@ namespace PE
 			set {
 				this [index] = value;
 			}
+		}
+
+		public static implicit operator Vector3 (Vec3 self)
+		{
+			return new Vector3 ((float)self.x, (float)self.y, (float)self.z);
+		}
+
+		public static implicit operator Vec3 (Vector3 v)
+		{
+			return new Vec3 ((double)v.x, (double)v.y, (double)v.z);
 		}
 
 		public static double Dot (Vec3 lhs, Vec3 rhs)
