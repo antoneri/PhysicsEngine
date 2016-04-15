@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace PE
@@ -21,7 +22,7 @@ namespace PE
 
 			foreach (var p in particles) {
 				E_tot += 0.5 * p.m * Vec3.Dot (p.v, p.v);
-				p.age += Time.deltaTime;
+				p.age += Time.deltaTime; // FIXME this is called in Engine.GameLoop, should we use another time step?
 			}
 		}
 
@@ -39,6 +40,10 @@ namespace PE
 				m = MASS,
 				age = 0,
 			});
+		}
+
+		public int ParticleCount {
+			get { return particles.Count; }
 		}
 
 		// Looping over particles

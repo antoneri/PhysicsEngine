@@ -1,24 +1,23 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 using System.Collections;
 
 public class Emitter : MonoBehaviour
 {
-
 	public float rate = 1.0f;
 
-	//public GameObject particlePrefab;
-
-	private PE.ParticleSystem ps;
+	private PE.ParticleSystem ps = new PE.ParticleSystem ();
 
 	private float lastEmitted = 0;
 	private int nrOfParticles = 0;
-    
+	private System.Random random = new System.Random ();
+
+
 	// Use this for initialization
 	void Start ()
 	{
-		ps = new PE.ParticleSystem ();
-		PE.Engine.instance.addParticleSystem (ps);
+		PE.Engine.instance.AddParticleSystem (ps);
 	}
 	
 	// Update is called once per frame
@@ -27,8 +26,16 @@ public class Emitter : MonoBehaviour
 		float t = Time.fixedTime;
         
 		if (t - lastEmitted >= 1 / rate) {
-			/* Add particle to particleSystem */
-			ps.AddParticle (transform.position, new PE.Vec3 (1, 0, 0));
+			// Add particle to particleSystem
+
+			// Do magic
+			var forward = (PE.Vec3)transform.forward;
+			var r = random.NextDouble () * (2 - 1) + 1;
+			var initialVelocity = forward * r;
+
+			var initialPosition = (PE.Vec3)transform.position + r * (PE.Vec3)transform.up - r * (PE.Vec3)transform.right;
+
+			ps.AddParticle (initialPosition, initialVelocity);
 			lastEmitted = t;
 		}
 
@@ -37,9 +44,9 @@ public class Emitter : MonoBehaviour
 
 	private void UpdateUnityParticleSystem ()
 	{
-		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.particles.Count];
+		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.ParticleCount];
 
-		for (int i = 0; i < ps.particles.Count; i++) {
+		for (int i = 0; i < ps.ParticleCount; i++) {
 			PE.Particle p = ps.particles [i];
 
 			unityParticles [i] = new ParticleSystem.Particle () {
@@ -49,7 +56,7 @@ public class Emitter : MonoBehaviour
 			};
 		}
 
-		nrOfParticles = ps.particles.Count; // For debugging
+		nrOfParticles = ps.ParticleCount; // For debugging
 
 		GetComponent<ParticleSystem> ().SetParticles (unityParticles, unityParticles.Length);
 

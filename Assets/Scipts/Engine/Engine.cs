@@ -24,7 +24,7 @@ namespace PE
 			DontDestroyOnLoad (gameObject);
 		}
 
-		public void addParticleSystem (PE.ParticleSystem ps)
+		public void AddParticleSystem (PE.ParticleSystem ps)
 		{
 			particleSystems.Add (ps);
 		}
