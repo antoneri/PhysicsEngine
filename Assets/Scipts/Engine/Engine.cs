@@ -8,7 +8,7 @@ namespace PE
 	{
 		public static Engine instance = null;
 
-		Vec3 g = new Vec3 (0, -9.82, 0);
+		readonly Vec3 g = new Vec3 (0, -9.82, 0);
 		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 
 		void Awake ()

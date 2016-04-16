@@ -15,7 +15,7 @@ public class Emitter : MonoBehaviour
 	// For debugging
 	private int particleCount = 0;
 
-	private float particleSize = 0.1f;
+	private const float particleSize = 0.1f;
 
 	// Use this for initialization
 	void Start ()
@@ -25,6 +25,12 @@ public class Emitter : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update ()
+	{
+		EmitParticles ();
+		UpdateUnityParticleSystem ();
+	}
+
+	private void EmitParticles ()
 	{
 		var t = Time.fixedTime;
 		var elapsed = t - lastTime;
@@ -45,8 +51,6 @@ public class Emitter : MonoBehaviour
 
 			lastTime = t;
 		}
-
-		UpdateUnityParticleSystem ();
 	}
 
 	private void UpdateUnityParticleSystem ()
