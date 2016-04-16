@@ -32,9 +32,15 @@ namespace PE
 			}
 		}
 
-		public static implicit operator Vector3 (Vec3 self)
+		public double Length {
+			get {
+				return Math.Sqrt (x * x + y * y + z * z);
+			}
+		}
+
+		public static implicit operator Vector3 (Vec3 v)
 		{
-			return new Vector3 ((float)self.x, (float)self.y, (float)self.z);
+			return new Vector3 ((float)v.x, (float)v.y, (float)v.z);
 		}
 
 		public static implicit operator Vec3 (Vector3 v)
@@ -45,11 +51,6 @@ namespace PE
 		public static double Dot (Vec3 lhs, Vec3 rhs)
 		{
 			return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
-		}
-
-		public static double Length (Vec3 v)
-		{
-			return Math.Sqrt (Math.Pow (v.x, 2) + Math.Pow (v.y, 2) + Math.Pow (v.z, 2));
 		}
 
 		public static Vec3 operator+ (Vec3 lhs, Vec3 rhs)
