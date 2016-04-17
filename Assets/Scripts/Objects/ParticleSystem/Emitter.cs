@@ -19,6 +19,7 @@ public class Emitter : MonoBehaviour
 
 	private const double MASS = 1e-5;
 
+	private const int MAX_PARTICLES = 10000;
 	private readonly Color startColor = Color.black;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
 	private ParticleSystem.Particle[] unityParticles;
@@ -27,6 +28,7 @@ public class Emitter : MonoBehaviour
 	void Start ()
 	{
 		PE.Engine.instance.AddParticleSystem (ps);
+		unityParticles = new ParticleSystem.Particle[MAX_PARTICLES];
 	}
 	
 	// Update is called once per frame
@@ -61,20 +63,19 @@ public class Emitter : MonoBehaviour
 
 	private void UpdateUnityParticleSystem ()
 	{
-		if (unityParticles == null || unityParticles.Length != ps.Count) {
-			unityParticles = new ParticleSystem.Particle[ps.Count];
-		}
-
 		for (int i = 0; i < ps.Count; i++) {
+			var p = ps [i];
+
 			unityParticles [i] = new ParticleSystem.Particle () {
-				position = (Vector3)ps [i].x - transform.position,
-				startColor = Color.Lerp (startColor, endColor, (float)ps [i].age),
+				position = (Vector3)p.x - transform.position,
+				startColor = Color.Lerp (startColor, endColor, (float)p.age),
 				startSize = particleSize,
 			};
 		}
 
 		particleCount = ps.Count;
 
-		GetComponent<ParticleSystem> ().SetParticles (unityParticles, unityParticles.Length);
+		var numParticles = ps.Count > MAX_PARTICLES ? MAX_PARTICLES : ps.Count;
+		GetComponent<ParticleSystem> ().SetParticles (unityParticles, numParticles);
 	}
 }
