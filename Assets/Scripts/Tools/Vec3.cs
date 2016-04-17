@@ -76,7 +76,8 @@ namespace PE
 
 		public static Vec3 operator/ (Vec3 lhs, double rhs)
 		{
-			return new Vec3 (lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
+			double inv = 1 / rhs;
+			return new Vec3 (lhs.x * inv, lhs.y * inv, lhs.z * inv);
 		}
 
 		public override string ToString ()
