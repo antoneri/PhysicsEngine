@@ -10,24 +10,12 @@ namespace PE
 	public class ParticleSystem : List<Particle>
 	{
 		private const double MAX_AGE = 5.0;
-		private const double MASS = 1e-5;
 
 		// Update is called once per frame
 		public void Update ()
 		{
 			this.RemoveAll (p => p.age >= MAX_AGE);
 			this.ForEach (p => p.age += Time.deltaTime);
-		}
-
-		public void AddParticle (Vec3 x, Vec3 v)
-		{
-			this.Add (new Particle () {
-				x = x,
-				v = v,
-				f = new Vec3 (0),
-				m = MASS,
-				age = 0,
-			});
 		}
 
 		public double Energy {

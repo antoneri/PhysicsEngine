@@ -6,16 +6,21 @@ using System.Linq;
 
 public class Emitter : MonoBehaviour
 {
-	public float rate = 10;
-
 	private PE.ParticleSystem ps = new PE.ParticleSystem ();
+
+	public float rate = 10;
+	public float radius = 0.4f;
+	public float particleSize = 0.1f;
 
 	private float lastTime = 0;
 
 	// For debugging
 	private int particleCount = 0;
 
-	private const float particleSize = 0.1f;
+	private const double MASS = 1e-5;
+
+	private readonly Color startColor = Color.black;
+	private readonly Color endColor = new Color (0, 0, 0, 0);
 
 	// Use this for initialization
 	void Start ()
@@ -43,10 +48,10 @@ public class Emitter : MonoBehaviour
 				var initialVelocity = transform.forward + Random.onUnitSphere;
 
 				var initialPosition = transform.position;
-				var coords = Random.insideUnitCircle * 0.4f;
+				var coords = Random.insideUnitCircle * radius;
 				initialPosition += coords.x * transform.right + coords.y * transform.up;
 
-				ps.AddParticle (initialPosition, initialVelocity);
+				ps.Add (new PE.Particle (initialPosition, initialVelocity, MASS));
 			}
 
 			lastTime = t;
@@ -56,10 +61,6 @@ public class Emitter : MonoBehaviour
 	private void UpdateUnityParticleSystem ()
 	{
 		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.Count];
-
-		var startColor = Color.black;
-		var endColor = Color.black;
-		endColor.a = 0;
 
 		for (int i = 0; i < ps.Count; i++) {
 			unityParticles [i] = new ParticleSystem.Particle () {
