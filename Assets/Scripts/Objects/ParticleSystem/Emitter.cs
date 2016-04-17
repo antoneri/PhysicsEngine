@@ -21,6 +21,7 @@ public class Emitter : MonoBehaviour
 
 	private readonly Color startColor = Color.black;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
+	private ParticleSystem.Particle[] unityParticles;
 
 	// Use this for initialization
 	void Start ()
@@ -60,7 +61,9 @@ public class Emitter : MonoBehaviour
 
 	private void UpdateUnityParticleSystem ()
 	{
-		ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[ps.Count];
+		if (unityParticles == null || unityParticles.Length != ps.Count) {
+			unityParticles = new ParticleSystem.Particle[ps.Count];
+		}
 
 		for (int i = 0; i < ps.Count; i++) {
 			unityParticles [i] = new ParticleSystem.Particle () {
