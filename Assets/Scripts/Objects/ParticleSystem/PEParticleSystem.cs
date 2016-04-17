@@ -14,8 +14,16 @@ namespace PE
 		// Update is called once per frame
 		public void Update ()
 		{
-			this.RemoveAll (p => p.age >= MAX_AGE);
-			this.ForEach (p => p.age += Time.deltaTime);
+			var dt = Time.deltaTime;
+
+			for (int i = this.Count - 1; i >= 0; i--) {
+				var p = this [i];
+				p.age += dt;
+
+				if (p.age > MAX_AGE) {
+					this.RemoveAt (i);
+				}
+			}
 		}
 
 		public double Energy {
