@@ -63,7 +63,9 @@ public class Emitter : MonoBehaviour
 
 	private void UpdateUnityParticleSystem ()
 	{
-		for (int i = 0; i < ps.Count; i++) {
+		var numParticles = ps.Count > MAX_PARTICLES ? MAX_PARTICLES : ps.Count;
+
+		for (int i = 0; i < numParticles; i++) {
 			var p = ps [i];
 
 			unityParticles [i] = new ParticleSystem.Particle () {
@@ -75,7 +77,6 @@ public class Emitter : MonoBehaviour
 
 		particleCount = ps.Count;
 
-		var numParticles = ps.Count > MAX_PARTICLES ? MAX_PARTICLES : ps.Count;
 		GetComponent<ParticleSystem> ().SetParticles (unityParticles, numParticles);
 	}
 }
