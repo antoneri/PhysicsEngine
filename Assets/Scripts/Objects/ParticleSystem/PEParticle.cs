@@ -10,6 +10,7 @@ namespace PE
 		public Vec3 v;
 		public Vec3 f;
 		public double m;
+		public double m_inv;
 		public double age = 0;
 
 		public Particle (Vec3 x, Vec3 v, double mass)
@@ -17,6 +18,7 @@ namespace PE
 			this.x = x;
 			this.v = v;
 			this.m = mass;
+			this.m_inv = 1 / mass;
 		}
 	}
 }
