@@ -19,16 +19,16 @@ public class Emitter : MonoBehaviour
 
 	private const double MASS = 1e-5;
 
-	private const int MAX_PARTICLES = 10000;
 	private readonly Color startColor = Color.black;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
-	private ParticleSystem.Particle[] unityParticles;
+
+	private const int MAX_PARTICLES = 10000;
+	private ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[MAX_PARTICLES];
 
 	// Use this for initialization
 	void Start ()
 	{
 		PE.Engine.instance.AddParticleSystem (ps);
-		unityParticles = new ParticleSystem.Particle[MAX_PARTICLES];
 	}
 	
 	// Update is called once per frame
