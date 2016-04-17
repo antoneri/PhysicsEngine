@@ -17,6 +17,7 @@ namespace PE
 		{
 			this.x = x;
 			this.v = v;
+			this.f = new Vec3 ();
 			this.m = mass;
 			this.m_inv = 1 / mass;
 		}
