@@ -9,11 +9,12 @@ namespace PE
 		public double y;
 		public double z;
 
-		public Vec3 (double v)
+		public Vec3 () : this (0)
 		{
-			x = v;
-			y = v;
-			z = v;
+		}
+
+		public Vec3 (double v) : this (v, v, v)
+		{
 		}
 
 		public Vec3 (double x, double y, double z)
