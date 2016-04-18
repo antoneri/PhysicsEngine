@@ -59,10 +59,15 @@ namespace PE
 			return new Vec3 (lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 		}
 
-		public static Vec3 operator- (Vec3 lhs, Vec3 rhs)
-		{
-			return new Vec3 (lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
-		}
+        public static Vec3 operator -(Vec3 v)
+        {
+            return new Vec3(-v.x, -v.y, -v.z);
+        }
+
+        public static Vec3 operator -(Vec3 lhs, Vec3 rhs)
+        {
+            return new Vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+        }
 
 		public static Vec3 operator* (double lhs, Vec3 rhs)
 		{

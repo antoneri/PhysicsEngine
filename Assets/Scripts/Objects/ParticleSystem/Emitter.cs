@@ -68,9 +68,9 @@ public class Emitter : MonoBehaviour
 		for (int i = 0; i < numParticles; i++) {
 			var p = ps [i];
 
-			unityParticles [i] = new ParticleSystem.Particle () {
-				position = (Vector3)p.x - transform.position,
-				startColor = Color.Lerp (startColor, endColor, (float)p.age),
+            unityParticles[i] = new ParticleSystem.Particle() {
+                position = (Vector3)p.x - transform.position,
+                startColor = startColor,//Color.Lerp (startColor, endColor, 0.5f*(float)p.age),
 				startSize = particleSize,
 			};
 		}
