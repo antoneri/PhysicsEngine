@@ -18,7 +18,7 @@ public class Emitter : MonoBehaviour
 
 	private const double MASS = 1e-5;
 
-	private readonly Color startColor = Color.black;
+	private readonly Color startColor = Color.blue;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
 
 	private const int MAX_PARTICLES = 1000000;
