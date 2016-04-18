@@ -12,7 +12,8 @@ namespace PE
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
 		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
-        List<Entity> entities = new List<Entity>();
+		List<Entity> entities = new List<Entity> ();
+		List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
 
 		void Awake ()
 		{
@@ -30,10 +31,15 @@ namespace PE
 			particleSystems.Add (ps);
 		}
 
-        public void AddEntity(Entity e)
-        {
-            entities.Add(e);
-        }
+		public void AddParticleMesh (ParticleMesh particleMesh)
+		{
+			particleMeshes.Add (particleMesh);
+		}
+
+		public void AddEntity (Entity e)
+		{
+			entities.Add (e);
+		}
 
 
 		// Use this for initialization
@@ -69,23 +75,21 @@ namespace PE
 						p.f.z -= 0.05 * p.m * p.v.z;
 					}
 
-                    // Accumulate dissipative forces, e.g.drag and viscous drag.
+					// Accumulate dissipative forces, e.g.drag and viscous drag.
 
-                    // Find contact sets with external boundaries, e.g.a plane.
-                    // Handle external boundary conditions by reflecting the
-                    // the velocities.
-                    foreach (var p in particleSystem)
-                    {
-                        Point po = new Point(p.x);
-                        if (entities[0].getCollider().Collides(po))
-                        {
-                            p.v = -p.v;
-                        }
-                    }
+					// Find contact sets with external boundaries, e.g.a plane.
+					// Handle external boundary conditions by reflecting the
+					// the velocities.
+					foreach (var p in particleSystem) {
+						Point po = new Point (p.x);
+						if (entities [0].getCollider ().Collides (po)) {
+							p.v = -p.v;
+						}
+					}
 
 
-                    // Take a timestep and integrate using e.g.Verlet / Leap Frog
-                    foreach (var p in particleSystem) {
+					// Take a timestep and integrate using e.g.Verlet / Leap Frog
+					foreach (var p in particleSystem) {
 						p.v.x += dt * p.m_inv * p.f.x;
 						p.v.y += dt * p.m_inv * p.f.y;
 						p.v.z += dt * p.m_inv * p.f.z;
@@ -94,6 +98,21 @@ namespace PE
 						p.x.z += dt * p.v.z;
 					}
 
+				}
+
+				foreach (var cloth in particleMeshes) {
+					for (int i = 0; i < cloth.Rows; i++) {
+						for (int j = 0; j < cloth.Cols; j++) {
+							if (i == 0 && j == 0 || i == cloth.Rows - 1 && j == 0) {
+								continue;
+							}
+
+							var p = cloth [i, j];
+							p.f = p.m * g;
+							p.v = p.v + dt * p.m_inv * p.f;
+							p.x = p.x + dt * p.v;
+						}
+					}
 				}
 
 				yield return new WaitForFixedUpdate ();
