@@ -7,7 +7,7 @@ using PE;
 
 public struct IntersectData {
     public PE.Particle particle;
-    public Vec3 distance;
+    public double distance;
     public Vec3 normal;
     public Vec3 point;
 }
@@ -15,23 +15,33 @@ public struct IntersectData {
 public abstract class Collider
 {
     public abstract List<IntersectData> Collides(PE.ParticleSystem ps);
-    public abstract IntersectData Collides(Plane p);
 
     public static List<IntersectData> Collides(PE.ParticleSystem ps, Plane pl)
     {
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
         {
-            if (Math.Abs(Vec3.Dot(pl.normal, pl.position - p.x)) < Plane.thickness) {
+            double d = Vec3.Dot(p.x, pl.normal) - pl.d;
+            if (Math.Abs(d) < Plane.thickness) {
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = pl.position - p.x,
+                    distance = d,
                     normal = pl.normal,
-                    point = pl.position + 0.2 * pl.normal
+                    point = (p.x - d * pl.normal) + Plane.thickness * pl.normal
                 };
                 intersections.Add(data);
             }
+        }
+        return intersections;
+    }
+
+    public static List<IntersectData> Collides(PE.ParticleSystem ps, AABB box)
+    {
+        List<IntersectData> intersections = new List<IntersectData>();
+        foreach (var p in ps)
+        {
+            
         }
         return intersections;
     }
@@ -42,14 +52,14 @@ public class Plane : Collider
 {
 
     public Vec3 normal;
-    public Vec3 position;
+    public double d;
 
     public const double thickness = 0.3;
 
-    public Plane(Vec3 normal, Vec3 position)
+    public Plane(Vec3 normal, double d)
     {
         this.normal = normal;
-        this.position = position;
+        this.d = d;
     }
 
     public override List<IntersectData> Collides(PE.ParticleSystem ps)
@@ -57,9 +67,14 @@ public class Plane : Collider
         return Collides(ps, this);
     }
 
-    public override IntersectData Collides(Plane p)
-    {
-        throw new NotImplementedException();
-    }
+}
 
+public class AABB : Collider
+{
+    
+
+    public override List<IntersectData> Collides(PE.ParticleSystem ps)
+    {
+        return Collides(ps, this);
+    }
 }

@@ -16,7 +16,7 @@ namespace Tests
         {
             PE.ParticleSystem ps = new PE.ParticleSystem();
             ps.Add(new Particle(new PE.Vec3(-2, 0, 0), new PE.Vec3(0, 0, 0), 0.0));
-            Plane pl0 = new Plane(new PE.Vec3(0,0,1), new PE.Vec3(0, 0, 0));
+            Plane pl0 = new Plane(new PE.Vec3(0,0,1), 0.0);
             
             Assert.IsTrue(Collider.Collides(ps, pl0).Count != 0);
 
@@ -28,7 +28,7 @@ namespace Tests
         {
             PE.ParticleSystem ps = new PE.ParticleSystem();
             ps.Add(new Particle(new PE.Vec3(1, 0, 2), new PE.Vec3(0, 0, 0), 0.0));
-            Plane pl1 = new Plane(new PE.Vec3(0, 0, 1), new PE.Vec3(0, 0, 1));
+            Plane pl1 = new Plane(new PE.Vec3(0, 0, 1), 1.0);
 
             Assert.IsFalse(Collider.Collides(ps, pl1).Count != 0);
         }

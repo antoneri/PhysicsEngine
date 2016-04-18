@@ -77,9 +77,9 @@ namespace PE
                     List<IntersectData> intersections = entities[0].getCollider().Collides(particleSystem);
                     foreach (IntersectData data in intersections)
                     {
-                        /* e = 0.8 */
+                        double e = 0.8;
                         Vec3 v = data.particle.v;
-                        data.particle.v = v - (1 + 0.8) * (Vec3.Dot(v, data.normal) * data.normal);
+                        data.particle.v = v - (1 + e) * (Vec3.Dot(v, data.normal) * data.normal);
                     }
 
                     

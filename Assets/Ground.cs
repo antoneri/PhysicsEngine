@@ -8,8 +8,8 @@ public class Ground : MonoBehaviour
 	// Use this for initialization
 	void Start () {
         ground = new Entity();
-        Vector3 position = transform.position;
-        ground.setCollider(new Plane(new PE.Vec3(0, 1.0, 0), position));
+        double d = transform.position.magnitude;
+        ground.setCollider(new Plane(new PE.Vec3(0, 1.0, 0), d));
         ground.setCollidable(true);
         ground.setStaticObject(true);
 
