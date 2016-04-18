@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +21,7 @@ public class Emitter : MonoBehaviour
 	private readonly Color startColor = Color.black;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
 
-	private const int MAX_PARTICLES = 10000;
+	private const int MAX_PARTICLES = 1000000;
 	private ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[MAX_PARTICLES];
 
 	// Use this for initialization
