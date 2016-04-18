@@ -36,12 +36,24 @@ public abstract class Collider
         return intersections;
     }
 
-    public static List<IntersectData> Collides(PE.ParticleSystem ps, AABB box)
+    public static List<IntersectData> Collides(PE.ParticleSystem ps, AABB b)
     {
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
         {
-            
+            if (p.x.x < b.max.x && p.x.x > b.min.x &&
+                p.x.y < b.max.y && p.x.y > b.min.y &&
+                p.x.z < b.max.z && p.x.z > b.min.z) {
+
+                IntersectData data = new IntersectData
+                {
+                    particle = p,
+                    distance = 0.1,
+                    normal = new Vec3(0, 1.0, 0),
+                    point = p.x
+                };
+                intersections.Add(data);
+            }
         }
         return intersections;
     }
@@ -71,7 +83,14 @@ public class Plane : Collider
 
 public class AABB : Collider
 {
-    
+    public Vec3 min;
+    public Vec3 max;
+
+    public AABB(Vec3 min, Vec3 max)
+    {
+        this.min = min;
+        this.max = max;
+    }
 
     public override List<IntersectData> Collides(PE.ParticleSystem ps)
     {

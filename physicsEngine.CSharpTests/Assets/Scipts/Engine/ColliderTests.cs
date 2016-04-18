@@ -32,5 +32,15 @@ namespace Tests
 
             Assert.IsFalse(Collider.Collides(ps, pl1).Count != 0);
         }
+
+        [TestMethod()]
+        public void Point_AABBTest()
+        {
+            PE.ParticleSystem ps = new PE.ParticleSystem();
+            ps.Add(new Particle(new PE.Vec3(0, 0.5, 0), new PE.Vec3(0, 0, 0), 0.0));
+            AABB aabb = new AABB(new Vec3(-1.0, -1.0, -1.0), new Vec3(1.0, 1.0, 1.0));
+
+            Assert.IsTrue(Collider.Collides(ps, aabb).Count != 0);
+        }
     }
 }
