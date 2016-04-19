@@ -9,7 +9,7 @@ namespace PE
 {
 	public class ParticleSystem : List<Particle>
 	{
-		private const double MAX_AGE = 5.0;
+		private const double MAX_AGE = 10.0;
 
 		// Update is called once per frame
 		public void Update ()

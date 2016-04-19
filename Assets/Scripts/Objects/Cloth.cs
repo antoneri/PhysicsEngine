@@ -29,6 +29,7 @@ namespace PE
 			}
 
 			Engine.instance.AddParticleMesh (particles);
+
 		}
 	
 		// Update is called once per frame

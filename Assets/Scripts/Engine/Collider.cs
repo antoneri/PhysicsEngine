@@ -1,66 +1,99 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System;
 
 using PE;
 
-public abstract class Collider
-{
-    public abstract bool Collides(Point p);
-    public abstract bool Collides(Plane p);
-
-    public static bool Collides(Point po, Plane pl)
-    {
-        return Math.Abs(Vec3.Dot(pl.normal, pl.position - po.position)) < 0.2;
-    }
-
-    public static bool Collides(PE.Particle pa, Plane pl)
-    {
-        return Math.Abs(Vec3.Dot(pl.normal, pl.position - pa.x)) < 0.01;
-    }
-
+public struct IntersectData {
+    public PE.Particle particle;
+    public double distance;
+    public Vec3 normal;
+    public Vec3 point;
 }
 
-public class Point : Collider
+public abstract class Collider
 {
+    public abstract List<IntersectData> Collides(PE.ParticleSystem ps);
 
-    public Vec3 position;
-
-    public Point(Vec3 position)
+    public static List<IntersectData> Collides(PE.ParticleSystem ps, Plane pl)
     {
-        this.position = position;
+        List<IntersectData> intersections = new List<IntersectData>();
+        foreach (var p in ps)
+        {
+            double d = Vec3.Dot(p.x, pl.normal) - pl.d;
+            if (Math.Abs(d) < Plane.thickness) {
+                IntersectData data = new IntersectData
+                {
+                    particle = p,
+                    distance = d,
+                    normal = pl.normal,
+                    point = (p.x - d * pl.normal) + Plane.thickness * pl.normal
+                };
+                intersections.Add(data);
+            }
+        }
+        return intersections;
     }
 
-    public override bool Collides(Plane p)
+    public static List<IntersectData> Collides(PE.ParticleSystem ps, AABB b)
     {
-        return Collider.Collides(this, p);
+        List<IntersectData> intersections = new List<IntersectData>();
+        foreach (var p in ps)
+        {
+            if (p.x.x < b.max.x && p.x.x > b.min.x &&
+                p.x.y < b.max.y && p.x.y > b.min.y &&
+                p.x.z < b.max.z && p.x.z > b.min.z) {
+
+                IntersectData data = new IntersectData
+                {
+                    particle = p,
+                    distance = 0.1,
+                    normal = new Vec3(0, 1.0, 0),
+                    point = p.x
+                };
+                intersections.Add(data);
+            }
+        }
+        return intersections;
     }
 
-    public override bool Collides(Point p)
-    {
-        throw new NotImplementedException();
-    }
 }
 
 public class Plane : Collider
 {
 
     public Vec3 normal;
-    public Vec3 position;
+    public double d;
 
-    public Plane(Vec3 normal, Vec3 position)
+    public const double thickness = 0.3;
+
+    public Plane(Vec3 normal, double d)
     {
         this.normal = normal;
-        this.position = position;
+        this.d = d;
     }
 
-    public override bool Collides(Plane p)
+    public override List<IntersectData> Collides(PE.ParticleSystem ps)
     {
-        throw new NotImplementedException();
+        return Collides(ps, this);
     }
 
-    public override bool Collides(Point p)
+}
+
+public class AABB : Collider
+{
+    public Vec3 min;
+    public Vec3 max;
+
+    public AABB(Vec3 min, Vec3 max)
     {
-        return Collider.Collides(p, this);
+        this.min = min;
+        this.max = max;
+    }
+
+    public override List<IntersectData> Collides(PE.ParticleSystem ps)
+    {
+        return Collides(ps, this);
     }
 }

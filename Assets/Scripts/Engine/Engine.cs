@@ -80,12 +80,13 @@ namespace PE
 					// Find contact sets with external boundaries, e.g.a plane.
 					// Handle external boundary conditions by reflecting the
 					// the velocities.
-					foreach (var p in particleSystem) {
-						Point po = new Point (p.x);
-						if (entities [0].getCollider ().Collides (po)) {
-							p.v = -p.v;
-						}
+					List<IntersectData> intersections = entities [0].getCollider ().Collides (particleSystem);
+					foreach (IntersectData data in intersections) {
+						double e = 0.8;
+						Vec3 v = data.particle.v;
+						data.particle.v = v - (1 + e) * (Vec3.Dot (v, data.normal) * data.normal);
 					}
+                    
 
 
 					// Take a timestep and integrate using e.g.Verlet / Leap Frog
@@ -96,6 +97,20 @@ namespace PE
 						p.x.x += dt * p.v.x;
 						p.x.y += dt * p.v.y;
 						p.x.z += dt * p.v.z;
+					}
+
+					/* Adjust collided particles */
+					foreach (IntersectData data in intersections) {
+						Particle p = data.particle;
+						if (Vec3.Dot (p.v, data.normal) < 0) {
+							p.v.x = 0;
+							p.v.y = 0;
+							p.v.z = 0;
+						}
+						double p_proj = Vec3.Dot (p.x - data.point, data.normal);
+						if (p_proj < 0) {
+							p.x = p.x - p_proj * data.normal;
+						}
 					}
 
 				}
