@@ -44,6 +44,12 @@ namespace PE
 			}
 		}
 
+		public Vec3 Normalize {
+			get {
+				return this / Length;
+			}
+		}
+
 		public static implicit operator Vector3 (Vec3 v)
 		{
 			return new Vector3 ((float)v.x, (float)v.y, (float)v.z);
@@ -64,15 +70,15 @@ namespace PE
 			return new Vec3 (lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 		}
 
-        public static Vec3 operator -(Vec3 v)
-        {
-            return new Vec3(-v.x, -v.y, -v.z);
-        }
+		public static Vec3 operator- (Vec3 v)
+		{
+			return new Vec3 (-v.x, -v.y, -v.z);
+		}
 
-        public static Vec3 operator -(Vec3 lhs, Vec3 rhs)
-        {
-            return new Vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
-        }
+		public static Vec3 operator- (Vec3 lhs, Vec3 rhs)
+		{
+			return new Vec3 (lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+		}
 
 		public static Vec3 operator* (double lhs, Vec3 rhs)
 		{
