@@ -15,21 +15,18 @@ namespace PE
 			var mesh = GetComponent<MeshFilter> ().mesh;
 			mesh.MarkDynamic ();
 
+			vertices = new Vector3[mesh.vertices.Length];
+
 			// We assume that the mesh is square
 			var size = Mathf.CeilToInt (Mathf.Sqrt (mesh.vertices.Length)); 
 
 			particles = new ParticleMesh (size, size);
-			vertices = new Vector3[mesh.vertices.Length];
 
-			for (int i = 0; i < particles.Rows; i++) {
-				for (int j = 0; j < particles.Cols; j++) {
-					var v = mesh.vertices;
-					particles [i, j] = new Particle (v [i * particles.Cols + j], new Vec3 (), 0.1);
-				}
+			for (int i = 0; i < particles.Size; i++) {
+				particles [i] = new Particle (mesh.vertices [i], new Vec3 (), 0.1);
 			}
-
+		
 			Engine.instance.AddParticleMesh (particles);
-
 		}
 	
 		// Update is called once per frame
@@ -37,12 +34,10 @@ namespace PE
 		{
 			var mesh = GetComponent<MeshFilter> ().mesh;
 
-			for (int i = 0; i < particles.Rows; i++) {
-				for (int j = 0; j < particles.Cols; j++) {
-					vertices [i * particles.Cols + j] = particles [i, j].x;
-				}
+			for (int i = 0; i < particles.Size; i++) {
+				vertices [i] = particles [i].x;
 			}
-
+	
 			mesh.vertices = vertices;
 		}
 	}
