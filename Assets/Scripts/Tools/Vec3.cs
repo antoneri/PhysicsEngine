@@ -33,6 +33,11 @@ namespace PE
 			}
 		}
 
+        public void set(double x, double y, double z)
+        {
+            this.x = x; this.y = y; this.z = z;
+        }
+
 		public double Length {
 			get {
 				return Math.Sqrt (x * x + y * y + z * z);
