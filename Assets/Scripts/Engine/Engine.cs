@@ -15,7 +15,9 @@ namespace PE
 		List<Entity> entities = new List<Entity> ();
 		List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
 
-		void Awake ()
+        private List<IntersectData> intersections = new List<IntersectData>(10000);
+
+        void Awake ()
 		{
 			if (instance == null)
 				instance = this;
@@ -75,12 +77,17 @@ namespace PE
 						p.f.z -= 0.05 * p.m * p.v.z;
 					}
 
-					// Accumulate dissipative forces, e.g.drag and viscous drag.
+                    // Accumulate dissipative forces, e.g.drag and viscous drag.
 
-					// Find contact sets with external boundaries, e.g.a plane.
-					// Handle external boundary conditions by reflecting the
-					// the velocities.
-					List<IntersectData> intersections = entities [0].getCollider ().Collides (particleSystem);
+                    // Find contact sets with external boundaries, e.g.a plane.
+                    // Handle external boundary conditions by reflecting the
+                    // the velocities.
+                    intersections.Clear();
+                    foreach (Entity e in entities)
+                    {
+                        intersections.AddRange(e.getCollider().Collides(particleSystem));
+                    }
+                    
 					foreach (IntersectData data in intersections) {
 						double e = 0.8;
 						Vec3 v = data.particle.v;
