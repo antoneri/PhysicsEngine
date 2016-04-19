@@ -115,17 +115,27 @@ namespace PE
 
 				}
 
-				foreach (var cloth in particleMeshes) {
-					for (int i = 0; i < cloth.Rows; i++) {
-						for (int j = 0; j < cloth.Cols; j++) {
-							if (i == 0 && j == 0 || i == cloth.Rows - 1 && j == 0) {
+				foreach (var particles in particleMeshes) {
+					foreach (var n in particles.Neighbors) {
+						var p1 = n.p1;
+						var p2 = n.p2;
+						var r = p1.x - p2.x;
+						var v = p1.v - p2.v;
+						p1.f = -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, r) / r.Length) * r.Normalize;
+						p2.f = -p1.f;
+					}
+
+					for (int i = 0; i < particles.Rows; i++) {
+						for (int j = 0; j < particles.Cols; j++) {
+							var p = particles [i, j];
+							if (j == 0 && (i == 0 || i == particles.Rows - 1)) {
+								// Top corners
 								continue;
 							}
 
-							var p = cloth [i, j];
-							p.f = p.m * g;
-							p.v = p.v + dt * p.m_inv * p.f;
-							p.x = p.x + dt * p.v;
+							//p.f += p.m * g;
+							p.v += dt * p.m_inv * p.f;
+							p.x += dt * p.v;
 						}
 					}
 				}

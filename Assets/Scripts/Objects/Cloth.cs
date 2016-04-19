@@ -8,24 +8,46 @@ namespace PE
 	{
 		ParticleMesh particles;
 		Vector3[] vertices;
-
+		public double k_stretch = 10;
+		public double k_shear = 5;
+	
 		// Use this for initialization
 		void Start ()
 		{
 			var mesh = GetComponent<MeshFilter> ().mesh;
 			mesh.MarkDynamic ();
-
+			
 			vertices = new Vector3[mesh.vertices.Length];
 
 			// We assume that the mesh is square
-			var size = Mathf.CeilToInt (Mathf.Sqrt (mesh.vertices.Length)); 
+			var N = Mathf.CeilToInt (Mathf.Sqrt (mesh.vertices.Length)); 
 
-			particles = new ParticleMesh (size, size);
+			particles = new ParticleMesh (N, N);
 
 			for (int i = 0; i < particles.Size; i++) {
-				particles [i] = new Particle (mesh.vertices [i], new Vec3 (), 0.1);
+				var worldPosition = transform.TransformPoint (mesh.vertices [i]);
+				particles [i] = new Particle (worldPosition, new Vec3 (), 0.1);
 			}
-		
+
+			// Springs between particles
+			List<Spring> neighbors = new List<Spring> ();
+
+			for (int i = 0; i < particles.Rows; i++) {
+				for (int j = 0; j < particles.Cols; j++) {
+					var current = particles [i, j];
+					if (i - 1 > 0 && j + 1 < particles.Cols)
+						neighbors.Add (new Spring (current, particles [i - 1, j + 1], k_shear));
+					if (j + 1 < particles.Cols)
+						neighbors.Add (new Spring (current, particles [i, j + 1], k_stretch));
+					if (i + 1 < particles.Rows && j + 1 < particles.Cols)
+						neighbors.Add (new Spring (current, particles [i + 1, j + 1], k_shear));
+					if (i + 1 < particles.Rows)
+						neighbors.Add (new Spring (current, particles [i + 1, j], k_stretch));
+				}
+			}
+
+			particles.Neighbors = neighbors;
+			
 			Engine.instance.AddParticleMesh (particles);
 		}
 	
@@ -35,7 +57,7 @@ namespace PE
 			var mesh = GetComponent<MeshFilter> ().mesh;
 
 			for (int i = 0; i < particles.Size; i++) {
-				vertices [i] = particles [i].x;
+				vertices [i] = transform.InverseTransformPoint (particles [i].x);
 			}
 	
 			mesh.vertices = vertices;
