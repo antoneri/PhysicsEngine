@@ -45,17 +45,69 @@ public abstract class Collider
                 p.x.y < b.max.y && p.x.y > b.min.y &&
                 p.x.z < b.max.z && p.x.z > b.min.z) {
 
+                Vec3 AABBPoint = ClosestPointAABB(p.x, b);
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = 0.1,
-                    normal = new Vec3(0, 1.0, 0),
-                    point = p.x
+                    distance = SqDistPointAABB(p.x, b),
+                    normal = PointNormalAABB(AABBPoint, b),
+                    point = AABBPoint
                 };
                 intersections.Add(data);
             }
         }
         return intersections;
+    }
+
+
+
+
+
+
+
+
+
+    /* AABB intersect data */
+
+    public static Vec3 PointNormalAABB(Vec3 p, AABB b)
+    {
+        Vec3 normal = new Vec3();
+        double minDistance = double.MaxValue;
+
+        if (Math.Abs(b.min.x - p.x) < minDistance) normal.set(-1, 0, 0);
+        if (Math.Abs(b.max.x - p.x) < minDistance) normal.set(1, 0, 0);
+        if (Math.Abs(b.min.y - p.y) < minDistance) normal.set(0, -1, 0);
+        if (Math.Abs(b.max.y - p.y) < minDistance) normal.set(0, 1, 0);
+        if (Math.Abs(b.min.z - p.z) < minDistance) normal.set(0, 0, -1);
+        if (Math.Abs(b.max.z - p.z) < minDistance) normal.set(0, 0, 1);
+
+        return normal;
+    }
+
+    public static Vec3 ClosestPointAABB(Vec3 p, AABB b)
+    {
+        Vec3 q = new Vec3();
+        for (int i = 0; i < 3; i++)
+        {
+            double v = p[i];
+            v = Math.Max(v, b.min[i]);
+            v = Math.Min(v, b.max[i]);
+            q[i] = v;
+        }
+        return q;
+    }
+
+    public static double SqDistPointAABB(Vec3 p, AABB b)
+    {
+        double sqDist = 0.0f;
+        for (int i = 0; i < 3; i++)
+        {
+            // For each axis count any excess distance outside box extents
+            double v = p[i];
+            if (v < b.min[i]) sqDist += (b.min[i] - v) * (b.min[i] - v);
+            if (v > b.max[i]) sqDist += (v - b.max[i]) * (v - b.max[i]);
+        }
+        return sqDist;
     }
 
 }
