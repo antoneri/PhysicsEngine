@@ -18,11 +18,14 @@ public class Box : MonoBehaviour {
         box.setCollider(aabb);
         box.setStaticObject(true);
 
-        //PE.Engine.instance.AddEntity(box);
+        PE.Engine.instance.AddEntity(box);
     }
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
+        /* Update collider */
+        AABB collider = (AABB) box.getCollider();
+        collider.min = transform.position - transform.lossyScale * 0.5f;
+        collider.max = transform.position + transform.lossyScale * 0.5f;
+    }
 }

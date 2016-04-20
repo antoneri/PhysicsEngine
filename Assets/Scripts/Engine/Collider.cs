@@ -10,6 +10,11 @@ public struct IntersectData {
     public double distance;
     public Vec3 normal;
     public Vec3 point;
+
+    public override string ToString()
+    {
+        return distance + "\n" + normal.ToString() + "\n" + point.ToString();
+    }
 }
 
 public abstract class Collider
@@ -49,7 +54,7 @@ public abstract class Collider
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = SqDistPointAABB(p.x, b),
+                    distance = 0,
                     normal = PointNormalAABB(AABBPoint, b),
                     point = AABBPoint
                 };
@@ -74,16 +79,17 @@ public abstract class Collider
         Vec3 normal = new Vec3();
         double minDistance = double.MaxValue;
 
-        if (Math.Abs(b.min.x - p.x) < minDistance) normal.set(-1, 0, 0);
-        if (Math.Abs(b.max.x - p.x) < minDistance) normal.set(1, 0, 0);
-        if (Math.Abs(b.min.y - p.y) < minDistance) normal.set(0, -1, 0);
-        if (Math.Abs(b.max.y - p.y) < minDistance) normal.set(0, 1, 0);
-        if (Math.Abs(b.min.z - p.z) < minDistance) normal.set(0, 0, -1);
-        if (Math.Abs(b.max.z - p.z) < minDistance) normal.set(0, 0, 1);
+        if (Math.Abs(b.min.x - p.x) < minDistance) { normal.set(-1, 0, 0); minDistance = Math.Abs(b.min.x - p.x); }
+        if (Math.Abs(b.max.x - p.x) < minDistance) { normal.set(1, 0, 0); minDistance = Math.Abs(b.max.x - p.x); }
+        if (Math.Abs(b.min.y - p.y) < minDistance) { normal.set(0, -1, 0); minDistance = Math.Abs(b.min.y - p.y); }
+        if (Math.Abs(b.max.y - p.y) < minDistance) { normal.set(0, 1, 0); minDistance = Math.Abs(b.max.y - p.y); }
+        if (Math.Abs(b.min.z - p.z) < minDistance) { normal.set(0, 0, -1); minDistance = Math.Abs(b.min.z - p.z); }
+        if (Math.Abs(b.max.z - p.z) < minDistance) { normal.set(0, 0, 1); minDistance = Math.Abs(b.max.z - p.z); }
 
         return normal;
     }
 
+    /* Works if p is outside of box */
     public static Vec3 ClosestPointAABB(Vec3 p, AABB b)
     {
         Vec3 q = new Vec3();
