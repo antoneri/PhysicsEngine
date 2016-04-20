@@ -114,9 +114,9 @@ namespace PE
 							p.v.y = 0;
 							p.v.z = 0;
 						}
-						double p_proj = Vec3.Dot (p.x - data.point, data.normal);
-						if (p_proj < 0) {
-							p.x = p.x - p_proj * data.normal;
+						double x = Vec3.Dot (p.x - data.point, data.normal);
+						if (x < 0) {
+							p.x = data.point;
 						}
 					}
 

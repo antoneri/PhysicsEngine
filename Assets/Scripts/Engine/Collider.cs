@@ -26,14 +26,14 @@ public abstract class Collider
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
         {
-            double d = Vec3.Dot(p.x, pl.normal) - pl.d;
-            if (Math.Abs(d) < Plane.thickness) {
+            double d = Math.Abs(Vec3.Dot(p.x, pl.normal) - pl.d);
+            if (d < Plane.thickness) {
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = d,
+                    distance = Plane.thickness - d,
                     normal = pl.normal,
-                    point = (p.x - d * pl.normal) + Plane.thickness * pl.normal
+                    point = (p.x - (Vec3.Dot(pl.normal, p.x) + pl.d) * pl.normal) + Plane.thickness * pl.normal
                 };
                 intersections.Add(data);
             }
@@ -50,12 +50,13 @@ public abstract class Collider
                 p.x.y < b.max.y && p.x.y > b.min.y &&
                 p.x.z < b.max.z && p.x.z > b.min.z) {
 
-                Vec3 AABBPoint = ClosestPointAABB(p.x, b);
+                Vec3 n = PointNormalAABB(p.x, b);
+                Vec3 AABBPoint = ClosestPointAABB(p.x, b, n);
                 IntersectData data = new IntersectData
                 {
                     particle = p,
                     distance = 0,
-                    normal = PointNormalAABB(AABBPoint, b),
+                    normal = n,
                     point = AABBPoint
                 };
                 intersections.Add(data);
@@ -89,18 +90,19 @@ public abstract class Collider
         return normal;
     }
 
-    /* Works if p is outside of box */
-    public static Vec3 ClosestPointAABB(Vec3 p, AABB b)
+    public static Vec3 ClosestPointAABB(Vec3 p, AABB b, Vec3 normal)
     {
-        Vec3 q = new Vec3();
-        for (int i = 0; i < 3; i++)
+        Vec3 proj = new Vec3();
+
+        if (normal.x + normal.y + normal.z > 0)
         {
-            double v = p[i];
-            v = Math.Max(v, b.min[i]);
-            v = Math.Min(v, b.max[i]);
-            q[i] = v;
+            proj = p - Vec3.Dot(p - b.max, normal) * normal;
+        } else
+        {
+            proj = p - Vec3.Dot(p - b.min, normal) * normal;
         }
-        return q;
+
+        return proj;
     }
 
     public static double SqDistPointAABB(Vec3 p, AABB b)
