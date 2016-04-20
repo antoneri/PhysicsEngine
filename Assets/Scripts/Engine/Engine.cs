@@ -116,13 +116,18 @@ namespace PE
 				}
 
 				foreach (var particles in particleMeshes) {
+					for (int i = 0; i < particles.Size; i++) {
+						var p = particles [i];
+						p.f.x = p.f.y = p.f.z = 0;
+					}
+
 					foreach (var n in particles.Neighbors) {
 						var p1 = n.p1;
 						var p2 = n.p2;
 						var r = p1.x - p2.x;
 						var v = p1.v - p2.v;
-						p1.f = -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, r) / r.Length) * r.Normalize;
-						p2.f = -p1.f;
+						p2.f += -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, r) / r.Length) * r.Normalize;
+						p1.f += -p2.f;
 					}
 
 					for (int i = 0; i < particles.Rows; i++) {
@@ -133,7 +138,7 @@ namespace PE
 								continue;
 							}
 
-							//p.f += p.m * g;
+							p.f += p.m * g;
 							p.v += dt * p.m_inv * p.f;
 							p.x += dt * p.v;
 						}

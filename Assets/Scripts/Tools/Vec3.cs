@@ -26,10 +26,31 @@ namespace PE
 
 		public double this [int index] {
 			get {
-				return this [index];
+				switch (index) {
+				case 0:
+					return x;
+				case 1:
+					return y;
+				case 2:
+					return z;
+				default:
+					throw new ArgumentOutOfRangeException ();
+				}
 			}
 			set {
-				this [index] = value;
+				switch (index) {
+				case 0:
+					x = value;
+					break;
+				case 1:
+					y = value;
+					break;
+				case 2:
+					z = value;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException ();
+				}
 			}
 		}
 
