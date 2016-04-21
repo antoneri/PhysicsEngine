@@ -54,9 +54,19 @@ namespace PE
 			}
 		}
 
-        public void set(double x, double y, double z)
+        public void Set(double x, double y, double z)
         {
             this.x = x; this.y = y; this.z = z;
+        }
+
+        public void Set(Vec3 v)
+        {
+            x = v.x; y = v.y; z = v.z;
+        }
+
+        public void Set(double v)
+        {
+            x = v; y = v; z = v;
         }
 
 		public double Length {
@@ -91,20 +101,40 @@ namespace PE
 			return new Vec3 (lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 		}
 
+        public void Add (Vec3 v)
+        {
+            x += v.x; y += v.y; z += v.z;
+        }
+
 		public static Vec3 operator- (Vec3 v)
 		{
 			return new Vec3 (-v.x, -v.y, -v.z);
 		}
+
+        public void Negate()
+        {
+            x = -x; y = -y; z = -z;
+        }
 
 		public static Vec3 operator- (Vec3 lhs, Vec3 rhs)
 		{
 			return new Vec3 (lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 		}
 
+        public void Subtract(Vec3 v)
+        {
+            x -= v.x; y -= v.y; z -= v.z;
+        }
+
 		public static Vec3 operator* (double lhs, Vec3 rhs)
 		{
 			return new Vec3 (lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
 		}
+
+        public void mult (double k)
+        {
+            x *= k; y *= k; z *= k;
+        }
 
 		public static Vec3 operator* (Vec3 lhs, double rhs)
 		{
@@ -116,6 +146,11 @@ namespace PE
 			double inv = 1 / rhs;
 			return new Vec3 (lhs.x * inv, lhs.y * inv, lhs.z * inv);
 		}
+
+        public void divide (double k)
+        {
+            x /= k; y /= k; z /= k;
+        }
 
 		public override string ToString ()
 		{
