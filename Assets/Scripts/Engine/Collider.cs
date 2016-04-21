@@ -80,12 +80,12 @@ public abstract class Collider
         Vec3 normal = new Vec3();
         double minDistance = double.MaxValue;
 
-        if (Math.Abs(b.min.x - p.x) < minDistance) { normal.set(-1, 0, 0); minDistance = Math.Abs(b.min.x - p.x); }
-        if (Math.Abs(b.max.x - p.x) < minDistance) { normal.set(1, 0, 0); minDistance = Math.Abs(b.max.x - p.x); }
-        if (Math.Abs(b.min.y - p.y) < minDistance) { normal.set(0, -1, 0); minDistance = Math.Abs(b.min.y - p.y); }
-        if (Math.Abs(b.max.y - p.y) < minDistance) { normal.set(0, 1, 0); minDistance = Math.Abs(b.max.y - p.y); }
-        if (Math.Abs(b.min.z - p.z) < minDistance) { normal.set(0, 0, -1); minDistance = Math.Abs(b.min.z - p.z); }
-        if (Math.Abs(b.max.z - p.z) < minDistance) { normal.set(0, 0, 1); minDistance = Math.Abs(b.max.z - p.z); }
+        if (Math.Abs(b.min.x - p.x) < minDistance) { normal.Set(-1, 0, 0); minDistance = Math.Abs(b.min.x - p.x); }
+        if (Math.Abs(b.max.x - p.x) < minDistance) { normal.Set(1, 0, 0); minDistance = Math.Abs(b.max.x - p.x); }
+        if (Math.Abs(b.min.y - p.y) < minDistance) { normal.Set(0, -1, 0); minDistance = Math.Abs(b.min.y - p.y); }
+        if (Math.Abs(b.max.y - p.y) < minDistance) { normal.Set(0, 1, 0); minDistance = Math.Abs(b.max.y - p.y); }
+        if (Math.Abs(b.min.z - p.z) < minDistance) { normal.Set(0, 0, -1); minDistance = Math.Abs(b.min.z - p.z); }
+        if (Math.Abs(b.max.z - p.z) < minDistance) { normal.Set(0, 0, 1); minDistance = Math.Abs(b.max.z - p.z); }
 
         return normal;
     }
