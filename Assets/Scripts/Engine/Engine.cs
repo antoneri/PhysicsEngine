@@ -9,6 +9,9 @@ namespace PE
 	{
 		public static Engine instance = null;
 
+		public Vector3 Wind = new Vector3 (0, 0, 0);
+		private Vec3 wind = new Vec3 (0);
+
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
 		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
@@ -55,8 +58,15 @@ namespace PE
 			/* Simulation loop */
 			while (true) {
 				double dt = Time.fixedDeltaTime;
+				wind = Wind;
 
 				foreach (var particleSystem in particleSystems) {
+
+					/* Clear forces */
+					foreach (var p in particleSystem) {
+						p.f.Set (0);
+					}
+
 					// Create particles at emitter
 					// (Remove particles at sinks or when they expire in time)
 					particleSystem.Update ();
@@ -68,24 +78,23 @@ namespace PE
 					// Accumulate the forces.Use Newton’s third law.
 
 					// Accumulate external forces from e.g.gravity.
-					foreach (var p in particleSystem) {
-                        p.f.Set(p.m * g);
-                        /*
-						p.f.x = p.m * g.x;
-						p.f.y = p.m * g.y;
-						p.f.z = p.m * g.z;
-                        */
-
-                        p.f.Subtract(0.05 * p.m * p.v);
-                        /*
-						p.f.x -= 0.05 * p.m * p.v.x;
-						p.f.y -= 0.05 * p.m * p.v.y;
-						p.f.z -= 0.05 * p.m * p.v.z;
-                        */
-					}
-
 					// Accumulate dissipative forces, e.g.drag and viscous drag.
+					foreach (var p in particleSystem) {
+						/* Gravity */
+						p.f.Add (p.m * g);
 
+						/* Air gravity counter force. Should be particle property dependent */
+						p.f.Add (-0.5 * p.m * g);
+
+						/* Air drag force */
+						double kd = 0.0000018;
+						Vec3 u = p.v - wind;
+						Vec3 Fair = -kd * u;
+                        
+						p.f.Add (Fair);
+
+					}
+						
 					// Find contact sets with external boundaries, e.g.a plane.
 					// Handle external boundary conditions by reflecting the
 					// the velocities.
@@ -104,30 +113,16 @@ namespace PE
 
 					// Take a timestep and integrate using e.g.Verlet / Leap Frog
 					foreach (var p in particleSystem) {
-                        p.v.Add(dt * p.m_inv * p.f);
-                        /*
-						p.v.x += dt * p.m_inv * p.f.x;
-						p.v.y += dt * p.m_inv * p.f.y;
-						p.v.z += dt * p.m_inv * p.f.z;
-                        */
-                        p.x.Add(dt * p.v);
-                        /*
-						p.x.x += dt * p.v.x;
-						p.x.y += dt * p.v.y;
-						p.x.z += dt * p.v.z;
-                        */
+						p.v.Add (dt * p.m_inv * p.f);
+
+						p.x.Add (dt * p.v);
 					}
 
 					/* Adjust collided particles */
 					foreach (IntersectData data in intersections) {
 						Particle p = data.particle;
 						if (Vec3.Dot (p.v, data.normal) < 0) {
-                            p.v.Set(0.0);
-                            /*
-							p.v.x = 0;
-							p.v.y = 0;
-							p.v.z = 0;
-                            */
+							p.v.Set (0.0);
 						}
 						double x = Vec3.Dot (p.x - data.point, data.normal);
 						if (x < 0) {
@@ -141,7 +136,7 @@ namespace PE
 					// Reset forces
 					for (int i = 0; i < particles.Size; i++) {
 						var p = particles [i];
-                        p.f.Set(0.0);
+						p.f.Set (0.0);
 						//p.f.x = p.f.y = p.f.z = 0;
 					}
 
