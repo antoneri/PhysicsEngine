@@ -9,10 +9,11 @@ namespace PE
 		ParticleMesh particles;
 		Vector3[] vertices;
 
-		public double k_stretch = 0;
+		public double k_stretch = 54;
 		public double k_shear = 0;
 		public double k_bend = 0;
-		public double mass = 0.01;
+		public double kd = 0.01;
+		public double mass = 0.025;
 	
 		// Use this for initialization
 		void Start ()
@@ -44,19 +45,19 @@ namespace PE
 					//  | \
 					//  4   3
 
-					if (i - 1 >= 0 && j + 1 < particles.Cols)
-						neighbors.Add (new Spring (current, particles [i - 1, j + 1], k_shear));
+					//if (i - 1 >= 0 && j + 1 < particles.Cols)
+					//	neighbors.Add (new Spring (current, particles [i - 1, j + 1], k_shear, kd));
 					if (j + 1 < particles.Cols)
-						neighbors.Add (new Spring (current, particles [i, j + 1], k_stretch));
-					if (i + 1 < particles.Rows && j + 1 < particles.Cols)
-						neighbors.Add (new Spring (current, particles [i + 1, j + 1], k_shear));
+						neighbors.Add (new Spring (current, particles [i, j + 1], k_stretch, kd));
+					//if (i + 1 < particles.Rows && j + 1 < particles.Cols)
+					//	neighbors.Add (new Spring (current, particles [i + 1, j + 1], k_shear, kd));
 					if (i + 1 < particles.Rows)
-						neighbors.Add (new Spring (current, particles [i + 1, j], k_stretch));
+						neighbors.Add (new Spring (current, particles [i + 1, j], k_stretch, kd));
 				}
 			}
 
 			if (neighbors.Count != 4 * N * N - 6 * N + 2) {
-				throw new MissingComponentException ("We are missing some springs!");
+				//throw new MissingComponentException ("We are missing some springs!");
 			}
 
 			List<Spring> nextNextNeighbors = new List<Spring> ();
@@ -66,9 +67,9 @@ namespace PE
 					var current = particles [i, j];
 
 					if (i + 2 < particles.Rows)
-						nextNextNeighbors.Add (new Spring (current, particles [i + 2, j], k_bend));
+						nextNextNeighbors.Add (new Spring (current, particles [i + 2, j], k_bend, kd));
 					if (j + 2 < particles.Cols)
-						nextNextNeighbors.Add (new Spring (current, particles [i, j + 2], k_bend));
+						nextNextNeighbors.Add (new Spring (current, particles [i, j + 2], k_bend, kd));
 				}
 			}
 
