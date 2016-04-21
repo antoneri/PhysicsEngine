@@ -10,6 +10,11 @@ public struct IntersectData {
     public double distance;
     public Vec3 normal;
     public Vec3 point;
+
+    public override string ToString()
+    {
+        return distance + "\n" + normal.ToString() + "\n" + point.ToString();
+    }
 }
 
 public abstract class Collider
@@ -21,14 +26,14 @@ public abstract class Collider
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
         {
-            double d = Vec3.Dot(p.x, pl.normal) - pl.d;
-            if (Math.Abs(d) < Plane.thickness) {
+            double d = Math.Abs(Vec3.Dot(p.x, pl.normal) - pl.d);
+            if (d < Plane.thickness) {
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = d,
+                    distance = Plane.thickness - d,
                     normal = pl.normal,
-                    point = (p.x - d * pl.normal) + Plane.thickness * pl.normal
+                    point = (p.x - (Vec3.Dot(pl.normal, p.x) + pl.d) * pl.normal) + Plane.thickness * pl.normal
                 };
                 intersections.Add(data);
             }
@@ -45,12 +50,13 @@ public abstract class Collider
                 p.x.y < b.max.y && p.x.y > b.min.y &&
                 p.x.z < b.max.z && p.x.z > b.min.z) {
 
-                Vec3 AABBPoint = ClosestPointAABB(p.x, b);
+                Vec3 n = PointNormalAABB(p.x, b);
+                Vec3 AABBPoint = ClosestPointAABB(p.x, b, n);
                 IntersectData data = new IntersectData
                 {
                     particle = p,
-                    distance = SqDistPointAABB(p.x, b),
-                    normal = PointNormalAABB(AABBPoint, b),
+                    distance = 0,
+                    normal = n,
                     point = AABBPoint
                 };
                 intersections.Add(data);
@@ -74,27 +80,29 @@ public abstract class Collider
         Vec3 normal = new Vec3();
         double minDistance = double.MaxValue;
 
-        if (Math.Abs(b.min.x - p.x) < minDistance) normal.set(-1, 0, 0);
-        if (Math.Abs(b.max.x - p.x) < minDistance) normal.set(1, 0, 0);
-        if (Math.Abs(b.min.y - p.y) < minDistance) normal.set(0, -1, 0);
-        if (Math.Abs(b.max.y - p.y) < minDistance) normal.set(0, 1, 0);
-        if (Math.Abs(b.min.z - p.z) < minDistance) normal.set(0, 0, -1);
-        if (Math.Abs(b.max.z - p.z) < minDistance) normal.set(0, 0, 1);
+        if (Math.Abs(b.min.x - p.x) < minDistance) { normal.set(-1, 0, 0); minDistance = Math.Abs(b.min.x - p.x); }
+        if (Math.Abs(b.max.x - p.x) < minDistance) { normal.set(1, 0, 0); minDistance = Math.Abs(b.max.x - p.x); }
+        if (Math.Abs(b.min.y - p.y) < minDistance) { normal.set(0, -1, 0); minDistance = Math.Abs(b.min.y - p.y); }
+        if (Math.Abs(b.max.y - p.y) < minDistance) { normal.set(0, 1, 0); minDistance = Math.Abs(b.max.y - p.y); }
+        if (Math.Abs(b.min.z - p.z) < minDistance) { normal.set(0, 0, -1); minDistance = Math.Abs(b.min.z - p.z); }
+        if (Math.Abs(b.max.z - p.z) < minDistance) { normal.set(0, 0, 1); minDistance = Math.Abs(b.max.z - p.z); }
 
         return normal;
     }
 
-    public static Vec3 ClosestPointAABB(Vec3 p, AABB b)
+    public static Vec3 ClosestPointAABB(Vec3 p, AABB b, Vec3 normal)
     {
-        Vec3 q = new Vec3();
-        for (int i = 0; i < 3; i++)
+        Vec3 proj = new Vec3();
+
+        if (normal.x + normal.y + normal.z > 0)
         {
-            double v = p[i];
-            v = Math.Max(v, b.min[i]);
-            v = Math.Min(v, b.max[i]);
-            q[i] = v;
+            proj = p - Vec3.Dot(p - b.max, normal) * normal;
+        } else
+        {
+            proj = p - Vec3.Dot(p - b.min, normal) * normal;
         }
-        return q;
+
+        return proj;
     }
 
     public static double SqDistPointAABB(Vec3 p, AABB b)
