@@ -9,9 +9,10 @@ namespace PE
 		ParticleMesh particles;
 		Vector3[] vertices;
 
-		public double k_stretch = 50;
-		public double k_shear = 50;
-		public double mass = 0.1;
+		public double k_stretch = 0;
+		public double k_shear = 0;
+		public double k_bend = 0;
+		public double mass = 0.01;
 	
 		// Use this for initialization
 		void Start ()
@@ -56,6 +57,19 @@ namespace PE
 
 			if (neighbors.Count != 4 * N * N - 6 * N + 2) {
 				throw new MissingComponentException ("We are missing some springs!");
+			}
+
+			List<Spring> nextNextNeighbors = new List<Spring> ();
+
+			for (int i = 0; i < particles.Rows; i++) {
+				for (int j = 0; j < particles.Cols; j++) {
+					var current = particles [i, j];
+
+					if (i + 2 < particles.Rows)
+						nextNextNeighbors.Add (new Spring (current, particles [i + 2, j], k_bend));
+					if (j + 2 < particles.Cols)
+						nextNextNeighbors.Add (new Spring (current, particles [i, j + 2], k_bend));
+				}
 			}
 
 			particles.Neighbors = neighbors;
