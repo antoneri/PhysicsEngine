@@ -14,8 +14,6 @@ namespace PE
 		public double k_bend = 0;
 		public double kd = 0.01;
 		public double mass = 0.025;
-	    private double density = 1;
-        private double radius = 0.25;
 
 		// Use this for initialization
 		void Start ()
@@ -32,7 +30,7 @@ namespace PE
 
 			for (int i = 0; i < particles.Size; i++) {
 				var worldPosition = transform.TransformPoint (mesh.vertices [i]);
-				particles [i] = new Particle (worldPosition, new Vec3 (), mass, radius, density);
+				particles [i] = new Particle (worldPosition, mass);
 			}
 
 			// Springs between particles
