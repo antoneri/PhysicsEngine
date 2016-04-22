@@ -122,10 +122,10 @@ namespace PE
 			return new Vec3 (lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
 		}
 
-        public static Vec3 operator* (Vec3 lhs, Vec3 rhs)
-        {
-            return new Vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
-        }
+		public static Vec3 operator* (Vec3 lhs, Vec3 rhs)
+		{
+			return new Vec3 (lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
+		}
 
 		public static Vec3 operator* (Vec3 lhs, double rhs)
 		{
@@ -135,7 +135,7 @@ namespace PE
 		public static Vec3 operator/ (Vec3 lhs, double rhs)
 		{
 			var inv = 1 / rhs;
-			return new Vec3 (lhs.x * inv, lhs.y * inv, lhs.z * inv);
+			return lhs * inv;
 		}
 
 		/*

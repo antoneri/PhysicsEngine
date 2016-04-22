@@ -57,7 +57,7 @@ namespace PE
 
 		public void FixedUpdate ()
 		{
-			float rate = 1000f; // Hz
+			float rate = 400f; // Hz
 			float dT = Time.fixedDeltaTime;
 			int N = Mathf.CeilToInt (dT * rate);
 			var dt = dT / N;
@@ -69,7 +69,6 @@ namespace PE
 
 		public void ClothUpdate (float dt)
 		{
-			//Debug.Log (dt);
 			foreach (var particles in particleMeshes) {
 				// Reset forces
 				for (int i = 0; i < particles.Size; i++) {
@@ -79,15 +78,18 @@ namespace PE
 				foreach (var n in particles.Neighbors) {
 					Particle pa = n.p1;
 					Particle pb = n.p2;
-					Vec3 r = pa.x - pb.x;
-					Vec3 v = pa.v - pb.v;
+					Vec3 r = pb.x - pa.x;
+					Vec3 v = pb.v - pa.v;
 					Vec3 u = r.UnitVector;
-					pb.f.Add (-(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, u)) * u);
+					double d = r.Length - n.x0;
+					double damping = n.kd * Vec3.Dot (v, u);
+					Vec3 Fspring = -(n.k * d + damping) * u;
+					pb.f.Add (Fspring);
 					pa.f.Add (-pb.f);
 				}
 
-				for (int i = 0; i < particles.Size; i++) {
-					Particle p = particles [i];
+				for (int i = 0; i < particles.Rows; i++) {
+					Particle p = particles [i, 0];
 					if (i == 0 || i == particles.Rows - 1) {
 						// Top corners
 						// TODO Add upwards force instead
@@ -131,11 +133,11 @@ namespace PE
 					// Accumulate external forces from e.g.gravity.
 					// Accumulate dissipative forces, e.g.drag and viscous drag.
 					foreach (var p in particleSystem) {
-                        /* Gravity, uses  Buoyant force to counter gravity force */
-                        double dp = p.p - AIR_P;
-                        /* Fb = (Pair - Pp) * g * V */
-                        p.f.Add(dp * g * (p.m / p.p));
-                        //p.f.Add (p.m * g);
+						/* Gravity, uses  Buoyant force to counter gravity force */
+						double dp = p.p - AIR_P;
+						/* Fb = (Pair - Pp) * g * V */
+						p.f.Add (dp * g * (p.m / p.p));
+						//p.f.Add (p.m * g);
                         
                         
 						//p.f.Add (-0.5 * p.m * g);
@@ -143,6 +145,7 @@ namespace PE
 						/* Air drag force */
 						//double kd = 0.000018;
 						Vec3 u = p.v - wind;
+
                         //Vec3 Fair = -kd * u;
                         double C = 0.5; /* Drag constant */
                         /* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
@@ -152,7 +155,6 @@ namespace PE
                         Debug.Log(Fair);
 						p.f.Add (Fair);
                         Debug.Log(p.f);
-
 					}
 						
 					// Find contact sets with external boundaries, e.g.a plane.
