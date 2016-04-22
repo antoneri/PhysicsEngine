@@ -10,8 +10,9 @@ public class Emitter : MonoBehaviour
 	public float rate = 10;
 	public float radius = 0.4f;
 	public float particleSize = 0.1f;
+    public float density = 2.0f;
 
-	private float lastTime = 0;
+    private float lastTime = 0;
 
 	// For debugging
 	private int particleCount = 0;
@@ -44,7 +45,7 @@ public class Emitter : MonoBehaviour
 
 		if (elapsed >= 1 / rate) {
 			var particlesToEmit = Mathf.CeilToInt (elapsed / (1 / rate));
-
+            
 			for (var i = 0; i < particlesToEmit; i++) {
 				// Add a random perturbation to initial position and velocity
 				var initialVelocity = transform.forward + Random.onUnitSphere;
@@ -53,7 +54,7 @@ public class Emitter : MonoBehaviour
 				var coords = Random.insideUnitCircle * radius;
 				initialPosition += coords.x * transform.right + coords.y * transform.up;
 
-				ps.Add (new PE.Particle (initialPosition, initialVelocity, MASS));
+				ps.Add (new PE.Particle (initialPosition, initialVelocity, MASS, particleSize / 2, density));
 			}
 
 			lastTime = t;

@@ -12,6 +12,8 @@ namespace PE
 		public Vector3 Wind = new Vector3 (0, 0, 0);
 		private Vec3 wind = new Vec3 (0);
 
+        private const double AIR_P = 1.18;
+
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
 		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
@@ -80,16 +82,22 @@ namespace PE
 					// Accumulate external forces from e.g.gravity.
 					// Accumulate dissipative forces, e.g.drag and viscous drag.
 					foreach (var p in particleSystem) {
-						/* Gravity */
-						p.f.Add (p.m * g);
-
-						/* Air gravity counter force. Should be particle property dependent */
-						p.f.Add (-0.5 * p.m * g);
+                        /* Gravity, uses  Buoyant force to counter gravity force */
+                        double dp = p.p - AIR_P;
+                        /* Fb = (Pair - Pp) * g * V */
+                        p.f.Add(dp * g * (p.m / p.p));
+                        //p.f.Add (p.m * g);
+                        
+                        
+						//p.f.Add (-0.5 * p.m * g);
 
 						/* Air drag force */
-						double kd = 0.0000018;
+						//double kd = 0.000018;
 						Vec3 u = p.v - wind;
-						Vec3 Fair = -kd * u;
+                        //Vec3 Fair = -kd * u;
+                        double C = 0.5; /* Drag constant */
+                        /* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
+                        Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * ;
                         
 						p.f.Add (Fair);
 

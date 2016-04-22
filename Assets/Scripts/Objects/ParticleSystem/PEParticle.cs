@@ -11,15 +11,19 @@ namespace PE
 		public Vec3 f;
 		public double m;
 		public double m_inv;
+        public double r; /* Radius */
+        public double p; /* Density */
 		public double age = 0;
 
-		public Particle (Vec3 x, Vec3 v, double mass)
+		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density)
 		{
 			this.x = x;
 			this.v = v;
-			this.f = new Vec3 ();
-			this.m = mass;
-			this.m_inv = 1 / mass;
+			f = new Vec3 ();
+			m = mass;
+			m_inv = 1 / mass;
+            r = radius;
+            p = density;
 		}
 	}
 }
