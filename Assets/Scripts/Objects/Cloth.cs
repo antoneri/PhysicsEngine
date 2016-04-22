@@ -9,11 +9,11 @@ namespace PE
 		ParticleMesh particles;
 		Vector3[] vertices;
 
-		public double k_stretch = 54;
-		public double k_shear = 0;
-		public double k_bend = 0;
-		public double kd = 0.01;
-		public double mass = 0.025;
+		private double k_stretch = 200;
+		private double k_shear = 0;
+		private double k_bend = 0;
+		private double kd = 0.5;
+		private double mass = 0.025;
 
 		// Use this for initialization
 		void Start ()
