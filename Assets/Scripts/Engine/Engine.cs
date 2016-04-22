@@ -12,8 +12,10 @@ namespace PE
 		public Vector3 Wind = new Vector3 (0, 0, 0);
 		private Vec3 wind = new Vec3 (0);
 
-        private const double AIR_P = 1.18; /* Density */
-        private const double AIR_u = 1.002; /* Viscosity */
+		private const double AIR_P = 1.18;
+		/* Density */
+		private const double AIR_u = 1.002;
+		/* Viscosity */
 
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
@@ -76,20 +78,18 @@ namespace PE
 				}
 
 				foreach (var n in particles.Neighbors) {
-					Particle pa = n.p1;
-					Particle pb = n.p2;
-					Vec3 r = pb.x - pa.x;
-					Vec3 v = pb.v - pa.v;
-					Vec3 u = r.UnitVector;
-					double d = r.Length - n.x0;
-					double damping = n.kd * Vec3.Dot (v, u);
-					Vec3 Fspring = -(n.k * d + damping) * u;
-					pb.f.Add (Fspring);
-					pa.f.Add (-pb.f);
+					var pa = n.p1;
+					var pb = n.p2;
+					var r = pb.x - pa.x;
+					var v = pb.v - pa.v;
+					var u = r.UnitVector;
+					var f = -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, u)) * u;
+					pb.f.Add (f);
+					pa.f.Add (-f);
 				}
 
-				for (int i = 0; i < particles.Rows; i++) {
-					Particle p = particles [i, 0];
+				for (int i = 0; i < particles.Size; i++) {
+					var p = particles [i];
 					if (i == 0 || i == particles.Rows - 1) {
 						// Top corners
 						// TODO Add upwards force instead
@@ -133,12 +133,13 @@ namespace PE
 					// Accumulate external forces from e.g.gravity.
 					// Accumulate dissipative forces, e.g.drag and viscous drag.
 					foreach (var p in particleSystem) {
-						/* Gravity, uses  Buoyant force to counter gravity force */
+						/* Gravity, uses Buoyant force to counter gravity force */
 						double dp = p.p - AIR_P;
 						/* Fb = (Pair - Pp) * g * V */
 						p.f.Add (dp * g * (p.m / p.p));
 						//p.f.Add (p.m * g);
                         
+
                         
 						//p.f.Add (-0.5 * p.m * g);
 
@@ -146,15 +147,13 @@ namespace PE
 						//double kd = 0.000018;
 						Vec3 u = p.v - wind;
 
-                        //Vec3 Fair = -kd * u;
-                        double C = 0.5; /* Drag constant */
-                        /* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
-                        //Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
-                        Vec3 Fair = - 6 * Math.PI * AIR_u * p.r * u;
+						//Vec3 Fair = -kd * u;
+						double C = 0.5; /* Drag constant */
+						/* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
+						//Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
+						Vec3 Fair = -6 * Math.PI * AIR_u * p.r * u;
 
-                        Debug.Log(Fair);
 						p.f.Add (Fair);
-                        Debug.Log(p.f);
 					}
 						
 					// Find contact sets with external boundaries, e.g.a plane.
