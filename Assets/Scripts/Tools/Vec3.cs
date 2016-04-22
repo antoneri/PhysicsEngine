@@ -158,17 +158,22 @@ namespace PE
 
 		public void Divide (double k)
 		{
-			var inv = 1 / k;
-			x *= inv;
-			y *= inv;
-			z *= inv;
+			Scale (1 / k);
+		}
+
+		public void SetZero ()
+		{
+			Set (0);
 		}
 
 		public void Set (double v)
 		{
-			x = v;
-			y = v;
-			z = v;
+			Set (v, v, v);
+		}
+
+		public void Set (Vec3 v)
+		{
+			Set (v.x, v.y, v.z);
 		}
 
 		public void Set (double x, double y, double z)
@@ -176,13 +181,6 @@ namespace PE
 			this.x = x;
 			this.y = y;
 			this.z = z;
-		}
-
-		public void Set (Vec3 v)
-		{
-			x = v.x;
-			y = v.y;
-			z = v.z;
 		}
 
 		/*
