@@ -15,8 +15,12 @@ namespace PE
         public double p; /* Density */
 		public double age = 0;
 
-		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density)
+		public Particle (Vec3 x, double mass) : this (x, new Vec3 (), mass, 0, 0)
 		{
+		}
+
+        public Particle(Vec3 x, Vec3 v, double mass, double radius, double density)
+        {
 			this.x = x;
 			this.v = v;
 			f = new Vec3 ();

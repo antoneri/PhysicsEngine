@@ -47,12 +47,60 @@ namespace PE
 		{
 			entities.Add (e);
 		}
-
-
+			
 		// Use this for initialization
 		void Start ()
 		{
 			StartCoroutine (GameLoop ());
+		}
+
+		public void FixedUpdate ()
+		{
+			float rate = 1000f; // Hz
+			float dT = Time.fixedDeltaTime;
+			int N = Mathf.CeilToInt (dT * rate);
+			var dt = dT / N;
+
+			for (int i = 0; i < N; i++) {
+				ClothUpdate (dt);
+			}
+		}
+
+		public void ClothUpdate (float dt)
+		{
+			Debug.Log (dt);
+			foreach (var particles in particleMeshes) {
+				// Reset forces
+				for (int i = 0; i < particles.Size; i++) {
+					particles [i].f.SetZero ();
+				}
+
+				foreach (var n in particles.Neighbors) {
+					Particle pa = n.p1;
+					Particle pb = n.p2;
+					Vec3 r = pa.x - pb.x;
+					Vec3 v = pa.v - pb.v;
+					Vec3 u = r.UnitVector;
+					pb.f.Add (-(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, u)) * u);
+					pa.f.Add (-pb.f);
+				}
+
+				for (int i = 0; i < particles.Size; i++) {
+					Particle p = particles [i];
+					if (i == 0 || i == particles.Rows - 1) {
+						// Top corners
+						// TODO Add upwards force instead
+						continue;
+					}
+
+					// Add gravity
+					p.f.Add (p.m * g);
+
+					// Integrate
+					p.v.Add (dt * p.m_inv * p.f);
+					p.x.Add (dt * p.v);
+				}
+			}
 		}
 
 		private IEnumerator GameLoop ()
@@ -97,9 +145,9 @@ namespace PE
                         //Vec3 Fair = -kd * u;
                         double C = 0.5; /* Drag constant */
                         /* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
-                        Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * ;
+                        //Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v * p.v;
                         
-						p.f.Add (Fair);
+						//p.f.Add (Fair);
 
 					}
 						
@@ -139,48 +187,11 @@ namespace PE
 					}
 
 				}
-
-				foreach (var particles in particleMeshes) {
-					// Reset forces
-					for (int i = 0; i < particles.Size; i++) {
-						var p = particles [i];
-						p.f.Set (0.0);
-						//p.f.x = p.f.y = p.f.z = 0;
-					}
-
-					foreach (var n in particles.Neighbors) {
-						var pa = n.p1;
-						var pb = n.p2;
-						var r = pa.x - pb.x;
-						var v = pa.v - pb.v;
-						pb.f += -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, r) / r.Length) * r.Normalize;
-						pa.f += -pb.f;
-					}
-
-					for (int i = 0; i < particles.Size; i++) {
-						var p = particles [i];
-						if (i == 0 || i == particles.Rows - 1) {
-							// Top corners
-							// TODO Add upwards force instead
-							continue;
-						}
-
-						// Add gravity
-						p.f += p.m * g;
-
-						// Integrate
-						p.v.x += dt * p.m_inv * p.f.x;
-						p.v.y += dt * p.m_inv * p.f.y;
-						p.v.z += dt * p.m_inv * p.f.z;
-						p.x.x += dt * p.v.x;
-						p.x.y += dt * p.v.y;
-						p.x.z += dt * p.v.z;
-					}
-				}
-
+					
 				yield return new WaitForFixedUpdate ();
 			}
 		}
+
 	}
 }
 
