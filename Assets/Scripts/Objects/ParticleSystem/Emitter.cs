@@ -17,8 +17,6 @@ public class Emitter : MonoBehaviour
 	// For debugging
 	private int particleCount = 0;
 
-	private const double MASS = 1e-5;
-
 	private readonly Color startColor = Color.blue;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
 
@@ -45,6 +43,9 @@ public class Emitter : MonoBehaviour
 
 		if (elapsed >= 1 / rate) {
 			var particlesToEmit = Mathf.CeilToInt (elapsed / (1 / rate));
+
+            float r = particleSize / 2;
+            float mass = density * 4 * Mathf.PI * r * r * r / 3;
             
 			for (var i = 0; i < particlesToEmit; i++) {
 				// Add a random perturbation to initial position and velocity
@@ -54,7 +55,7 @@ public class Emitter : MonoBehaviour
 				var coords = Random.insideUnitCircle * radius;
 				initialPosition += coords.x * transform.right + coords.y * transform.up;
 
-				ps.Add (new PE.Particle (initialPosition, initialVelocity, MASS, particleSize / 2, density));
+				ps.Add (new PE.Particle (initialPosition, initialVelocity, mass, particleSize / 2, density));
 			}
 
 			lastTime = t;

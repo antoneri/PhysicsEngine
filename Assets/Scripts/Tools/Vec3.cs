@@ -69,7 +69,15 @@ namespace PE
 			}
 		}
 
-		public Vec3 UnitVector {
+        public double SqLength
+        {
+            get
+            {
+                return x * x + y * y + z * z;
+            }
+        }
+
+        public Vec3 UnitVector {
 			get {
 				return this / Length;
 			}

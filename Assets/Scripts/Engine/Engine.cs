@@ -12,7 +12,8 @@ namespace PE
 		public Vector3 Wind = new Vector3 (0, 0, 0);
 		private Vec3 wind = new Vec3 (0);
 
-        private const double AIR_P = 1.18;
+        private const double AIR_P = 1.18; /* Density */
+        private const double AIR_u = 1.002; /* Viscosity */
 
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
@@ -68,7 +69,7 @@ namespace PE
 
 		public void ClothUpdate (float dt)
 		{
-			Debug.Log (dt);
+			//Debug.Log (dt);
 			foreach (var particles in particleMeshes) {
 				// Reset forces
 				for (int i = 0; i < particles.Size; i++) {
@@ -145,9 +146,12 @@ namespace PE
                         //Vec3 Fair = -kd * u;
                         double C = 0.5; /* Drag constant */
                         /* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
-                        //Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v * p.v;
-                        
-						//p.f.Add (Fair);
+                        //Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
+                        Vec3 Fair = - 6 * Math.PI * AIR_u * p.r * u;
+
+                        Debug.Log(Fair);
+						p.f.Add (Fair);
+                        Debug.Log(p.f);
 
 					}
 						
