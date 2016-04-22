@@ -65,19 +65,17 @@ namespace PE
 		 */
 		public double Length {
 			get {
-				return Math.Sqrt (x * x + y * y + z * z);
+				return Math.Sqrt (SqLength);
 			}
 		}
 
-        public double SqLength
-        {
-            get
-            {
-                return x * x + y * y + z * z;
-            }
-        }
+		public double SqLength {
+			get {
+				return x * x + y * y + z * z;
+			}
+		}
 
-        public Vec3 UnitVector {
+		public Vec3 UnitVector {
 			get {
 				return this / Length;
 			}
