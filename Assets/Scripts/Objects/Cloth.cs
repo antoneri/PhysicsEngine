@@ -9,11 +9,11 @@ namespace PE
 		ParticleMesh particles;
 		Vector3[] vertices;
 
-		private double k_stretch = 100;
-		private double k_shear = 20;
-		private double k_bend = 0;
-		private double kd = 1;
-		private double mass = 0.01;
+		private double k_stretch = 300;
+		private double k_shear = 100;
+		private double k_bend = 80;
+		private double kd = 5;
+		private double mass = 0.1;
 
 		// Use this for initialization
 		void Start ()
@@ -64,24 +64,16 @@ namespace PE
 						var neighbor = particles [i + 1, j];
 						neighbors.Add (new Spring (current, neighbor, k_stretch, kd));
 					}
-				}
-			}
 
-			if (neighbors.Count != 4 * N * N - 6 * N + 2) {
-				throw new MissingComponentException ("We are missing some springs!");
-			}
+					if (i + 2 < particles.Rows) {
+						var nextNeighbor = particles [i + 2, j];
+						neighbors.Add (new Spring (current, nextNeighbor, k_bend, kd));
+					}
 
-			// TODO Not used right now
-			List<Spring> nextNextNeighbors = new List<Spring> ();
-
-			for (int i = 0; i < particles.Rows; i++) {
-				for (int j = 0; j < particles.Cols; j++) {
-					var current = particles [i, j];
-
-					if (i + 2 < particles.Rows)
-						nextNextNeighbors.Add (new Spring (current, particles [i + 2, j], k_bend, kd));
-					if (j + 2 < particles.Cols)
-						nextNextNeighbors.Add (new Spring (current, particles [i, j + 2], k_bend, kd));
+					if (j + 2 < particles.Cols) {
+						var nextNeighbor = particles [i, j + 2];
+						neighbors.Add (new Spring (current, nextNeighbor, k_bend, kd));
+					}
 				}
 			}
 
