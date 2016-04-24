@@ -99,6 +99,12 @@ namespace PE
 					// Add gravity
 					p.f.Add (p.m * g);
 
+					// Add air friction forces
+					if (p.v.Length != 0) {
+						var f_air = -1e-2 * p.v.SqLength * p.v.UnitVector;
+						p.f.Add (f_air);
+					}
+
 					// Integrate
 					p.v.Add (dt * p.m_inv * p.f);
 					p.x.Add (dt * p.v);
