@@ -74,8 +74,8 @@ namespace PE
 		{
 			foreach (var particles in particleMeshes) {
 				// Reset forces
-				for (int i = 0; i < particles.Size; i++) {
-					particles [i].f.SetZero ();
+				foreach (var p in particles) {
+					p.f.SetZero ();					
 				}
 
 				// Compute spring forces
@@ -87,8 +87,7 @@ namespace PE
 
 				for (int i = 0; i < particles.Size; i++) {
 					var p = particles [i];
-					if (i == 0 || i == particles.Rows - 1) {
-						// Top corners
+					if (i == 0) {
 						// TODO Add upwards force instead
 						continue;
 					}

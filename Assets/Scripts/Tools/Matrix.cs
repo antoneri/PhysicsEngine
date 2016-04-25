@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PE
 {
-	public class Matrix<T>: IEnumerable
+	public class Matrix<T>: IEnumerable<T>
 	{
 		protected int rows;
 		protected int cols;
@@ -54,17 +54,18 @@ namespace PE
 			}
 		}
 
-		public IEnumerable GetEnumerator ()
+		public IEnumerator<T> GetEnumerator ()
 		{
 			for (int i = 0; i < Size; i++) {
-				yield return items [i];
+				yield return this [i];
 			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator ()
 		{
-			return (IEnumerator)GetEnumerator ();
+			throw new NotImplementedException ();
 		}
 	}
+
 }
 

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ namespace PE
 
 		private double k_stretch = 600;
 		private double k_shear = 400;
-		private double k_bend = 60;
+		private double k_bend = 100;
 		private double kd = 5;
 		private double mass = 0.1;
 
