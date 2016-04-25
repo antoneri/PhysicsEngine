@@ -5,30 +5,32 @@ using System;
 
 using PE;
 
-public struct IntersectData {
-    public PE.Particle particle;
-    public double distance;
-    public Vec3 normal;
-    public Vec3 point;
+public struct Intersection
+{
+	public PE.Particle particle;
+	public double distance;
+	public Vec3 normal;
+	public Vec3 point;
 
-    public override string ToString()
-    {
-        return distance + "\n" + normal.ToString() + "\n" + point.ToString();
-    }
+	public override string ToString ()
+	{
+		return distance + "\n" + normal.ToString () + "\n" + point.ToString ();
+	}
 }
 
 public abstract class Collider
 {
-    public abstract List<IntersectData> Collides(IEnumerable<PE.Particle> ps);
 
-    public static List<IntersectData> Collides(IEnumerable<PE.Particle> ps, Plane pl)
+    public abstract List<Intersection> Collides(IEnumerable<PE.Particle> ps);
+
+    public static List<Intersection> Collides(IEnumerable<PE.Particle> ps, Plane pl)
     {
-        List<IntersectData> intersections = new List<IntersectData>();
+        List<Intersection> intersections = new List<Intersection>();
         foreach (var p in ps)
         {
             double d = Math.Abs(Vec3.Dot(p.x, pl.normal) - pl.d);
             if (d < Plane.thickness) {
-                IntersectData data = new IntersectData
+                Intersection data = new Intersection
                 {
                     particle = p,
                     distance = Plane.thickness - d,
@@ -41,9 +43,9 @@ public abstract class Collider
         return intersections;
     }
 
-    public static List<IntersectData> Collides(IEnumerable<PE.Particle> ps, AABB b)
+    public static List<Intersection> Collides(IEnumerable<PE.Particle> ps, AABB b)
     {
-        List<IntersectData> intersections = new List<IntersectData>();
+        List<Intersection> intersections = new List<Intersection>();
         foreach (var p in ps)
         {
             if (p.x.x < b.max.x && p.x.x > b.min.x &&
@@ -52,7 +54,7 @@ public abstract class Collider
 
                 Vec3 n = PointNormalAABB(p.x, b);
                 Vec3 AABBPoint = ClosestPointAABB(p.x, b, n);
-                IntersectData data = new IntersectData
+                Intersection data = new Intersection
                 {
                     particle = p,
                     distance = 0,
@@ -64,14 +66,6 @@ public abstract class Collider
         }
         return intersections;
     }
-
-
-
-
-
-
-
-
 
     /* AABB intersect data */
 
@@ -118,31 +112,32 @@ public abstract class Collider
         return sqDist;
     }
 
+
 }
 
 public class Plane : Collider
 {
+	public Vec3 normal;
+	public double d;
 
-    public Vec3 normal;
-    public double d;
+	public const double thickness = 0.3;
 
-    public const double thickness = 0.3;
-
-    public Plane(Vec3 normal, double d)
-    {
-        this.normal = normal;
-        this.d = d;
-    }
-
-    public override List<IntersectData> Collides(IEnumerable<PE.Particle> ps)
+    public override List<Intersection> Collides(IEnumerable<PE.Particle> ps)
     {
         return Collides(ps, this);
     }
+
+	public Plane (Vec3 normal, double d)
+	{
+		this.normal = normal;
+		this.d = d;
+	}
 
 }
 
 public class AABB : Collider
 {
+
     public Vec3 min;
     public Vec3 max;
 
@@ -152,8 +147,9 @@ public class AABB : Collider
         this.max = max;
     }
 
-    public override List<IntersectData> Collides(IEnumerable<PE.Particle> ps)
+    public override List<Intersection> Collides(IEnumerable<PE.Particle> ps)
     {
         return Collides(ps, this);
     }
+
 }
