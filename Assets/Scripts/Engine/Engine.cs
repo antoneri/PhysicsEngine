@@ -61,10 +61,10 @@ namespace PE
 		{
 			float rate = 400f; // Hz
 			float dT = Time.fixedDeltaTime;
-			int N = Mathf.CeilToInt (dT * rate);
-			var dt = dT / N;
+			int numTimeSteps = Mathf.CeilToInt (dT * rate);
+			var dt = dT / numTimeSteps;
 
-			for (int i = 0; i < N; i++) {
+			for (int i = 0; i < numTimeSteps; i++) {
 				ClothUpdate (dt);
 			}
 		}
@@ -77,15 +77,11 @@ namespace PE
 					particles [i].f.SetZero ();
 				}
 
-				foreach (var n in particles.Neighbors) {
-					var pa = n.p1;
-					var pb = n.p2;
-					var r = pb.x - pa.x;
-					var v = pb.v - pa.v;
-					var u = r.UnitVector;
-					var f = -(n.k * (r.Length - n.x0) + n.kd * Vec3.Dot (v, u)) * u;
-					pb.f.Add (f);
-					pa.f.Add (-f);
+				// Compute spring forces
+				foreach (var spring in particles.Neighbors) {
+					var f = spring.Force;
+					spring.p2.f.Add (f);
+					spring.p1.f.Add (-f);
 				}
 
 				for (int i = 0; i < particles.Size; i++) {
@@ -167,7 +163,7 @@ namespace PE
 					// the velocities.
 					intersections.Clear ();
 					foreach (Entity e in entities) {
-						intersections.AddRange (e.getCollider ().Collides (particleSystem));
+						intersections.AddRange (e.Collider.Collides (particleSystem));
 					}
                     
 					foreach (IntersectData data in intersections) {

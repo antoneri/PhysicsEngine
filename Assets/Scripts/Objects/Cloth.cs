@@ -9,9 +9,9 @@ namespace PE
 		ParticleMesh particles;
 		Vector3[] vertices;
 
-		private double k_stretch = 300;
-		private double k_shear = 100;
-		private double k_bend = 80;
+		private double k_stretch = 600;
+		private double k_shear = 400;
+		private double k_bend = 60;
 		private double kd = 5;
 		private double mass = 0.1;
 
@@ -34,16 +34,18 @@ namespace PE
 			}
 
 			// Springs between particles
-			List<Spring> neighbors = new List<Spring> ();
+			var neighbors = new List<Spring> ();
 
 			for (int i = 0; i < particles.Rows; i++) {
 				for (int j = 0; j < particles.Cols; j++) {
 					var current = particles [i, j];
 					//      1
 					//    /
-					//  * - 2
+					//  * - 2 - 5
 					//  | \
 					//  4   3
+					//  |
+					//  6
 
 					if (i - 1 >= 0 && j + 1 < particles.Cols) {
 						var neighbor = particles [i - 1, j + 1];
