@@ -9,21 +9,24 @@ namespace PE
 	{
 		public static Engine instance = null;
 
-		public Vector3 Wind = new Vector3 (0, 0, 0);
-		private Vec3 wind = new Vec3 (0);
-
-		private const double AIR_P = 1.18;
-		/* Density */
-		private const double AIR_u = 1.002;
-		/* Viscosity */
+		private const float clothFrameRate = 400f;
+		private int clothTimeSteps;
+		private double clothDeltaTime;
 
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
-		List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
-		List<Entity> entities = new List<Entity> ();
-		List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
+		public Vector3 Wind = new Vector3 (0, 0, 0);
+		private Vec3 wind = new Vec3 (0);
 
-		private List<IntersectData> intersections = new List<IntersectData> (10000);
+		/* Density */
+		private const double AIR_P = 1.18;
+		/* Viscosity */
+		private const double AIR_u = 1.002;
+
+		private List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
+		private List<Entity> entities = new List<Entity> ();
+		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
+		private List<Intersection> intersections = new List<Intersection> (10000);
 
 		void Awake ()
 		{
@@ -41,9 +44,9 @@ namespace PE
 			particleSystems.Add (ps);
 		}
 
-		public void AddParticleMesh (ParticleMesh particleMesh)
+		public void AddParticleMesh (ParticleMesh mesh)
 		{
-			particleMeshes.Add (particleMesh);
+			particleMeshes.Add (mesh);
 		}
 
 		public void AddEntity (Entity e)
@@ -54,22 +57,20 @@ namespace PE
 		// Use this for initialization
 		void Start ()
 		{
-			StartCoroutine (GameLoop ());
+			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
+			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
 		}
 
 		public void FixedUpdate ()
 		{
-			float rate = 400f; // Hz
-			float dT = Time.fixedDeltaTime;
-			int numTimeSteps = Mathf.CeilToInt (dT * rate);
-			var dt = dT / numTimeSteps;
-
-			for (int i = 0; i < numTimeSteps; i++) {
-				ClothUpdate (dt);
+			for (int i = 0; i < clothTimeSteps; i++) {
+				ClothUpdate (clothDeltaTime);
 			}
+
+			ParticleUpdate (Time.fixedDeltaTime);
 		}
 
-		public void ClothUpdate (float dt)
+		public void ClothUpdate (double dt)
 		{
 			foreach (var particles in particleMeshes) {
 				// Reset forces
@@ -108,94 +109,80 @@ namespace PE
 			}
 		}
 
-		private IEnumerator GameLoop ()
+		private void ParticleUpdate (double dt)
 		{
-			/* Simulation loop */
-			while (true) {
-				double dt = Time.fixedDeltaTime;
-				wind = Wind;
+			wind = Wind;
 
-				foreach (var particleSystem in particleSystems) {
+			foreach (var particleSystem in particleSystems) {
 
-					/* Clear forces */
-					foreach (var p in particleSystem) {
-						p.f.Set (0);
-					}
+				/* Clear forces */
+				foreach (var p in particleSystem) {
+					p.f.SetZero ();
+				}
 
-					// Create particles at emitter
-					// (Remove particles at sinks or when they expire in time)
-					particleSystem.Update ();
+				// Create particles at emitter
+				// (Remove particles at sinks or when they expire in time)
+				particleSystem.Update ();
 
-					// Do inter-particle collision detection and construct a
-					// neighbour list – or use a fixed interaction list (cloth).
+				// Do inter-particle collision detection and construct a
+				// neighbour list – or use a fixed interaction list (cloth).
 
-					// Loop over neighbour lists and compute interaction forces.
-					// Accumulate the forces.Use Newton’s third law.
+				// Loop over neighbour lists and compute interaction forces.
+				// Accumulate the forces.Use Newton’s third law.
 
-					// Accumulate external forces from e.g.gravity.
-					// Accumulate dissipative forces, e.g.drag and viscous drag.
-					foreach (var p in particleSystem) {
-						/* Gravity, uses Buoyant force to counter gravity force */
-						double dp = p.p - AIR_P;
-						/* Fb = (Pair - Pp) * g * V */
-						p.f.Add (dp * g * (p.m / p.p));
-						//p.f.Add (p.m * g);
-                        
-
-                        
-						//p.f.Add (-0.5 * p.m * g);
-
-						/* Air drag force */
-						//double kd = 0.000018;
-						Vec3 u = p.v - wind;
-
-						//Vec3 Fair = -kd * u;
-						double C = 0.5; /* Drag constant */
-						/* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
-						//Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
-						Vec3 Fair = -6 * Math.PI * AIR_u * p.r * u;
-
-						p.f.Add (Fair);
-					}
-						
-					// Find contact sets with external boundaries, e.g.a plane.
-					// Handle external boundary conditions by reflecting the
-					// the velocities.
-					intersections.Clear ();
-					foreach (Entity e in entities) {
-						intersections.AddRange (e.Collider.Collides (particleSystem));
-					}
+				// Accumulate external forces from e.g.gravity.
+				// Accumulate dissipative forces, e.g.drag and viscous drag.
+				foreach (var p in particleSystem) {
+					/* Gravity, uses Buoyant force to counter gravity force */
+					//double dp = p.p - AIR_P;
+					/* Fb = (Pair - Pp) * g * V */
+					//p.f.Add (dp * g * (p.m / p.p));
+					p.f.Add (p.m * g);
                     
-					foreach (IntersectData data in intersections) {
-						double e = 0.8;
-						Vec3 v = data.particle.v;
-						data.particle.v = v - (1 + e) * (Vec3.Dot (v, data.normal) * data.normal);
-					}
-                    
+					/* Air drag force */
+					//double kd = 0.000018;
+					Vec3 u = p.v - wind;
 
-
-					// Take a timestep and integrate using e.g.Verlet / Leap Frog
-					foreach (var p in particleSystem) {
-						p.v.Add (dt * p.m_inv * p.f);
-
-						p.x.Add (dt * p.v);
-					}
-
-					/* Adjust collided particles */
-					foreach (IntersectData data in intersections) {
-						Particle p = data.particle;
-						if (Vec3.Dot (p.v, data.normal) < 0) {
-							p.v.Set (0.0);
-						}
-						double x = Vec3.Dot (p.x - data.point, data.normal);
-						if (x < 0) {
-							p.x = data.point;
-						}
-					}
-
+					//Vec3 Fair = -kd * u;
+					double C = 0.5; /* Drag constant */
+					/* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
+					//Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
+					Vec3 Fair = -6 * Math.PI * AIR_u * p.r * u;
+					//p.f.Add (Fair);
 				}
 					
-				yield return new WaitForFixedUpdate ();
+				// Find contact sets with external boundaries, e.g.a plane.
+				// Handle external boundary conditions by reflecting the
+				// the velocities.
+				intersections.Clear ();
+
+				foreach (var entity in entities) {
+					intersections.AddRange (entity.Collider.Collides (particleSystem));
+				}
+                
+				foreach (var data in intersections) {
+					double e = 0.8;
+					var v = data.particle.v;
+					data.particle.v = v - (1 + e) * Vec3.Dot (v, data.normal) * data.normal;
+				}
+
+				// Take a timestep and integrate using e.g.Verlet / Leap Frog
+				foreach (var p in particleSystem) {
+					p.v.Add (dt * p.m_inv * p.f);
+					p.x.Add (dt * p.v);
+				}
+
+				/* Adjust collided particles */
+				foreach (var data in intersections) {
+					var p = data.particle;
+					if (Vec3.Dot (p.v, data.normal) < 0) {
+						p.v.SetZero ();
+					}
+
+					if (Vec3.Dot (p.x - data.point, data.normal) < 0) {
+						p.x = data.point;
+					}
+				}
 			}
 		}
 
