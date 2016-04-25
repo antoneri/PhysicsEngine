@@ -19,9 +19,9 @@ public struct IntersectData {
 
 public abstract class Collider
 {
-    public abstract List<IntersectData> Collides(PE.ParticleSystem ps);
+    public abstract List<IntersectData> Collides(IEnumerable<PE.Particle> ps);
 
-    public static List<IntersectData> Collides(PE.ParticleSystem ps, Plane pl)
+    public static List<IntersectData> Collides(IEnumerable<PE.Particle> ps, Plane pl)
     {
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
@@ -41,7 +41,7 @@ public abstract class Collider
         return intersections;
     }
 
-    public static List<IntersectData> Collides(PE.ParticleSystem ps, AABB b)
+    public static List<IntersectData> Collides(IEnumerable<PE.Particle> ps, AABB b)
     {
         List<IntersectData> intersections = new List<IntersectData>();
         foreach (var p in ps)
@@ -134,7 +134,7 @@ public class Plane : Collider
         this.d = d;
     }
 
-    public override List<IntersectData> Collides(PE.ParticleSystem ps)
+    public override List<IntersectData> Collides(IEnumerable<PE.Particle> ps)
     {
         return Collides(ps, this);
     }
@@ -152,7 +152,7 @@ public class AABB : Collider
         this.max = max;
     }
 
-    public override List<IntersectData> Collides(PE.ParticleSystem ps)
+    public override List<IntersectData> Collides(IEnumerable<PE.Particle> ps)
     {
         return Collides(ps, this);
     }
