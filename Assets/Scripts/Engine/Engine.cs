@@ -63,7 +63,8 @@ namespace PE
 
 		public void FixedUpdate ()
 		{
-			for (int i = 0; i < clothTimeSteps; i++) {
+
+            for (int i = 0; i < clothTimeSteps; i++) {
 				ClothUpdate (clothDeltaTime);
 			}
 
@@ -101,16 +102,24 @@ namespace PE
 						p.f.Add (f_air);
 					}
 
-					// Integrate
-					p.v.Add (dt * p.m_inv * p.f);
+                    // Integrate
+                    p.v.Add (dt * p.m_inv * p.f);
 					p.x.Add (dt * p.v);
-				}
+
+                }
 			}
 		}
 
 		private void ParticleUpdate (double dt)
 		{
-			wind = Wind;
+            wind = Wind;
+            foreach (var particles in particleMeshes)
+            {
+                intersections.Clear();
+                CheckCollisions(particles);
+                HandleCollisions();
+                AdjustIntersections();
+            }
 
 			foreach (var particleSystem in particleSystems) {
 
@@ -154,16 +163,8 @@ namespace PE
 				// Handle external boundary conditions by reflecting the
 				// the velocities.
 				intersections.Clear ();
-
-				foreach (var entity in entities) {
-					intersections.AddRange (entity.Collider.Collides (particleSystem));
-				}
-                
-				foreach (var data in intersections) {
-					double e = 0.8;
-					var v = data.particle.v;
-					data.particle.v = v - (1 + e) * Vec3.Dot (v, data.normal) * data.normal;
-				}
+                CheckCollisions(particleSystem);
+                HandleCollisions();
 
 				// Take a timestep and integrate using e.g.Verlet / Leap Frog
 				foreach (var p in particleSystem) {
@@ -171,20 +172,53 @@ namespace PE
 					p.x.Add (dt * p.v);
 				}
 
-				/* Adjust collided particles */
-				foreach (var data in intersections) {
-					var p = data.particle;
-					if (Vec3.Dot (p.v, data.normal) < 0) {
-						p.v.SetZero ();
-					}
-
-					if (Vec3.Dot (p.x - data.point, data.normal) < 0) {
-						p.x = data.point;
-					}
-				}
+                /* 
+                If there still are overlaps in the contact set with
+                external boundaries, you could project the positions of
+                the particles to the constraint manifold, e.g.to the
+                surface of the plane.                 */                AdjustIntersections();
 			}
 		}
 
-	}
+        private void CheckCollisions(IEnumerable<Particle> particles)
+        {
+            foreach (var entity in entities)
+            {
+                intersections.AddRange(entity.Collider.Collides(particles));
+            }
+        }
+
+        private void HandleCollisions()
+        {
+            foreach (var data in intersections)
+            {
+                double e = 0.8;
+                var v = data.particle.v;
+                data.particle.v = v - (1 + e) * Vec3.Dot(v, data.normal) * data.normal;
+            }
+        }
+
+        private void AdjustIntersections()
+        {
+            /* Adjust collided particles */
+            foreach (var data in intersections)
+            {
+                var p = data.particle;
+                if (Vec3.Dot(p.v, data.normal) < 0)
+                {
+                    p.v.SetZero();
+                }
+
+                if (Vec3.Dot(p.x - data.point, data.normal) < 0)
+                {
+                    p.x = data.point;
+                }
+            }
+        }
+
+
+
+    }
+
 }
 
