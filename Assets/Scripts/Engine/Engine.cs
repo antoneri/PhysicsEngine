@@ -97,7 +97,7 @@ namespace PE
 
 					// Add air friction forces
 					if (p.v.Length != 0) {
-						var f_air = -1e-2 * p.v.SqLength * p.v.UnitVector;
+						var f_air = -1e-2 * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
 						p.f.Add (f_air);
 					}
 
