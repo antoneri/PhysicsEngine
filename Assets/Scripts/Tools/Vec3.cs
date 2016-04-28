@@ -65,19 +65,23 @@ namespace PE
 		 */
 		public double Length {
 			get {
-				return Math.Sqrt (SqLength);
+				return Math.Sqrt (Dot (this, this));
 			}
 		}
 
 		public double SqLength {
 			get {
-				return x * x + y * y + z * z;
+				return Dot (this, this);
 			}
 		}
 
 		public Vec3 UnitVector {
 			get {
-				return this / Length;
+				var l = Length;
+				if (l == 0) {
+					throw new DivideByZeroException ("Zero vector has no unit vector.");
+				}
+				return this / l;
 			}
 		}
 
