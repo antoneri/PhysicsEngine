@@ -14,11 +14,10 @@ public class Box : MonoBehaviour
 		Vector3 min = transform.position - transform.lossyScale * 0.5f;
 		Vector3 max = transform.position + transform.lossyScale * 0.5f;
 
-		min = min - ColliderThickness;
-		max = max + ColliderThickness;
-
 		box.Collider = new AABB (min, max);
 		box.Static = true;
+
+        //growColliderBox();
 
 		PE.Engine.instance.AddEntity (box);
 	}
@@ -26,9 +25,23 @@ public class Box : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		/* Update collider */
-		AABB collider = (AABB)box.Collider;
-		collider.min = transform.position - transform.lossyScale * 0.5f - ColliderThickness;
-		collider.max = transform.position + transform.lossyScale * 0.5f + ColliderThickness;
+        //growColliderBox();
+        updateCollider();
 	}
+
+    private void updateCollider()
+    {
+        /* Update collider */
+        AABB collider = (AABB)box.Collider;
+        collider.min = transform.position - transform.lossyScale * 0.5f;
+        collider.max = transform.position + transform.lossyScale * 0.5f;
+    }
+
+    private void growColliderBox()
+    {
+        /* Update collider */
+        AABB collider = (AABB)box.Collider;
+        collider.min = transform.position - transform.lossyScale * 0.5f - ColliderThickness;
+        collider.max = transform.position + transform.lossyScale * 0.5f + ColliderThickness;
+    }
 }
