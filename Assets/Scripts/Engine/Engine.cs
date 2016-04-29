@@ -25,6 +25,7 @@ namespace PE
 		private List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 		private List<Entity> entities = new List<Entity> ();
 		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
+		private List<List<Particle>> ropes = new List<List<Particle>> ();
 		private List<Intersection> intersections = new List<Intersection> (10000);
 
 		void Awake ()
@@ -57,6 +58,11 @@ namespace PE
 			particleMeshes.Add (mesh);
 		}
 
+		public void AddRope (List<Particle> rope)
+		{
+			ropes.Add (rope);
+		}
+
 		public void AddEntity (Entity entity)
 		{
 			entities.Add (entity);
@@ -77,6 +83,8 @@ namespace PE
 				HandleCollisions ();
 				AdjustIntersections ();
 			}
+
+			RopeUpdate (Time.fixedDeltaTime);
 
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
@@ -118,6 +126,47 @@ namespace PE
 					p.x.Add (dt * p.v);
 
 				}
+			}
+		}
+
+		private void RopeUpdate (double dt)
+		{
+			foreach (var rope in ropes) {
+				foreach (var p in rope) {
+					p.f.Set (p.m * g);
+				}
+
+				double k = 1;
+
+				var n = rope.Count;
+				var G = new Matrix<Vec3> (n, n - 1);
+
+				for (int i = 0; i < n - 1; i++) {
+					Particle pi = rope [i];
+					Particle pj = rope [i + 1];
+					Vec3 u = (pi.x - pj.x).UnitVector;
+					G [i, i] = u;
+					G [i, i + 1] = -u;
+				}
+
+				var M = new Matrix<Vec3> (2 * n, 2 * n);
+				var f = new Vec3[2 * n];
+				var W = new Vec3[2 * n];
+
+				for (int i = 0; i < n; i++) {
+					var idx = 2 * i;
+					M [idx, idx] = new Vec3 (rope [i].m);
+					M [idx + 1, idx + 1] = new Vec3 (1); // Moments of inertia
+					f [idx] = rope [i].f;
+					f [idx + 1] = new Vec3 (); // Torque
+					W [idx] = rope [i].v;
+					W [idx + 1] = new Vec3 (); // Angular velocity
+				}
+
+
+				// Solve for lambda
+
+				// Integrate
 			}
 		}
 
