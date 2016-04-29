@@ -15,8 +15,7 @@ namespace PE
 
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
-		public Vector3 Wind = new Vector3 (0, 0, 0);
-		private Vec3 wind = new Vec3 (0);
+		public Vector3 wind = new Vector3 (0, 0, 0);
 
 		/* Density */
 		private const double AIR_P = 1.18;
@@ -39,9 +38,18 @@ namespace PE
 			DontDestroyOnLoad (gameObject);
 		}
 
-		public void AddParticleSystem (PE.ParticleSystem ps)
+		void Start ()
 		{
-			particleSystems.Add (ps);
+			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
+			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
+		}
+
+		/*
+		 * Setters
+		 */
+		public void AddParticleSystem (PE.ParticleSystem particleSystem)
+		{
+			particleSystems.Add (particleSystem);
 		}
 
 		public void AddParticleMesh (ParticleMesh mesh)
@@ -49,23 +57,25 @@ namespace PE
 			particleMeshes.Add (mesh);
 		}
 
-		public void AddEntity (Entity e)
+		public void AddEntity (Entity entity)
 		{
-			entities.Add (e);
-		}
-			
-		// Use this for initialization
-		void Start ()
-		{
-			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
-			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
+			entities.Add (entity);
 		}
 
+		/*
+		 * Main loop
+		 */
 		public void FixedUpdate ()
 		{
-
 			for (int i = 0; i < clothTimeSteps; i++) {
 				ClothUpdate (clothDeltaTime);
+			}
+
+			foreach (var particles in particleMeshes) {
+				intersections.Clear ();
+				CheckCollisions (particles);
+				HandleCollisions ();
+				AdjustIntersections ();
 			}
 
 			ParticleUpdate (Time.fixedDeltaTime);
@@ -98,7 +108,8 @@ namespace PE
 
 					// Add air friction forces
 					if (p.v.Length != 0) {
-						var f_air = -1e-2 * p.v.SqLength * p.v.UnitVector;
+						double air_fric = -1e-2;
+						var f_air = air_fric * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
 						p.f.Add (f_air);
 					}
 
@@ -112,14 +123,6 @@ namespace PE
 
 		private void ParticleUpdate (double dt)
 		{
-			wind = Wind;
-			foreach (var particles in particleMeshes) {
-				intersections.Clear ();
-				CheckCollisions (particles);
-				HandleCollisions ();
-				AdjustIntersections ();
-			}
-
 			foreach (var particleSystem in particleSystems) {
 
 				/* Clear forces */
@@ -148,7 +151,7 @@ namespace PE
                     
 					/* Air drag force */
 					//double kd = 0.000018;
-					Vec3 u = p.v - wind;
+					Vec3 u = p.v - (Vec3)wind;
 
 					//Vec3 Fair = -kd * u;
 					double C = 0.5; /* Drag constant */
@@ -183,14 +186,14 @@ namespace PE
 
 		private void CheckCollisions (IEnumerable<Particle> particles)
 		{
-			foreach (var entity in entities) {
+			foreach (Entity entity in entities) {
 				intersections.AddRange (entity.Collider.Collides (particles));
 			}
 		}
 
 		private void HandleCollisions ()
 		{
-			foreach (var data in intersections) {
+			foreach (Intersection data in intersections) {
 				double e = 0.8;
 				var v = data.particle.v;
 				data.particle.v = v - (1 + e) * Vec3.Dot (v, data.normal) * data.normal;
@@ -200,7 +203,7 @@ namespace PE
 		private void AdjustIntersections ()
 		{
 			/* Adjust collided particles */
-			foreach (var data in intersections) {
+			foreach (Intersection data in intersections) {
 				var p = data.particle;
 				if (Vec3.Dot (p.v, data.normal) < 0) {
 					p.v.SetZero ();
