@@ -11,8 +11,8 @@ namespace PE
 		Vector3[] vertices;
 
 		private double k_stretch = 600;
-		private double k_shear = 400;
-		private double k_bend = 100;
+		private double k_shear = 200;
+		private double k_bend = 10;
 		private double kd = 5;
 		private double mass = 0.1;
 

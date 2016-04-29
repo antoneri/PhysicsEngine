@@ -17,7 +17,7 @@ public class Box : MonoBehaviour
 		box.Collider = new AABB (min, max);
 		box.Static = true;
 
-        //growColliderBox();
+		//growColliderBox();
 
 		PE.Engine.instance.AddEntity (box);
 	}
@@ -25,23 +25,24 @@ public class Box : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-        //growColliderBox();
-        updateCollider();
+		//growColliderBox();
+		updateCollider ();
 	}
 
-    private void updateCollider()
-    {
-        /* Update collider */
-        AABB collider = (AABB)box.Collider;
-        collider.min = transform.position - transform.lossyScale * 0.5f;
-        collider.max = transform.position + transform.lossyScale * 0.5f;
-    }
+	private void updateCollider ()
+	{
+		/* Update collider */
+		//AABB collider = (AABB)box.Collider;
+		//collider.min = transform.position - transform.lossyScale * 0.5f;
+		//collider.max = transform.position + transform.lossyScale * 0.5f;
+		growColliderBox ();
+	}
 
-    private void growColliderBox()
-    {
-        /* Update collider */
-        AABB collider = (AABB)box.Collider;
-        collider.min = transform.position - transform.lossyScale * 0.5f - ColliderThickness;
-        collider.max = transform.position + transform.lossyScale * 0.5f + ColliderThickness;
-    }
+	private void growColliderBox ()
+	{
+		/* Update collider */
+		AABB collider = (AABB)box.Collider;
+		collider.min = transform.position - transform.lossyScale * 0.5f - ColliderThickness;
+		collider.max = transform.position + transform.lossyScale * 0.5f + ColliderThickness;
+	}
 }

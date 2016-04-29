@@ -100,7 +100,7 @@ namespace PE
 					var p = particles [i];
 					if (i == 0) {
 						// TODO Add upwards force instead
-						continue;
+						//continue;
 					}
 
 					// Add gravity
