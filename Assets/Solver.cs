@@ -33,7 +33,7 @@ namespace PE
                     sum2 += S[i, j] * lambda[j];
                 }
 
-                lambda[i] = (1.0 / S[i, i]); 
+                lambda[i] = (1.0 / S[i, i]) * (B[i] - sum2 - sum1); 
             }
         }
     }
