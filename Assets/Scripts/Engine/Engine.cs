@@ -132,15 +132,26 @@ namespace PE
 		private void RopeUpdate (double dt)
 		{
 			foreach (var rope in ropes) {
+				// Add gravity
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
-
+					
 				double k = 1;
 
 				var n = rope.Count;
+
+				// Constraint matrix
 				var G = new Matrix<Vec3> (n, n - 1);
 
+				// Set G to zero
+				for (int i = 0; i < G.Rows; i++) {
+					for (int j = 0; j < G.Cols; j++) {
+						G [i, j] = new Vec3 ();
+					}
+				}
+
+				// Set constraints
 				for (int i = 0; i < n - 1; i++) {
 					Particle pi = rope [i];
 					Particle pj = rope [i + 1];
@@ -149,22 +160,30 @@ namespace PE
 					G [i, i + 1] = -u;
 				}
 
-				var M = new Matrix<Vec3> (2 * n, 2 * n);
-				var f = new Vec3[2 * n];
-				var W = new Vec3[2 * n];
+				// Mass matrix
+				var M = new Matrix<Vec3> (n, n);
 
-				for (int i = 0; i < n; i++) {
-					var idx = 2 * i;
-					M [idx, idx] = new Vec3 (rope [i].m);
-					M [idx + 1, idx + 1] = new Vec3 (1); // Moments of inertia
-					f [idx] = rope [i].f;
-					f [idx + 1] = new Vec3 (); // Torque
-					W [idx] = rope [i].v;
-					W [idx + 1] = new Vec3 (); // Angular velocity
+				// Set M to zero
+				for (int i = 0; i < M.Rows; i++) {
+					for (int j = 0; j < M.Cols; j++) {
+						M [i, j] = new Vec3 ();
+					}
 				}
 
+				// All forces
+				var f = new Vec3[n];
+				// All velocities
+				var W = new Vec3[n];
 
+				// Set values to M, f, W
+				for (int i = 0; i < n; i++) {
+					M [i, i] = new Vec3 (rope [i].m);
+					f [i] = rope [i].f;
+					W [i] = rope [i].v;
+				}
+					
 				// Solve for lambda
+				// ????
 
 				// Integrate
 			}

@@ -54,6 +54,13 @@ namespace PE
 			}
 		}
 
+		public void ForEach (Action<T> action)
+		{
+			foreach (T item in items) {
+				action (item);
+			}
+		}
+
 		public IEnumerator<T> GetEnumerator ()
 		{
 			for (int i = 0; i < Size; i++) {
