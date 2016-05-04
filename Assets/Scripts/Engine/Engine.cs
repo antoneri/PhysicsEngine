@@ -192,22 +192,14 @@ namespace PE
 				// Accumulate external forces from e.g.gravity.
 				// Accumulate dissipative forces, e.g.drag and viscous drag.
 				foreach (var p in particleSystem) {
-					/* Gravity, uses Buoyant force to counter gravity force */
-					//double dp = p.p - AIR_P;
-					/* Fb = (Pair - Pp) * g * V */
-					//p.f.Add (dp * g * (p.m / p.p));
+					/* Gravity */
 					p.f.Add (p.m * g);
                     
 					/* Air drag force */
-					//double kd = 0.000018;
+					double kd = 0.18;
 					Vec3 u = p.v - (Vec3)wind;
-
-					//Vec3 Fair = -kd * u;
-					double C = 0.5; /* Drag constant */
-					/* Air drag: Fdrag = 1/2 * C * P_air * A * V^2 */
-					//Vec3 Fair = -0.5 * C * AIR_P * p.r * p.r * Math.PI * p.v.SqLength * p.v.UnitVector;
-					Vec3 Fair = -6 * Math.PI * AIR_u * p.r * u;
-					//p.f.Add (Fair);
+					Vec3 Fair = -kd * u;
+					p.f.Add (Fair);
 				}
 					
 				// Find contact sets with external boundaries, e.g.a plane.
