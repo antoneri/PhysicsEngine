@@ -140,6 +140,11 @@ namespace PE
 			return lhs * inv;
 		}
 
+		public static Vec3 operator/ (double lhs, Vec3 rhs)
+		{
+			return new Vec3 (1 / rhs.x, 1 / rhs.y, 1 / rhs.z);
+		}
+
 		/*
 		 * Java-style mutators
 		 */

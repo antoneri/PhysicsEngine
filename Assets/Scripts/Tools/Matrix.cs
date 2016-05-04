@@ -10,6 +10,7 @@ namespace PE
 		protected int rows;
 		protected int cols;
 		protected T[] items;
+		protected Matrix<T> transpose = null;
 
 		public Matrix (int rows, int cols)
 		{
@@ -51,6 +52,22 @@ namespace PE
 		public int Cols {
 			get {
 				return cols;
+			}
+		}
+
+		public Matrix<T> Transpose {
+			get {
+				if (transpose == null) {
+					transpose = new Matrix<T> (Cols, Rows);
+
+					for (int i = 0; i < Rows; i++) {
+						for (int j = 0; j < Cols; j++) {
+							transpose [j, i] = this [i, j];
+						}
+					}
+				}
+
+				return transpose;
 			}
 		}
 
