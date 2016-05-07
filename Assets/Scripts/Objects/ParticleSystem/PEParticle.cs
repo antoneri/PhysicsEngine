@@ -17,6 +17,10 @@ namespace PE
 		public double p;
 		public double age = 0;
 
+        public Particle ()
+        {
+        }
+
 		public Particle (Vec3 x, double mass) : this (x, new Vec3 (), mass)
 		{
 		}

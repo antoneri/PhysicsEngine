@@ -136,20 +136,21 @@ namespace PE
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
-					
-				double k = 1;
 
-				var n = rope.Count;
+                double k = 1; /* Spring constant for system */
+                double d = 3; /* Number of timesteps to stabilize the constraint */
+
+                var n = rope.Count;
 
 				// Constraint matrix
-				var G = new Matrix<Vec3> (n, n - 1);
+				var G = new Matrix<Vec3> (n-1, n);
 
 				// Set G to zero
-				for (int i = 0; i < G.Rows; i++) {
-					for (int j = 0; j < G.Cols; j++) {
-						G [i, j] = new Vec3 ();
-					}
-				}
+				//for (int i = 0; i < G.Rows; i++) {
+				//	for (int j = 0; j < G.Cols; j++) {
+				//		G [i, j] = new Vec3 ();
+				//	}
+				//}
 
 				// Set constraints
 				for (int i = 0; i < n - 1; i++) {
@@ -161,33 +162,50 @@ namespace PE
 				}
 
 				// Mass matrix
-				var M = new Matrix<Vec3> (n, n);
+				var Minv = new Matrix<Vec3> (n, n);
 
 				// Set M to zero
-				for (int i = 0; i < M.Rows; i++) {
-					for (int j = 0; j < M.Cols; j++) {
-						M [i, j] = new Vec3 ();
-					}
-				}
+				//for (int i = 0; i < Minv.Rows; i++) {
+				//	for (int j = 0; j < Minv.Cols; j++) {
+				//		Minv [i, j] = new Vec3 ();
+				//	}
+				//}
 
 				// All forces
-				var f = new Vec3[n];
+				var f = new Vector<Vec3>(n);
 				// All velocities
-				var W = new Vec3[n];
+				var W = new Vector<Vec3>(n);
+                // All positions
+                var q = new Vector<Vec3>(n);
 
 				// Set values to M, f, W
 				for (int i = 0; i < n; i++) {
-					M [i, i] = new Vec3 (rope [i].m);
+					Minv [i, i] = new Vec3 (rope [i].m_inv);
 					f [i] = rope [i].f;
 					W [i] = rope [i].v;
+                    q[i] = rope[i].x;
 				}
-					
-				// Solve for lambda
-				// ????
 
-				// Integrate
-			}
-		}
+                /* Constant parameters in SPOOK */
+                double a = 4 / (dt * (1 + 4 * d));
+                double b = (4 * d) / (1 + 4 * d);
+                double e = 4 / (dt * dt * k * (1 + 4 * d));
+
+                Matrix<Vec3> S = G * Minv * G.Transpose;
+                for (int i = 0; i < S.Rows; i++)
+                {
+                    S[i, i] *= e;
+                }
+
+                Vector<Vec3> B = -a * (G * q) - b * (G * W) - dt * (G * (Minv * f));
+
+                // Solve for lambda
+                Vector<Vec3> lambda = Solver.GaussSeidel(S, B, 3);
+                //Debug.Log(lambda);
+
+                // Integrate
+            }
+        }
 
 		private void ParticleUpdate (double dt)
 		{

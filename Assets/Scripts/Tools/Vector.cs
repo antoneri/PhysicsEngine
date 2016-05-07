@@ -13,6 +13,11 @@ namespace PE
 		{
 			this.size = size;
 			items = new T[size];
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i] = Activator.CreateInstance<T>();
+            }
 		}
 
 		public T this [int i] {
@@ -60,6 +65,42 @@ namespace PE
 		{
 			throw new NotImplementedException ();
 		}
-	}
+
+        public static Vector<Vec3> operator * (double k, Vector<T> v)
+        {
+            Vector<Vec3> nv = new Vector<Vec3>(v.size);
+            for (int i = 0; i < v.size; i++)
+            {
+                nv[i] = k * (Vec3)(object)v[i];
+            }
+            return nv;
+        }
+
+        public static Vector<Vec3> operator -(Vector<T> v1, Vector<T> v2)
+        {
+                if (v1.Size != v2.Size)
+            {
+                throw new InvalidOperationException("Invalid dimensions");
+            }
+
+            Vector<Vec3> nv = new Vector<Vec3>(v1.size);
+            for (int i = 0; i < v1.size; i++)
+            {
+                nv[i] = (Vec3)(object)v1[i] - (Vec3)(object)v2[i];
+            }
+            return nv;
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (var e in items)
+            {
+                sb.Append(e.ToString());
+            };
+
+            return sb.ToString();
+        }
+    }
 }
 

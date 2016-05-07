@@ -8,13 +8,14 @@ namespace PE
 
         public Solver() { }
 
-        public static Vector<Vec3> GaussSeidel(Matrix<Vec3> S, Vector<Vec3> lambda_init, Vector<Vec3> B, uint iterations)
+        public static Vector<Vec3> GaussSeidel(Matrix<Vec3> S, Vector<Vec3> B, uint iterations)
         {
+            Vector<Vec3> lambda = new Vector<Vec3>(B.Size);
             for (int i = 0; i < iterations; i++)
             {
-                GaussSeidelIterate(S, lambda_init, B);
+                GaussSeidelIterate(S, lambda, B);
             }
-            return null;
+            return lambda;
         }
 
         private static void GaussSeidelIterate(Matrix<Vec3> S, Vector<Vec3> lambda, Vector<Vec3> B)
