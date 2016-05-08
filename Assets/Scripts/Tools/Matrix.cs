@@ -135,43 +135,48 @@ namespace PE
                     {
                         e = e + (Vec3)(Object)M1[i, k] * M2[k, j];
                     }
+                    nM[i, j] = e;
                 }
             }
 
             return nM;
         }
 
-    }
-
-    public class Vec3Matrix: Matrix<Vec3>
-    {
-
-        public Vec3Matrix(int rows, int cols) : base (rows, cols)
+        public override string ToString()
         {
-
-        }
-
-        public static Vector<Vec3> operator *(Vec3Matrix M, Vector<Vec3> v)
-        {
-            if (M.Cols != v.Size)
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = 0; i < Rows; i++)
             {
-                throw new InvalidOperationException("Invalid dimensions");
-            }
-
-            Vector<Vec3> nv = new Vector<Vec3>(v.Size);
-
-            for (int i = 0; i < M.Rows; i++)
-            {
-                Vec3 e = new Vec3();
-                for (int j = 0; j < M.Cols; j++)
+                sb.Append("| ");
+                for (int j = 0; j < Cols; j++)
                 {
-                    e = e + M[i, j] * v[j];
+                    sb.Append(this[i, j] + " ");
                 }
-                nv[i] = e;
+                sb.Append("|\n");
             }
-
-            return nv;
+            return sb.ToString();
         }
+
+        public override bool Equals(object obj)
+        {
+            Matrix<T> M = obj as Matrix<T>;
+            if (M == null)
+                return false;
+
+            if (M.Rows != Rows || M.Cols != Cols)
+                return false;
+
+            for (int i = 0; i < Rows; i++)
+            {
+                for (int j = 0; j < Cols; j++)
+                {
+                    if (!M[i, j].Equals(this[i, j]))
+                        return false;
+                }
+            }
+            return true;
+        }
+
     }
 
 }

@@ -63,6 +63,15 @@ namespace PE
 		/*
 		 * Vector properties
 		 */
+
+        public int Size
+        {
+            get
+            {
+                return 3;
+            }
+        }
+
 		public double Length {
 			get {
 				return Math.Sqrt (Dot (this, this));
@@ -220,6 +229,26 @@ namespace PE
 		{
 			return "[" + x + ", " + y + ", " + z + "]";
 		}
-	}
+
+        public override bool Equals(object obj)
+        {
+
+            Vec3 v = obj as Vec3;
+            if (v == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < v.Size; i++)
+            {
+                if (Math.Abs(v[i] - this[i]) > 0.0000001) {
+                    return false;
+                }
+
+            }
+
+            return true;
+        }
+    }
 }
 

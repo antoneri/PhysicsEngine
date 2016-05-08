@@ -201,7 +201,7 @@ namespace PE
 
                 // Solve for lambda
                 Vector<Vec3> lambda = Solver.GaussSeidel(S, B, 3);
-                //Debug.Log(lambda);
+                Debug.Log(lambda);
 
                 // Integrate
             }

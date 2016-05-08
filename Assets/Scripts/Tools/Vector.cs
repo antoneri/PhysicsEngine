@@ -94,12 +94,32 @@ namespace PE
         public override string ToString()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append("[ ");
             foreach (var e in items)
             {
-                sb.Append(e.ToString());
+                sb.Append(e.ToString() + " ");
             };
-
+            sb.Append("]");
             return sb.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+
+            Vector<T> v = obj as Vector<T>;
+            if (v == null)
+                return false;
+
+            if (v.Length != items.Length)
+                return false;
+  
+            for (int i = 0; i < v.Length; i++)
+            {
+                if (!v[i].Equals(items[i]))
+                    return false;
+            }
+
+            return true;
         }
     }
 }
