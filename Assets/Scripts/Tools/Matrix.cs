@@ -18,13 +18,12 @@ namespace PE
 			this.cols = cols;
 			items = new T[rows * cols];
 
-            for (int i = 0; i < items.Length; i++)
-            {
-                items[i] = Activator.CreateInstance<T>();
-            }
-        }
+			for (int i = 0; i < items.Length; i++) {
+				items [i] = Activator.CreateInstance<T> ();
+			}
+		}
 
-        public T this [int i, int j] {
+		public T this [int i, int j] {
 			get {
 				return items [i * cols + j];
 			}
@@ -62,6 +61,7 @@ namespace PE
 
 		public Matrix<T> Transpose {
 			get {
+				// FIXME source of bugs
 				if (transpose == null) {
 					transpose = new Matrix<T> (Cols, Rows);
 
@@ -95,89 +95,97 @@ namespace PE
 			throw new NotImplementedException ();
 		}
 
-        public static Vector<Vec3> operator *(Matrix<T> M, Vector<Vec3> v)
-        {
-            if (M.Cols != v.Size)
-            {
-                throw new InvalidOperationException("Invalid dimensions");
-            }
+		public static Vector<Vec3> operator * (Matrix<T> M, Vector<Vec3> v)
+		{
+			if (M.Cols != v.Size) {
+				throw new InvalidOperationException ("Invalid dimensions");
+			}
 
-            Vector<Vec3> nv = new Vector<Vec3>(M.Rows);
+			Vector<Vec3> nv = new Vector<Vec3> (M.Rows);
 
-            for (int i = 0; i < M.Rows; i++)
-            {
-                Vec3 e = new Vec3();
-                for (int j = 0; j < M.Cols; j++)
-                {
-                    e = e + (Vec3)(object)M[i, j] * v[j];
-                }
-                nv[i] = e;
-            }
+			for (int i = 0; i < M.Rows; i++) {
+				Vec3 e = new Vec3 ();
+				for (int j = 0; j < M.Cols; j++) {
+					e = e + (Vec3)(object)M [i, j] * v [j];
+				}
+				nv [i] = e;
+			}
 
-            return nv;
-        }
+			return nv;
+		}
 
-        public static Matrix<Vec3> operator *(Matrix<T> M1, Matrix<Vec3> M2)
-        {
-            if (M1.Cols != M2.Rows)
-            {
-                throw new InvalidOperationException("Invalid dimensions");
-            }
+		public static Vector<Vec3> operator * (Matrix<T> M, Vector<double> v)
+		{
+			if (M.Cols != v.Size) {
+				throw new InvalidOperationException ("Invalid dimensions");
+			}
 
-            Matrix<Vec3> nM = new Matrix<Vec3>(M1.Rows, M2.Cols);
+			var nv = new Vector<Vec3> (M.Rows);
 
-            for (int i = 0; i < M1.Rows; i++)
-            {
-                for (int j = 0; j < M2.Cols; j++)
-                {
-                    Vec3 e = new Vec3();
-                    for (int k = 0; k < M1.Cols; k++)
-                    {
-                        e = e + (Vec3)(Object)M1[i, k] * M2[k, j];
-                    }
-                    nM[i, j] = e;
-                }
-            }
+			for (int i = 0; i < M.Rows; i++) {
+				var e = new Vec3 ();
+				for (int j = 0; j < M.Cols; j++) {
+					e = e + (Vec3)(object)M [i, j] * v [j];
+				}
+				nv [i] = e;
+			}
 
-            return nM;
-        }
+			return nv;
+		}
 
-        public override string ToString()
-        {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            for (int i = 0; i < Rows; i++)
-            {
-                sb.Append("| ");
-                for (int j = 0; j < Cols; j++)
-                {
-                    sb.Append(this[i, j] + " ");
-                }
-                sb.Append("|\n");
-            }
-            return sb.ToString();
-        }
+		public static Matrix<Vec3> operator * (Matrix<T> M1, Matrix<Vec3> M2)
+		{
+			if (M1.Cols != M2.Rows) {
+				throw new InvalidOperationException ("Invalid dimensions");
+			}
 
-        public override bool Equals(object obj)
-        {
-            Matrix<T> M = obj as Matrix<T>;
-            if (M == null)
-                return false;
+			Matrix<Vec3> nM = new Matrix<Vec3> (M1.Rows, M2.Cols);
 
-            if (M.Rows != Rows || M.Cols != Cols)
-                return false;
+			for (int i = 0; i < M1.Rows; i++) {
+				for (int j = 0; j < M2.Cols; j++) {
+					Vec3 e = new Vec3 ();
+					for (int k = 0; k < M1.Cols; k++) {
+						e = e + (Vec3)(Object)M1 [i, k] * M2 [k, j];
+					}
+					nM [i, j] = e;
+				}
+			}
 
-            for (int i = 0; i < Rows; i++)
-            {
-                for (int j = 0; j < Cols; j++)
-                {
-                    if (!M[i, j].Equals(this[i, j]))
-                        return false;
-                }
-            }
-            return true;
-        }
+			return nM;
+		}
 
-    }
+		public override string ToString ()
+		{
+			System.Text.StringBuilder sb = new System.Text.StringBuilder ();
+			for (int i = 0; i < Rows; i++) {
+				sb.Append ("| ");
+				for (int j = 0; j < Cols; j++) {
+					sb.Append (this [i, j] + " ");
+				}
+				sb.Append ("|\n");
+			}
+			return sb.ToString ();
+		}
+
+		public override bool Equals (object obj)
+		{
+			Matrix<T> M = obj as Matrix<T>;
+			if (M == null)
+				return false;
+
+			if (M.Rows != Rows || M.Cols != Cols)
+				return false;
+
+			for (int i = 0; i < Rows; i++) {
+				for (int j = 0; j < Cols; j++) {
+					if (!M [i, j].Equals (this [i, j]))
+						return false;
+				}
+			}
+			return true;
+		}
+
+	}
 
 }
 

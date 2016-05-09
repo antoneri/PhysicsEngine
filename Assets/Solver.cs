@@ -6,8 +6,6 @@ namespace PE
     public class Solver
     {
 
-        public Solver() { }
-
         public static Vector<Vec3> GaussSeidel(Matrix<Vec3> S, Vector<Vec3> B, uint iterations)
         {
             Vector<Vec3> lambda = new Vector<Vec3>(B.Size);

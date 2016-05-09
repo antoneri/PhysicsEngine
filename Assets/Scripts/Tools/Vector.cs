@@ -97,7 +97,7 @@ namespace PE
             sb.Append("[ ");
             foreach (var e in items)
             {
-                sb.Append(e.ToString() + " ");
+                sb.Append(e.ToString() + "\n");
             };
             sb.Append("]");
             return sb.ToString();

@@ -14,8 +14,8 @@ namespace PE
 		// Use this for initialization
 		void Start ()
 		{
-			var startPos = new Vec3 (-3, 2, 0);
-			var dx = new Vec3 (0.1, 1, 0.1);
+			var startPos = new Vec3 (-3, 7, 0);
+			var dx = new Vec3 (0, -1, 0);
 			var mass = 1.0;
 
 			for (int i = 0; i < NUM_PARTICLES; i++) {

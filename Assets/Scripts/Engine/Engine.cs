@@ -137,20 +137,13 @@ namespace PE
 					p.f.Set (p.m * g);
 				}
 
-                double k = 1; /* Spring constant for system */
-                double d = 3; /* Number of timesteps to stabilize the constraint */
+				double k = 1; /* Spring constant for system */
+				double d = 3; /* Number of timesteps to stabilize the constraint */
 
-                var n = rope.Count;
+				var n = rope.Count;
 
 				// Constraint matrix
-				var G = new Matrix<Vec3> (n-1, n);
-
-				// Set G to zero
-				//for (int i = 0; i < G.Rows; i++) {
-				//	for (int j = 0; j < G.Cols; j++) {
-				//		G [i, j] = new Vec3 ();
-				//	}
-				//}
+				var G = new Matrix<Vec3> (n - 1, n);
 
 				// Set constraints
 				for (int i = 0; i < n - 1; i++) {
@@ -162,50 +155,59 @@ namespace PE
 				}
 
 				// Mass matrix
-				var Minv = new Matrix<Vec3> (n, n);
-
-				// Set M to zero
-				//for (int i = 0; i < Minv.Rows; i++) {
-				//	for (int j = 0; j < Minv.Cols; j++) {
-				//		Minv [i, j] = new Vec3 ();
-				//	}
-				//}
+				var M_inv = new Matrix<Vec3> (n, n);
 
 				// All forces
-				var f = new Vector<Vec3>(n);
+				var f = new Vector<Vec3> (n);
 				// All velocities
-				var W = new Vector<Vec3>(n);
-                // All positions
-                var q = new Vector<Vec3>(n);
+				var W = new Vector<Vec3> (n);
+				// All generalized positions
+				var q = new Vector<double> (n);
 
 				// Set values to M, f, W
 				for (int i = 0; i < n; i++) {
-					Minv [i, i] = new Vec3 (rope [i].m_inv);
+					M_inv [i, i] = new Vec3 (rope [i].m_inv);
 					f [i] = rope [i].f;
 					W [i] = rope [i].v;
-                    q[i] = rope[i].x;
+					//q [i] = rope [i].x;
 				}
 
-                /* Constant parameters in SPOOK */
-                double a = 4 / (dt * (1 + 4 * d));
-                double b = (4 * d) / (1 + 4 * d);
-                double e = 4 / (dt * dt * k * (1 + 4 * d));
+				for (int i = 0; i < n - 1; i++) {
+					Particle pi = rope [i];
+					Particle pj = rope [i + 1];
+					var L = 0.1;
+					q [i] = 0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
+				}
+				q [n-1] = 0;
 
-                Matrix<Vec3> S = G * Minv * G.Transpose;
-                for (int i = 0; i < S.Rows; i++)
-                {
-                    S[i, i] *= e;
-                }
+				/* Constant parameters in SPOOK */
+				double a = 4 / (dt * (1 + 4 * d));
+				double b = (4 * d) / (1 + 4 * d);
+				var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
-                Vector<Vec3> B = -a * (G * q) - b * (G * W) - dt * (G * (Minv * f));
+				Matrix<Vec3> S = G * M_inv * G.Transpose;
 
-                // Solve for lambda
-                Vector<Vec3> lambda = Solver.GaussSeidel(S, B, 3);
-                //Debug.Log(lambda);
+				for (int i = 0; i < S.Rows; i++) {
+					S [i, i] += e;
+				}
 
-                // Integrate
-            }
-        }
+				Vector<Vec3> B = -a * (G * q) - b * (G * W) - dt * (G * (M_inv * f));
+
+				// Solve for lambda
+				uint max_iter = 4;
+				Vector<Vec3> lambda = Solver.GaussSeidel (S, B, max_iter);
+				Debug.Log(lambda);
+
+				var constraints = G.Transpose * lambda;
+
+				// Integrate
+				for (int i = 1; i < n; i++) {
+					Particle p = rope [i];
+					p.v = p.v + p.m_inv * constraints[i] + dt * p.m_inv * p.f;
+					p.x = p.x + dt * p.v;
+				}
+			}
+		}
 
 		private void ParticleUpdate (double dt)
 		{
