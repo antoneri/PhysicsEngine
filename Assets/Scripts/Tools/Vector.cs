@@ -76,7 +76,22 @@ namespace PE
             return nv;
         }
 
-        public static Vector<Vec3> operator -(Vector<T> v1, Vector<T> v2)
+        public static Vector<Vec3> operator +(Vector<Vec3> v1, Vector<T> v2)
+        {
+            if (v1.Size != v2.Size)
+            {
+                throw new InvalidOperationException("Invalid dimensions");
+            }
+
+            Vector<Vec3> nv = new Vector<Vec3>(v1.size);
+            for (int i = 0; i < v1.size; i++)
+            {
+                nv[i] = v1[i] + (Vec3)(object)v2[i];
+            }
+            return nv;
+        }
+
+        public static Vector<Vec3> operator -(Vector<Vec3> v1, Vector<T> v2)
         {
                 if (v1.Size != v2.Size)
             {
@@ -86,7 +101,7 @@ namespace PE
             Vector<Vec3> nv = new Vector<Vec3>(v1.size);
             for (int i = 0; i < v1.size; i++)
             {
-                nv[i] = (Vec3)(object)v1[i] - (Vec3)(object)v2[i];
+                nv[i] = v1[i] - (Vec3)(object)v2[i];
             }
             return nv;
         }

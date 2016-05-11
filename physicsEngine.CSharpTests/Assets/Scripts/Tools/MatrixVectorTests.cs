@@ -20,7 +20,7 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
 
             Vector<Vec3> nv = M * v;
             Console.Write("v(" + v[0] + v[1] + ")  nv(" + nv[0] + nv[1] + ")");
-            Assert.AreEqual(nv, nv);
+            Assert.AreEqual(v, nv);
         }
 
         [TestMethod]
@@ -37,6 +37,23 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
             Matrix<Vec3> M3 = M1 * M2;
 
             Assert.AreEqual(M2, M3);
+
+        }
+
+        [TestMethod]
+        public void DoubleVec3VectorMultTest1()
+        {
+            double k = 2.0;
+
+            Vector<Vec3> v = new Vector<Vec3>(2);
+            v[0] = new Vec3(1, 1, 1); v[1] = new Vec3(2, 2, 2);
+
+            Vector<Vec3> correct = new Vector<Vec3>(2);
+            correct[0] = new Vec3(2, 2, 2); correct[1] = new Vec3(4, 4, 4);
+
+            Vector<Vec3> nv = k * v;
+            Console.Write("correct(" + correct[0] + correct[1] + ")  nv(" + nv[0] + nv[1] + ")");
+            Assert.AreEqual(correct, nv);
 
         }
     }
