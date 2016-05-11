@@ -142,27 +142,26 @@ namespace PE
 
 				var n = rope.Count;
 
-				// Constraint matrix
+				// Constraint Jacobian matrix
 				var G = new Matrix<Vec3> (n - 1, n);
+                // Inverse Mass matrix
+                var M_inv = new Matrix<Vec3>(n, n);
 
-				// Set constraints
-				for (int i = 0; i < n - 1; i++) {
+                // All forces
+                var f = new Vector<Vec3>(n);
+                // All velocities
+                var W = new Vector<Vec3>(n);
+                // All generalized positions
+                var q = new Vector<double>(n);
+
+                // Set Jacobians
+                for (int i = 0; i < n - 1; i++) {
 					Particle pi = rope [i];
 					Particle pj = rope [i + 1];
 					Vec3 u = (pi.x - pj.x).UnitVector;
 					G [i, i] = u;
 					G [i, i + 1] = -u;
 				}
-
-				// Mass matrix
-				var M_inv = new Matrix<Vec3> (n, n);
-
-				// All forces
-				var f = new Vector<Vec3> (n);
-				// All velocities
-				var W = new Vector<Vec3> (n);
-				// All generalized positions
-				var q = new Vector<double> (n);
 
 				// Set values to M, f, W
 				for (int i = 0; i < n; i++) {
@@ -172,10 +171,11 @@ namespace PE
 					//q [i] = rope [i].x;
 				}
 
+                // Set constraints q
 				for (int i = 0; i < n - 1; i++) {
 					Particle pi = rope [i];
 					Particle pj = rope [i + 1];
-					var L = 0.5;
+					var L = 0.2;
                     q[i] = (pi.x - pj.x).SqLength - L; //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
                 }
 				q [n-1] = 0;
@@ -196,7 +196,7 @@ namespace PE
 				// Solve for lambda
 				uint max_iter = 4;
 				Vector<Vec3> lambda = Solver.GaussSeidel (S, B, max_iter);
-				Debug.Log(lambda + "\n");
+				//Debug.Log(lambda + "\n");
                 //Debug.Log((dt * f));
 
 				var fc = G.Transpose * lambda;
