@@ -20,19 +20,19 @@ namespace PE
         {
             for (int i = 0; i < lambda.Length; i++)
             {
-                Vec3 sum1 = new Vec3();
-                for (int j = i; j < lambda.Length; j++)
-                {
-                    sum1 += S[i,j] * lambda[j];
-                }
 
-                Vec3 sum2 = new Vec3();
+                Vec3 sum = new Vec3();
                 for (int j = 0; j < i; j++)
                 {
-                    sum2 += S[i, j] * lambda[j];
+                    sum += S[i, j] * lambda[j];
                 }
 
-                lambda[i] = (1.0 / S[i, i]) * (B[i] - sum2 - sum1); 
+                for (int j = i+1; j < lambda.Length; j++)
+                {
+                    sum += S[i,j] * lambda[j];
+                }
+
+                lambda[i] = (1.0 / S[i, i]) * (B[i] - sum); 
             }
         }
     }
