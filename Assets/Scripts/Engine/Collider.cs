@@ -20,8 +20,13 @@ public struct Intersection
 
 public abstract class Collider
 {
+	public readonly List<Intersection> CollisionNotImplemented = new List<Intersection> ();
 
     public abstract List<Intersection> Collides(IEnumerable<PE.Particle> ps);
+
+	public abstract List<Intersection> Collides (Sphere sphere);
+
+	public abstract List<Intersection> Collides (Plane plane);
 
     public static List<Intersection> Collides(IEnumerable<PE.Particle> ps, Plane pl)
     {
@@ -112,7 +117,15 @@ public abstract class Collider
         return sqDist;
     }
 
+	public static List<Intersection> Collides(Sphere a, Sphere b)
+	{
+		throw new NotImplementedException ();
+	}
 
+	public static List<Intersection> Collides(Sphere sphere, Plane plane)
+	{
+		throw new NotImplementedException ();
+	}
 }
 
 public class Plane : Collider
@@ -122,17 +135,26 @@ public class Plane : Collider
 
 	public const double thickness = 0.3;
 
-    public override List<Intersection> Collides(IEnumerable<PE.Particle> ps)
-    {
-        return Collides(ps, this);
-    }
-
 	public Plane (Vec3 normal, double d)
 	{
 		this.normal = normal;
 		this.d = d;
 	}
 
+	public override List<Intersection> Collides(IEnumerable<PE.Particle> ps)
+	{
+		return Collides(ps, this);
+	}
+		
+	public override List<Intersection> Collides (Sphere sphere)
+	{
+		return CollisionNotImplemented;
+	}
+
+	public override List<Intersection> Collides (Plane plane)
+	{
+		return CollisionNotImplemented;
+	}
 }
 
 public class AABB : Collider
@@ -152,4 +174,40 @@ public class AABB : Collider
         return Collides(ps, this);
     }
 
+	public override List<Intersection> Collides (Sphere sphere)
+	{
+		return CollisionNotImplemented;
+	}
+
+	public override List<Intersection> Collides (Plane plane)
+	{
+		return CollisionNotImplemented;
+	}
+}
+
+public class Sphere : Collider
+{
+	Vec3 position;
+	double radius;
+
+	public Sphere (Vec3 position, double radius)
+	{
+		this.position = position;
+		this.radius = radius;
+	}
+
+	public override List<Intersection> Collides (IEnumerable<PE.Particle> ps)
+	{
+		return CollisionNotImplemented;
+	}
+
+	public override List<Intersection> Collides (Sphere sphere)
+	{
+		return Collides (this, sphere);
+	}
+
+	public override List<Intersection> Collides (Plane plane)
+	{
+		return Collides (this, plane);
+	}
 }

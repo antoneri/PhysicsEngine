@@ -27,6 +27,7 @@ namespace PE
 		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
 		private List<List<Particle>> ropes = new List<List<Particle>> ();
 		private List<Intersection> intersections = new List<Intersection> (10000);
+		private List<RigidBody> rigidBodies;
 
 		void Awake ()
 		{
@@ -68,6 +69,12 @@ namespace PE
 			entities.Add (entity);
 		}
 
+		public List<RigidBody> RigidBodies {
+			set {
+				rigidBodies = value;
+			}
+		}
+
 		/*
 		 * Main loop
 		 */
@@ -85,6 +92,8 @@ namespace PE
 			}
 
 			RopeUpdate (Time.fixedDeltaTime);
+
+			RigidBodyUpdate (Time.fixedDeltaTime);
 
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
@@ -213,6 +222,16 @@ namespace PE
                     p.v = p.v + p.m_inv * fc[i] + dt * p.m_inv * p.f;
 					p.x = p.x + dt * p.v;
 				}
+			}
+		}
+
+		private void RigidBodyUpdate (double dt)
+		{
+			if (rigidBodies == null)
+				return;
+
+			foreach (RigidBody body in rigidBodies) {
+				body.x.Add (new Vec3 (0, 0, 0.1));
 			}
 		}
 
