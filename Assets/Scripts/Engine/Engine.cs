@@ -27,6 +27,7 @@ namespace PE
 		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
 		private List<List<Particle>> ropes = new List<List<Particle>> ();
 		private List<Intersection> intersections = new List<Intersection> (10000);
+		private List<RigidBody> rigidBodies;
 
 		void Awake ()
 		{
@@ -66,6 +67,12 @@ namespace PE
 		public void AddEntity (Entity entity)
 		{
 			entities.Add (entity);
+		}
+
+		public List<RigidBody> RigidBodies {
+			set {
+				rigidBodies = value;
+			}
 		}
 
 		/*
@@ -214,7 +221,12 @@ namespace PE
 
 		private void RigidBodyUpdate (double dt)
 		{
-			
+			if (rigidBodies == null)
+				return;
+
+			foreach (RigidBody body in rigidBodies) {
+				body.x.Add (new Vec3 (0, 0, 0.1));
+			}
 		}
 
 		private void ParticleUpdate (double dt)
