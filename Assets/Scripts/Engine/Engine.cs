@@ -86,6 +86,8 @@ namespace PE
 
 			RopeUpdate (Time.fixedDeltaTime);
 
+			RigidBodyUpdate (Time.fixedDeltaTime);
+
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
 
@@ -208,6 +210,11 @@ namespace PE
 					p.x = p.x + dt * p.v;
 				}
 			}
+		}
+
+		private void RigidBodyUpdate (double dt)
+		{
+			
 		}
 
 		private void ParticleUpdate (double dt)
