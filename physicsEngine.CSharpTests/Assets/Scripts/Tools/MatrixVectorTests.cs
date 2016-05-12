@@ -56,5 +56,21 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
             Assert.AreEqual(correct, nv);
 
         }
+
+        [TestMethod]
+        public void Vec3MatrixTransposeTest1()
+        {
+            Matrix<Vec3> M = new Matrix<Vec3>(2, 2);
+            M[0, 0] = new Vec3(1, 1, 1); M[0, 1] = new Vec3(1, 2, 1);
+            M[1, 0] = new Vec3(2, 1, 2); M[1, 1] = new Vec3(1, 1, 1);
+
+            Matrix<Vec3> C = new Matrix<Vec3>(2, 2);
+            C[0, 0] = new Vec3(1, 1, 1); C[0, 1] = new Vec3(2, 1, 2);
+            C[1, 0] = new Vec3(1, 2, 1); C[1, 1] = new Vec3(1, 1, 1);
+
+            Matrix<Vec3> T = M.Transpose;
+            Console.Write("C(" + C + ")  T(" + T + ")");
+            Assert.AreEqual(C, T);
+        }
     }
 }
