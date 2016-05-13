@@ -6,7 +6,7 @@ namespace PE
 {
 	public class Rope : MonoBehaviour
 	{
-		const int NUM_PARTICLES = 2;
+		const int NUM_PARTICLES = 10;
 
 		List<Particle> particles = new List<Particle> ();
 		private UnityEngine.ParticleSystem.Particle[] unityParticles = new UnityEngine.ParticleSystem.Particle[NUM_PARTICLES];
@@ -15,7 +15,7 @@ namespace PE
 		void Start ()
 		{
 			var startPos = new Vec3 (-3, 12, 0);
-			var dx = new Vec3 (-0.2, -1, 0);
+			var dx = new Vec3 (-1, -1, 0);
 			var mass = 1.0;
 
 			for (int i = 0; i < NUM_PARTICLES; i++) {

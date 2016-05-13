@@ -66,6 +66,26 @@ namespace PE
 			throw new NotImplementedException ();
 		}
 
+        public static Vec3Vector operator *(Vector<T> v1, Vec3Vector v2)
+        {
+            Vec3Vector nv = new Vec3Vector(v1.size);
+            for (int i = 0; i < v1.size; i++)
+            {
+                nv[i] = (double)(object)v1[i] * v2[i];
+            }
+            return nv;
+        }
+
+        public static Vector<double> operator * (double k, Vector<T> v)
+        {
+            Vector<double> nv = new Vector<double>(v.size);
+            for (int i = 0; i < v.size; i++)
+            {
+                nv[i] = k * (double)(object)v[i];
+            }
+            return nv;
+        }
+
         //public static Vector<Vec3> operator * (double k, Vector<T> v)
         //{
         //    Vector<Vec3> nv = new Vector<Vec3>(v.size);
@@ -171,12 +191,22 @@ namespace PE
             return dot;
         }
 
+        public static Vec3Vector operator *(Vector<double> v1, Vec3Vector v2)
+        {
+            Vec3Vector nv = new Vec3Vector(v1.Size);
+            for (int i = 0; i < v1.Size; i++)
+            {
+                nv[i] = v1[i] * v2[i];
+            }
+            return nv;
+        }
+
         public static Vec3Vector operator *(double k, Vec3Vector v)
         {
             Vec3Vector nv = new Vec3Vector(v.Size);
             for (int i = 0; i < v.Size; i++)
             {
-                nv[i] = k * (Vec3)(object)v[i];
+                nv[i] = k * v[i];
             }
             return nv;
         }

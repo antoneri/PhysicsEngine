@@ -144,8 +144,11 @@ namespace PE
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
+                intersections.Clear();
+                CheckCollisions(rope);
+                HandleCollisions();
 
-				double k = 1000; /* Spring constant for system */
+                double k = 600; /* Spring constant for system */
 				double d = 3; /* Number of timesteps to stabilize the constraint */
 
 				/* Constant parameters in SPOOK */
@@ -165,7 +168,7 @@ namespace PE
                 // All velocities
                 var W = new Vec3Vector(n);
                 // All generalized positions
-                var q = new Vector<double>(n);
+                var q = new Vec3Vector(n-1);
 
                 // Set Jacobians
                 for (int i = 0; i < n-1; i++) {
@@ -183,9 +186,8 @@ namespace PE
                     Particle pi = rope[i];
                     Particle pj = rope[i + 1];
                     
-                    q[i] = (pi.x - pj.x).SqLength - L; //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
+                    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
                 }
-                //q[n - 1] = 0;
 
                 // Set values to M, f, W
                 for (int i = 0; i < n; i++) {
@@ -200,11 +202,10 @@ namespace PE
 				for (int i = 0; i < S.Rows; i++) {
 					S [i, i] += e;
 				}
-
-                Vec3Vector B = -a * (G * q) - b * (G * W) - dt * (G * (M_inv * f));
+                Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
-				uint max_iter = 1;
+				uint max_iter = 10;
                 Vec3Vector lambda = Solver.GaussSeidel (S, B, max_iter);
                 
 				var fc = G.Transpose * lambda;
@@ -219,6 +220,8 @@ namespace PE
                     p.v = p.v + p.m_inv * fc[i] + dt * p.m_inv * p.f;
 					p.x = p.x + dt * p.v;
 				}
+
+                AdjustIntersections();
 			}
 		}
 
