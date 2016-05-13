@@ -157,9 +157,9 @@ namespace PE
                 var M_inv = new Matrix<Vec3>(n, n);
 
                 // All forces
-                var f = new Vector<Vec3>(n);
+                var f = new Vec3Vector(n);
                 // All velocities
-                var W = new Vector<Vec3>(n);
+                var W = new Vec3Vector(n);
                 // All generalized positions
                 var q = new Vector<double>(n);
 
@@ -203,18 +203,18 @@ namespace PE
 					S [i, i] += e;
 				}
 
-				Vector<Vec3> B = -a * (G * q) - b * (G * W) - dt * (G * (M_inv * f));
+                Vec3Vector B = -a * (G * q) - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
 				uint max_iter = 1;
-				Vector<Vec3> lambda = Solver.GaussSeidel (S, B, max_iter);
+                Vec3Vector lambda = Solver.GaussSeidel (S, B, max_iter);
                 
 
 				var fc = G.Transpose * lambda;
 
-                Debug.Log("fc: " + fc + "\n");
-                Debug.Log(("lambda: " + lambda));
-                Debug.Log("GT: " + G.Transpose);
+                //Debug.Log("fc: " + fc + "\n");
+                //Debug.Log(("lambda: " + lambda));
+                //Debug.Log("GT: " + G.Transpose);
 
                 // Integrate
                 for (int i = 1; i < n; i++) {

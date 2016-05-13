@@ -6,18 +6,20 @@ namespace PE
     public class Solver
     {
 
-        public static Vector<Vec3> GaussSeidel(Matrix<Vec3> S, Vector<Vec3> B, uint iterations)
+        public static Vec3Vector GaussSeidel(Matrix<Vec3> S, Vec3Vector B, uint iterations)
         {
-            Vector<Vec3> lambda = new Vector<Vec3>(B.Size);
+            Vec3Vector lambda = new Vec3Vector(B.Size);
             for (int i = 0; i < iterations; i++)
             {
-                GaussSeidelIterate(S, lambda, B);
+                double absError = GaussSeidelIterate(S, lambda, B);
+                //Debug.Log("Solver error: " + absError);
             }
             return lambda;
         }
 
-        private static void GaussSeidelIterate(Matrix<Vec3> S, Vector<Vec3> lambda, Vector<Vec3> B)
+        private static double GaussSeidelIterate(Matrix<Vec3> S, Vec3Vector lambda, Vec3Vector B)
         {
+            Vec3Vector r = new Vec3Vector(lambda);
             for (int i = 0; i < lambda.Length; i++)
             {
 
@@ -34,6 +36,8 @@ namespace PE
 
                 lambda[i] = (1.0 / S[i, i]) * (B[i] - sum); 
             }
+
+            return (lambda - r).Norm;
         }
     }
 }

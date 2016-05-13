@@ -27,6 +27,10 @@ namespace PE
 			this.z = z;
 		}
 
+        public Vec3 (Vec3 v) : this (v.x, v.y, v.z)
+        {
+        }
+
 		/*
 		 * Getters and setters
 		 */

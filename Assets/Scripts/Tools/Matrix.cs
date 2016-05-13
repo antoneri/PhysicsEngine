@@ -95,13 +95,13 @@ namespace PE
 			throw new NotImplementedException ();
 		}
 
-		public static Vector<Vec3> operator * (Matrix<T> M, Vector<Vec3> v)
+		public static Vec3Vector operator * (Matrix<T> M, Vec3Vector v)
 		{
 			if (M.Cols != v.Size) {
 				throw new InvalidOperationException ("Invalid dimensions");
 			}
 
-			Vector<Vec3> nv = new Vector<Vec3> (M.Rows);
+            Vec3Vector nv = new Vec3Vector(M.Rows);
 
 			for (int i = 0; i < M.Rows; i++) {
 				Vec3 e = new Vec3 ();
@@ -114,13 +114,13 @@ namespace PE
 			return nv;
 		}
 
-		public static Vector<Vec3> operator * (Matrix<T> M, Vector<double> v)
+		public static Vec3Vector operator * (Matrix<T> M, Vector<double> v)
 		{
 			if (M.Cols != v.Size) {
 				throw new InvalidOperationException ("Invalid dimensions");
 			}
 
-			var nv = new Vector<Vec3> (M.Rows);
+			var nv = new Vec3Vector(M.Rows);
 
 			for (int i = 0; i < M.Rows; i++) {
 				var e = new Vec3 ();

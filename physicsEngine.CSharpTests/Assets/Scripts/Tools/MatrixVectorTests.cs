@@ -15,10 +15,10 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
             M[0, 0] = new Vec3(1, 1, 1); M[0, 1] = new Vec3(0, 0, 0);
             M[1, 0] = new Vec3(0, 0, 0); M[1, 1] = new Vec3(1, 1, 1);
 
-            Vector<Vec3> v = new Vector<Vec3>(2);
+            Vec3Vector v = new Vec3Vector(2);
             v[0] = new Vec3(1, 1, 1); v[1] = new Vec3(2, 2, 2);
 
-            Vector<Vec3> nv = M * v;
+            Vec3Vector nv = M * v;
             Console.Write("v(" + v[0] + v[1] + ")  nv(" + nv[0] + nv[1] + ")");
             Assert.AreEqual(v, nv);
         }
@@ -45,13 +45,13 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
         {
             double k = 2.0;
 
-            Vector<Vec3> v = new Vector<Vec3>(2);
+            Vec3Vector v = new Vec3Vector(2);
             v[0] = new Vec3(1, 1, 1); v[1] = new Vec3(2, 2, 2);
 
-            Vector<Vec3> correct = new Vector<Vec3>(2);
+            Vec3Vector correct = new Vec3Vector(2);
             correct[0] = new Vec3(2, 2, 2); correct[1] = new Vec3(4, 4, 4);
 
-            Vector<Vec3> nv = k * v;
+            Vec3Vector nv = k * v;
             Console.Write("correct(" + correct[0] + correct[1] + ")  nv(" + nv[0] + nv[1] + ")");
             Assert.AreEqual(correct, nv);
 
