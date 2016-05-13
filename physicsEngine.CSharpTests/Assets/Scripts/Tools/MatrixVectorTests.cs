@@ -72,5 +72,20 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
             Console.Write("C(" + C + ")  T(" + T + ")");
             Assert.AreEqual(C, T);
         }
+
+        [TestMethod]
+        public void Vec3VectorNorm1()
+        {
+            Vec3Vector v = new Vec3Vector(2);
+            v[0] = new Vec3(1, 1, 1); v[1] = new Vec3(2, 2, 2);
+
+            double correct = Math.Sqrt(15);
+
+            double norm = v.Norm;
+            Console.Write("Correct: " + correct + " norm: " + v.Norm);
+
+            Assert.IsTrue(correct - v.Norm < 0.00001);
+
+        }
     }
 }
