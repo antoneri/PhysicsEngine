@@ -146,13 +146,13 @@ namespace PE
 					p.f.Set (p.m * g);
 				}
 
-				double k = 600; /* Spring constant for system */
+				double k = 1000; /* Spring constant for system */
 				double d = 3; /* Number of timesteps to stabilize the constraint */
 
 				var n = rope.Count;
 
 				// Constraint Jacobian matrix
-				var G = new Matrix<Vec3> (n - 1, n);
+				var G = new Matrix<Vec3> (n-1, n);
                 // Inverse Mass matrix
                 var M_inv = new Matrix<Vec3>(n, n);
 
@@ -164,32 +164,30 @@ namespace PE
                 var q = new Vector<double>(n);
 
                 // Set Jacobians
-                G[0, 0] = (new Vec3(-3, 7, 0) - rope[0].x).UnitVector;
-                G[0, 1] = (rope[0].x - rope[1].x).UnitVector;
-                for (int i = 1; i < n - 1; i++) {
+                for (int i = 0; i < n-1; i++) {
 					Particle pi = rope [i];
 					Particle pj = rope [i + 1];
 					Vec3 u = (pi.x - pj.x).UnitVector;
-					G [i, i] = u;
-					G [i, i + 1] = -u;
-				} 
+					G [i, i] = u;   
+					G [i, i+1] = -u;
+				}
 
                 // Set constraints q
-                for (int i = 0; i < n - 1; i++)
+                var L = 2;
+                for (int i = 0; i < n-1; i++)
                 {
                     Particle pi = rope[i];
                     Particle pj = rope[i + 1];
-                    var L = 0.2;
+                    
                     q[i] = (pi.x - pj.x).SqLength - L; //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
                 }
-                q[n - 1] = 0;
+                //q[n - 1] = 0;
 
                 // Set values to M, f, W
                 for (int i = 0; i < n; i++) {
 					M_inv [i, i] = new Vec3 (rope [i].m_inv);
 					f [i] = rope [i].f;
 					W [i] = rope [i].v;
-					//q [i] = rope [i].x;
 				}
 
                 
@@ -208,16 +206,18 @@ namespace PE
 				Vector<Vec3> B = -a * (G * q) - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
-				uint max_iter = 4;
+				uint max_iter = 1;
 				Vector<Vec3> lambda = Solver.GaussSeidel (S, B, max_iter);
-                //Debug.Log(lambda + "\n");
-                //Debug.Log((dt * f));
-                //Debug.Log("G: " + G);
+                
 
 				var fc = G.Transpose * lambda;
 
-				// Integrate
-				for (int i = 1; i < n; i++) {
+                Debug.Log("fc: " + fc + "\n");
+                Debug.Log(("lambda: " + lambda));
+                Debug.Log("GT: " + G.Transpose);
+
+                // Integrate
+                for (int i = 1; i < n; i++) {
 					Particle p = rope [i];
                     p.v = p.v + p.m_inv * fc[i] + dt * p.m_inv * p.f;
 					p.x = p.x + dt * p.v;
