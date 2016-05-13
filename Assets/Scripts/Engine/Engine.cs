@@ -85,7 +85,6 @@ namespace PE
 			}
 
 			foreach (var particles in particleMeshes) {
-				intersections.Clear ();
 				CheckCollisions (particles);
 				HandleCollisions ();
 				AdjustIntersections ();
@@ -149,6 +148,11 @@ namespace PE
 				double k = 1000; /* Spring constant for system */
 				double d = 3; /* Number of timesteps to stabilize the constraint */
 
+				/* Constant parameters in SPOOK */
+				double a = 4 / (dt * (1 + 4 * d));
+				double b = (4 * d) / (1 + 4 * d);
+				var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
+
 				var n = rope.Count;
 
 				// Constraint Jacobian matrix
@@ -189,13 +193,7 @@ namespace PE
 					f [i] = rope [i].f;
 					W [i] = rope [i].v;
 				}
-
-                
-
-				/* Constant parameters in SPOOK */
-				double a = 4 / (dt * (1 + 4 * d));
-				double b = (4 * d) / (1 + 4 * d);
-				var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
+					
 
 				Matrix<Vec3> S = G * M_inv * G.Transpose;
 
@@ -209,7 +207,6 @@ namespace PE
 				uint max_iter = 1;
                 Vec3Vector lambda = Solver.GaussSeidel (S, B, max_iter);
                 
-
 				var fc = G.Transpose * lambda;
 
                 //Debug.Log("fc: " + fc + "\n");
@@ -230,9 +227,51 @@ namespace PE
 			if (rigidBodies == null)
 				return;
 
-			foreach (RigidBody body in rigidBodies) {
-				body.x.Add (new Vec3 (0, 0, 0.1));
+			for (int i = 0; i < rigidBodies.Count; i++) {
+				RigidBody body = rigidBodies [i];
+
+				intersections.Clear ();
+
+				body.f.Set (body.m * g);
+
+				foreach (Entity entity in entities) {
+					intersections.AddRange (entity.Collider.Collides (body));
+				}
+
+				for (int j = i + 1; j < rigidBodies.Count; j++) {
+					var other = rigidBodies [j];
+					var data = body.Collides (other);
+					intersections.AddRange (data);
+				}
+
+				foreach (Intersection data in intersections) {
+					double e = 0.8;
+					var v1 = body.v;
+					body.v = v1 - (1 + e) * Vec3.Dot (v1, data.normal) * data.normal;
+
+					if (data.body != null) {
+						var v2 = data.body.v;
+						data.body.v = v2 - (1 + e) * Vec3.Dot (v2, data.normal) * data.normal;
+					}
+				}
+
+				body.v.Add (dt * body.m_inv * body.f);
+				body.x.Add (dt * body.v);
+
+				foreach (Intersection data in intersections) {
+					var p = body;
+					if (Vec3.Dot (p.v, data.normal) < 0) {
+						p.v.SetZero ();
+					}
+
+					if (Vec3.Dot (p.x - data.point, data.normal) < 0) {
+						p.x = data.point;
+					}
+				}
+			
 			}
+
+
 		}
 
 		private void ParticleUpdate (double dt)
@@ -270,7 +309,6 @@ namespace PE
 				// Find contact sets with external boundaries, e.g.a plane.
 				// Handle external boundary conditions by reflecting the
 				// the velocities.
-				intersections.Clear ();
 				CheckCollisions (particleSystem);
 				HandleCollisions ();
 
@@ -292,6 +330,8 @@ namespace PE
 
 		private void CheckCollisions (IEnumerable<Particle> particles)
 		{
+			intersections.Clear ();
+
 			foreach (Entity entity in entities) {
 				intersections.AddRange (entity.Collider.Collides (particles));
 			}

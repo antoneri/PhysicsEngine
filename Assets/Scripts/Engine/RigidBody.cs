@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 namespace PE
 {
-	public class RigidBody
+	public class RigidBody : Collider
 	{
-		Collider collider;
-
 		public Vec3 x;
 		public Quaternion q;
 
@@ -20,6 +19,8 @@ namespace PE
 		public double m_inv;
 		public double I;
 		public double I_inv;
+
+		public double r = 0.5;
 
 		public RigidBody (Vec3 x, double m, double I)
 		{
@@ -37,13 +38,14 @@ namespace PE
 			I_inv = 1 / I_inv;
 		}
 
-		public Collider Collider {
-			get {
-				return this.collider;
-			}
-			set {
-				collider = value;
-			}
+		public override List<Intersection> Collides (IEnumerable<Particle> ps)
+		{
+			return CollisionNotImplemented;
+		}
+
+		public override List<Intersection> Collides (RigidBody b)
+		{
+			return Collides (this, b);
 		}
 	}
 }
