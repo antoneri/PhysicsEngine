@@ -87,5 +87,25 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
             Assert.IsTrue(correct - v.Norm < 0.00001);
 
         }
+
+        [TestMethod]
+        public void Vec3VectorCopy()
+        {
+            Vec3Vector v = new Vec3Vector(2);
+            v[0] = new Vec3(1, 1, 1); v[1] = new Vec3(2, 2, 2);
+
+            Vec3Vector correct = new Vec3Vector(2);
+            correct[0] = new Vec3(1, 1, 1); correct[1] = new Vec3(2, 2, 2);
+
+            Vec3Vector v2 = new Vec3Vector(v);
+
+            v[0] = new Vec3(0, 0, 0);
+            v[1] = new Vec3(5, 5, 5);
+
+            Console.Write("Correct: " + correct + " vcopy: " + v2);
+
+            Assert.AreEqual(correct, v2);
+
+        }
     }
 }
