@@ -25,7 +25,7 @@ namespace PE
 		private List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 		private List<Entity> entities = new List<Entity> ();
 		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
-		private List<List<Particle>> ropes = new List<List<Particle>> ();
+		private List<ParticleSystem> ropes = new List<ParticleSystem> ();
 		private List<Intersection> intersections = new List<Intersection> (10000);
 		private List<RigidBody> rigidBodies;
 
@@ -59,7 +59,7 @@ namespace PE
 			particleMeshes.Add (mesh);
 		}
 
-		public void AddRope (List<Particle> rope)
+		public void AddRope (ParticleSystem rope)
 		{
 			ropes.Add (rope);
 		}
@@ -157,9 +157,9 @@ namespace PE
 				var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
 				var n = rope.Count;
-
-				// Constraint Jacobian matrix
-				var G = new Matrix<Vec3> (n-1, n);
+                List<Constraint> C = rope.constraints;
+                // Constraint Jacobian matrix
+                var G = new Matrix<Vec3> (C.Count, n);
                 // Inverse Mass matrix
                 var M_inv = new Matrix<Vec3>(n, n);
 
@@ -168,25 +168,45 @@ namespace PE
                 // All velocities
                 var W = new Vec3Vector(n);
                 // All generalized positions
-                var q = new Vec3Vector(n-1);
+                var q = new Vec3Vector(C.Count);
 
                 // Set Jacobians
-                for (int i = 0; i < n-1; i++) {
-					Particle pi = rope [i];
-					Particle pj = rope [i + 1];
-					Vec3 u = (pi.x - pj.x).UnitVector;
-					G [i, i] = u;   
-					G [i, i+1] = -u;
-				}
+                //            for (int i = 0; i < n-1; i++) {
+                //	Particle pi = rope [i];
+                //	Particle pj = rope [i + 1];
+                //	Vec3 u = (pi.x - pj.x).UnitVector;
+                //	G [i, i] = u;   
+                //	G [i, i+1] = -u;
+                //}
+
+                // Set Jacobians
+                for (int i = 0; i < C.Count; i++)
+                {
+                    var c = C[i];
+                    int body_i = c.body_i;
+                    int body_j = c.body_j;
+
+                    Vec3[] jac = c.getJacobians(rope);
+                    G[i, body_i] = jac[0];
+                    G[i, body_j] = jac[1];
+                }
 
                 // Set constraints q
-                var L = 2;
-                for (int i = 0; i < n-1; i++)
+                //var L = 2;
+                //for (int i = 0; i < n-1; i++)
+                //{
+                //    Particle pi = rope[i];
+                //    Particle pj = rope[i + 1];
+
+                //    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
+                //}
+
+                // Set constraints q
+                for (int i = 0; i < C.Count; i++)
                 {
-                    Particle pi = rope[i];
-                    Particle pj = rope[i + 1];
-                    
-                    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
+                    var c = C[i];
+                    Vec3 g = c.getConstraint(rope);
+                    q[i] = g;
                 }
 
                 // Set values to M, f, W
@@ -196,7 +216,6 @@ namespace PE
 					W [i] = rope [i].v;
 				}
 					
-
 				Matrix<Vec3> S = G * M_inv * G.Transpose;
 
 				for (int i = 0; i < S.Rows; i++) {

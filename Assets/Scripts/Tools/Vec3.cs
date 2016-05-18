@@ -92,8 +92,7 @@ namespace PE
 			get {
 				var l = Length;
 				if (l == 0) {
-                    return new Vec3(0);
-					//throw new DivideByZeroException ("Zero vector has no unit vector.");
+					throw new DivideByZeroException ("Zero vector has no unit vector.");
 				}
 				return this / l;
 			}

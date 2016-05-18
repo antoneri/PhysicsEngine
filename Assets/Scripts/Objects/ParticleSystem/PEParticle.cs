@@ -16,6 +16,7 @@ namespace PE
 		/* Density */
 		public double p;
 		public double age = 0;
+        public double lifetime = 0;
 
         public Particle ()
         {
@@ -39,5 +40,10 @@ namespace PE
 			r = radius;
 			p = density;
 		}
-	}
+
+        public Particle(Vec3 x, Vec3 v, double mass, double radius, double density, double lifetime) : this (x, v, mass, radius, density)
+        {
+            this.lifetime = lifetime;
+        }
+    }
 }

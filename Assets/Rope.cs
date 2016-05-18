@@ -8,7 +8,7 @@ namespace PE
 	{
 		const int NUM_PARTICLES = 10;
 
-		List<Particle> particles = new List<Particle> ();
+		ParticleSystem particles = new ParticleSystem ();
 		private UnityEngine.ParticleSystem.Particle[] unityParticles = new UnityEngine.ParticleSystem.Particle[NUM_PARTICLES];
 
 		// Use this for initialization
@@ -22,7 +22,17 @@ namespace PE
 				particles.Add (new Particle (startPos + i * dx, mass));
 			}
 
-			Engine.instance.AddRope (particles);
+            List<Constraint> constraints = new List<Constraint>();
+            //  constraints.Add(new PositionConstraint(0, 0, startPos));
+            double length = 2;
+            for (int i = 0; i < NUM_PARTICLES - 1; i++)
+            {
+                constraints.Add(new DistanceConstraint(i, i + 1, length));
+            }
+
+            particles.constraints = constraints;
+
+            Engine.instance.AddRope (particles);
 		}
 
 		// Update is called once per frame

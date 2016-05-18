@@ -5,8 +5,9 @@ using System.Linq;
 
 public class Emitter : MonoBehaviour
 {
-	private PE.ParticleSystem ps = new PE.ParticleSystem ();
+	private PE.ParticleSystem ps = new PE.ParticleSystem (true);
 
+    public float lifetime = 10;
 	public float rate = 10;
 	public float radius = 0.4f;
 	public float particleSize = 0.1f;
@@ -55,7 +56,7 @@ public class Emitter : MonoBehaviour
 				var coords = Random.insideUnitCircle * radius;
 				initialPosition += coords.x * transform.right + coords.y * transform.up;
 
-				ps.Add (new PE.Particle (initialPosition, initialVelocity, mass, particleSize / 2, density));
+				ps.Add (new PE.Particle (initialPosition, initialVelocity, mass, particleSize / 2, density, lifetime));
 			}
 
 			lastTime = t;

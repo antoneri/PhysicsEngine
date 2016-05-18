@@ -9,21 +9,38 @@ namespace PE
 {
 	public class ParticleSystem : List<Particle>
 	{
-		private const double MAX_AGE = 10.0;
 
-		// Update is called once per frame
-		public void Update ()
+        public ParticleSystem() { }
+
+        public ParticleSystem(bool lifetime)
+        {
+            this.lifetime = lifetime;
+        }
+
+        public bool lifetime = false;
+
+        public List<Constraint> constraints = new List<Constraint>();
+
+        // Update is called once per frame
+        public void Update ()
 		{
-			var dt = Time.deltaTime;
+            var dt = Time.deltaTime;
 
-			for (int i = this.Count - 1; i >= 0; i--) {
-				var p = this [i];
-				p.age += dt;
+            if (lifetime)
+            {
+                for (int i = this.Count - 1; i >= 0; i--)
+                {
+                    var p = this[i];
+                    p.age += dt;
 
-				if (p.age > MAX_AGE) {
-					this.RemoveAt (i);
-				}
-			}
+                    if (p.age > p.lifetime)
+                    {
+                        this.RemoveAt(i);
+                    }
+                }
+            }
+
+
 		}
 
 		public double Energy {
