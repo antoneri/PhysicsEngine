@@ -110,7 +110,8 @@ namespace PE
 				foreach (var spring in particles.Neighbors) {
 					var f = spring.Force;
 					spring.p2.f.Add (f);
-					spring.p1.f.Add (-f);
+					f.Negate();
+					spring.p1.f.Add (f);
 				}
 
 				for (int i = 0; i < particles.Size; i++) {

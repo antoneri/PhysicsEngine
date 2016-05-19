@@ -10,6 +10,10 @@ namespace PE
 		public double k;
 		public double kd;
 
+		// Cached objects
+		private Vec3 v_rel = new Vec3();
+		private Vec3 x_rel = new Vec3();
+
 		public Spring (Particle p1, Particle p2, double k, double kd)
 		{
 			this.p1 = p1;
@@ -24,7 +28,8 @@ namespace PE
 				var x = Displacement;
 				var v = RelativeVelocity;
 				var u = Direction;
-				return -(k * x + kd * Vec3.Dot (v, u)) * u;
+				u.Scale (-(k * x + kd * Vec3.Dot (v, u)));
+				return u;
 			}
 		}
 
@@ -36,19 +41,29 @@ namespace PE
 
 		public double Distance {
 			get {
-				return (p2.x - p1.x).Length;
+				return RelativePosition.Length;
 			}
 		}
 
 		public Vec3 Direction {
 			get {
-				return (p2.x - p1.x).UnitVector;
+				return RelativePosition.UnitVector;
+			}
+		}
+
+		public Vec3 RelativePosition {
+			get {
+				x_rel.Set (p2.x);
+				x_rel.Subtract (p1.x);
+				return x_rel;
 			}
 		}
 
 		public Vec3 RelativeVelocity {
 			get {
-				return p2.v - p1.v;
+				v_rel.Set (p2.v);
+				v_rel.Subtract (p1.v);
+				return v_rel;
 			}
 		}
 	}
