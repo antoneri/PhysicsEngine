@@ -262,39 +262,29 @@ namespace PE
 				}
 
 				for (int j = i + 1; j < rigidBodies.Count; j++) {
-					var other = rigidBodies [j];
-					var data = body.Collides (other);
-					intersections.AddRange (data);
+					intersections.AddRange (body.Collides (rigidBodies[j]));
 				}
 
 				foreach (Intersection data in intersections) {
-					double e = 0.8;
-					var v1 = body.v;
-					body.v = v1 - (1 + e) * Vec3.Dot (v1, data.normal) * data.normal;
+					if (data.body == null)
+						continue;
 
-					if (data.body != null) {
-						var v2 = data.body.v;
-						data.body.v = v2 - (1 + e) * Vec3.Dot (v2, data.normal) * data.normal;
-					}
+					const double e = 0.8;
+
+					var other = data.body;
+					var u = other.v - body.v;
+					var r = other.x - body.x;
+					var u_n = -e * Vec3.Dot (u, r) * r.UnitVector;
+					var r_a = body.x - data.point;
+					var r_b = other.x - data.point;
+					var K = 0; // TODO
+					var J = K * (u_n - u);
 				}
 
 				body.v.Add (dt * body.m_inv * body.f);
 				body.x.Add (dt * body.v);
 
-				foreach (Intersection data in intersections) {
-					var p = body;
-					if (Vec3.Dot (p.v, data.normal) < 0) {
-						p.v.SetZero ();
-					}
-
-					if (Vec3.Dot (p.x - data.point, data.normal) < 0) {
-						p.x = data.point;
-					}
-				}
-			
 			}
-
-
 		}
 
 		private void ParticleUpdate (double dt)
