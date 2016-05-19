@@ -16,6 +16,7 @@ namespace PE
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
 		public Vector3 wind = new Vector3 (0, 0, 0);
+        public uint solver_iterations = 10;
 
 		/* Density */
 		private const double AIR_P = 1.18;
@@ -225,8 +226,8 @@ namespace PE
                 Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
-				uint max_iter = 10;
-                Vec3Vector lambda = Solver.GaussSeidel (S, B, max_iter);
+				//uint max_iter = 10;
+                Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
                 
 				var fc = G.Transpose * lambda;
 

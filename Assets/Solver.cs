@@ -12,6 +12,10 @@ namespace PE
             for (int i = 0; i < iterations; i++)
             {
                 double absError = GaussSeidelIterate(S, lambda, B);
+                if (absError < 0.001)
+                {
+                    break;
+                }
                 //Debug.Log("Solver error: " + absError);
             }
             return lambda;
