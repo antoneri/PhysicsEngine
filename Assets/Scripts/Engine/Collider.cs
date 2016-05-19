@@ -133,13 +133,14 @@ public abstract class Collider
 	{
 		var intersections = new List<Intersection> ();
 
-		double d = Math.Abs (Vec3.Dot (body.x, plane.normal) - body.r - plane.d);
+		double dist = Vec3.Dot (body.x, plane.normal) - plane.d;
+		double d = Math.Abs (dist) - body.r;
 
-		if (d < Plane.thickness) {
+		if (d < 0) {
 			intersections.Add (new Intersection {
-				distance = Plane.thickness - d,
+				distance = - d,
 				normal = plane.normal,
-				point = body.x - (Vec3.Dot (plane.normal, body.x) + plane.d) * plane.normal + Plane.thickness * plane.normal
+				point = body.x - (dist - body.r) * plane.normal
 			});
 		}
 

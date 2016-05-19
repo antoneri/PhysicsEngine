@@ -18,10 +18,8 @@ namespace PE
 		public Vector3 wind = new Vector3 (0, 0, 0);
         public uint solver_iterations = 10;
 
-		/* Density */
-		private const double AIR_P = 1.18;
-		/* Viscosity */
-		private const double AIR_u = 1.002;
+		private const double AIR_P = 1.18; // Air density
+		private const double AIR_u = 1.002; // Air viscosity
 
 		private List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 		private List<Entity> entities = new List<Entity> ();

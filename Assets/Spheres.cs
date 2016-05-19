@@ -17,8 +17,7 @@ public class Spheres : MonoBehaviour {
 		foreach (Transform child in transform) {
 			children.Add (child);
 			var I = 2 / 5 * mass * radius * radius;
-			var body = new RigidBody (child.position, mass, I);
-			bodies.Add (body);
+			bodies.Add (new RigidBody (child.position, mass, I));
 		}
 
 		Engine.instance.RigidBodies = bodies;
