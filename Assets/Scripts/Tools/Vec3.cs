@@ -168,7 +168,14 @@ namespace PE
 			z += v.z;
 		}
 
-		public void Negate ()
+        public void Add(double k)
+        {
+            x += k;
+            y += k;
+            z += k;
+        }
+
+        public void Negate ()
 		{
 			x = -x;
 			y = -y;

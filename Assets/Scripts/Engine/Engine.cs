@@ -148,13 +148,13 @@ namespace PE
                 CheckCollisions(rope);
                 HandleCollisions();
 
-                double k = 600; /* Spring constant for system */
+                //double k = 1000; /* Spring constant for system */
 				double d = 3; /* Number of timesteps to stabilize the constraint */
 
 				/* Constant parameters in SPOOK */
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
-				var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
+				//var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
 				var n = rope.Count;
                 List<Constraint> C = rope.constraints;
@@ -219,7 +219,8 @@ namespace PE
 				Matrix<Vec3> S = G * M_inv * G.Transpose;
 
 				for (int i = 0; i < S.Rows; i++) {
-					S [i, i] += e;
+                    var e = 4 / (dt * dt * C[i].k * (1 + 4 * d));
+                    S [i, i].Add(e);
 				}
                 Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
@@ -234,7 +235,7 @@ namespace PE
                 //Debug.Log("GT: " + G.Transpose);
 
                 // Integrate
-                for (int i = 1; i < n; i++) {
+                for (int i = 0; i < n; i++) {
 					Particle p = rope [i];
                     p.v = p.v + p.m_inv * fc[i] + dt * p.m_inv * p.f;
 					p.x = p.x + dt * p.v;

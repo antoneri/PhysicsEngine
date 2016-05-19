@@ -6,7 +6,7 @@ namespace PE
 {
 	public class Rope : MonoBehaviour
 	{
-		const int NUM_PARTICLES = 10;
+		const int NUM_PARTICLES = 20;
 
 		ParticleSystem particles = new ParticleSystem ();
 		private UnityEngine.ParticleSystem.Particle[] unityParticles = new UnityEngine.ParticleSystem.Particle[NUM_PARTICLES];
@@ -14,8 +14,8 @@ namespace PE
 		// Use this for initialization
 		void Start ()
 		{
-			var startPos = new Vec3 (-3, 12, 0);
-			var dx = new Vec3 (-1, -1, 0);
+			var startPos = new Vec3 (-3, 15, 0);
+			var dx = new Vec3 (-0.25, -0.25, 0);
 			var mass = 1.0;
 
 			for (int i = 0; i < NUM_PARTICLES; i++) {
@@ -23,8 +23,8 @@ namespace PE
 			}
 
             List<Constraint> constraints = new List<Constraint>();
-            //  constraints.Add(new PositionConstraint(0, 0, startPos));
-            double length = 2;
+            constraints.Add(new PositionConstraint(0, 0, startPos));
+            double length = 0.1;
             for (int i = 0; i < NUM_PARTICLES - 1; i++)
             {
                 constraints.Add(new DistanceConstraint(i, i + 1, length));

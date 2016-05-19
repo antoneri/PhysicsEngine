@@ -7,11 +7,16 @@ namespace PE {
 
         public int body_i;
         public int body_j;
+        public double k = 1000;
 
         public Constraint(int body_i, int body_j)
         {
             this.body_i = body_i;
             this.body_j = body_j;
+        }
+        public Constraint(int body_i, int body_j, double k) : this (body_i, body_j)
+        {
+            this.k = k;
         }
 
         abstract public Vec3 getConstraint(List<Particle> ps);
@@ -21,6 +26,11 @@ namespace PE {
     public class DistanceConstraint : Constraint
     {
         private double L;
+        public DistanceConstraint(int body_i, int body_j, double length, double k) : base(body_i, body_j, k)
+        {
+            L = length;
+        }
+
         public DistanceConstraint(int body_i, int body_j, double length) : base(body_i, body_j)
         {
             L = length;
@@ -56,6 +66,11 @@ namespace PE {
 
         private Vec3 p;
 
+        public PositionConstraint(int body_i, int body_j, Vec3 position, double k) : base(body_i, body_j, k)
+        {
+            p = position;
+        }
+
         public PositionConstraint(int body_i, int body_j, Vec3 position) : base(body_i, body_j)
         {
             p = position;
@@ -85,8 +100,8 @@ namespace PE {
             }
 
             Vec3[] G = new Vec3[2];
-            G[0] = u;
-            G[1] = u;
+            G[0] = -u;
+            G[1] = -u;
 
             return G;
         }
