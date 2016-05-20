@@ -91,7 +91,7 @@ namespace PE
 
 			RopeUpdate (Time.fixedDeltaTime);
 
-			RigidBodyUpdate (Time.fixedDeltaTime);
+			SpheresUpdate (Time.fixedDeltaTime);
 
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
