@@ -53,6 +53,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Engine\ColliderTests.cs" />
+    <Compile Include="Assets\Scripts\Engine\HGridTests.cs" />
     <Compile Include="Assets\Scripts\Tools\MatrixVectorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
