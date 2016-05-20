@@ -29,7 +29,7 @@ namespace PE
 
 		public Mat3 Inverse {
 			get {
-				var d = Determinant;
+				var d = 1 / Determinant;
 				var inverse = new Mat3 ();
 				inverse [0, 0] = (this [1, 1] * this [2, 2] - this [2, 1] * this [1, 2]) * d;
 				inverse [0, 1] = -(this [0, 1] * this [2, 2] - this [0, 2] * this [2, 1]) * d;
@@ -56,6 +56,24 @@ namespace PE
 			}
 		}
 
+		public static Mat3 Identity {
+			get {
+				return Diag(1);
+			}
+		}
+
+		public static Mat3 Diag(double value) {
+			return Diag(value, value, value);
+		}
+
+		public static Mat3 Diag(double i, double j, double k) {
+			var diag = new Mat3();
+			diag [0, 0] = i;
+			diag [1, 1] = j;
+			diag [2, 2] = k;
+			return diag;
+		}
+
 		public static Mat3 operator+(Mat3 lhs, Mat3 rhs) {
 			var result = new Mat3();
 
@@ -78,6 +96,10 @@ namespace PE
 			}
 
 			return result;
+		}
+
+		public static Mat3 operator-(Mat3 mat) {
+			return -1 * mat;
 		}
 
 		public static Mat3 operator*(Mat3 lhs, Mat3 rhs) {
@@ -110,6 +132,10 @@ namespace PE
 			return result;
 		}
 
+		public static Vec3 operator*(Vec3 lhs, Mat3 rhs) {
+			return rhs * lhs;
+		}
+
 		public static Mat3 operator*(double lhs, Mat3 rhs) {
 			var result = new Mat3();
 
@@ -120,6 +146,20 @@ namespace PE
 			}
 
 			return result;
+		}
+
+		public override string ToString ()
+		{
+			var sb = new System.Text.StringBuilder ();
+
+			for (int i = 0; i < 3; i++) {
+				sb.Append ("| ");
+				for (int j = 0; j < 3; j++) {
+					sb.Append (this [i, j] + " ");
+				}
+				sb.Append ("|\n");
+			}
+			return sb.ToString ();
 		}
 	}
 }
