@@ -8,7 +8,7 @@ using PE;
 public struct Intersection
 {
 	public PE.Particle particle;
-	public RigidBody body;
+	public Sphere sphere;
 	public double distance;
 	public Vec3 normal;
 	public Vec3 point;
@@ -25,7 +25,7 @@ public abstract class Collider
 
 	public abstract List<Intersection> Collides (IEnumerable<PE.Particle> ps);
 
-	public abstract List<Intersection> Collides (RigidBody b);
+	public abstract List<Intersection> Collides (Sphere b);
 
 	public static List<Intersection> Collides (IEnumerable<PE.Particle> ps, Plane pl)
 	{
@@ -129,25 +129,25 @@ public abstract class Collider
 		return sqDist;
 	}
 
-	public static List<Intersection> Collides (RigidBody body, Plane plane)
+	public static List<Intersection> Collides (Sphere sphere, Plane plane)
 	{
 		var intersections = new List<Intersection> ();
 
-		double dist = Vec3.Dot (body.x, plane.normal) - plane.d;
-		double d = Math.Abs (dist) - body.r;
+		double dist = Vec3.Dot (sphere.x, plane.normal) - plane.d;
+		double d = Math.Abs (dist) - sphere.r;
 
 		if (d < 0) {
 			intersections.Add (new Intersection {
 				distance = - d,
 				normal = plane.normal,
-				point = body.x - (dist - body.r) * plane.normal
+				point = sphere.x - (dist - sphere.r) * plane.normal
 			});
 		}
 
 		return intersections;
 	}
 
-	public static List<Intersection> Collides (RigidBody a, RigidBody b)
+	public static List<Intersection> Collides (Sphere a, Sphere b)
 	{
 		var intersections = new List<Intersection> ();
 
@@ -155,7 +155,7 @@ public abstract class Collider
 
 		if (sqdist < Math.Pow (a.r + b.r, 2)) {
 			intersections.Add (new Intersection {
-				body = b,
+				sphere = b,
 				distance = Math.Sqrt(sqdist) - a.r - b.r,
 				normal = (a.x - b.x).UnitVector,
 				point = (a.x * a.r - b.x * b.r)/(a.r + b.r)
@@ -184,7 +184,7 @@ public class Plane : Collider
 		return Collides (ps, this);
 	}
 
-	public override List<Intersection> Collides (RigidBody b)
+	public override List<Intersection> Collides (Sphere b)
 	{
 		return Collides (b, this);
 	}
@@ -207,7 +207,7 @@ public class AABB : Collider
 		return Collides (ps, this);
 	}
 
-	public override List<Intersection> Collides (RigidBody b)
+	public override List<Intersection> Collides (Sphere b)
 	{
 		return CollisionNotImplemented;
 	}

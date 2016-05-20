@@ -26,7 +26,7 @@ namespace PE
 		private List<ParticleMesh> particleMeshes = new List<ParticleMesh> ();
 		private List<ParticleSystem> ropes = new List<ParticleSystem> ();
 		private List<Intersection> intersections = new List<Intersection> (10000);
-		private List<RigidBody> rigidBodies;
+		private List<Sphere> spheres;
 
 		void Awake ()
 		{
@@ -68,9 +68,9 @@ namespace PE
 			entities.Add (entity);
 		}
 
-		public List<RigidBody> RigidBodies {
+		public List<Sphere> Spheres {
 			set {
-				rigidBodies = value;
+				spheres = value;
 			}
 		}
 
@@ -245,13 +245,13 @@ namespace PE
 			}
 		}
 
-		private void RigidBodyUpdate (double dt)
+		private void SpheresUpdate (double dt)
 		{
-			if (rigidBodies == null)
+			if (spheres == null)
 				return;
 
-			for (int idx = 0; idx < rigidBodies.Count; idx++) {
-				RigidBody body = rigidBodies [idx];
+			for (int idx = 0; idx < spheres.Count; idx++) {
+				Sphere body = spheres [idx];
 
 				intersections.Clear ();
 
@@ -261,21 +261,26 @@ namespace PE
 					intersections.AddRange (entity.Collider.Collides (body));
 				}
 
-				for (int j = idx + 1; j < rigidBodies.Count; j++) {
-					intersections.AddRange (body.Collides (rigidBodies[j]));
+				for (int j = idx + 1; j < spheres.Count; j++) {
+					intersections.AddRange (body.Collides (spheres[j]));
 				}
 
 				foreach (Intersection data in intersections) {
-					if (data.body == null) // No body-body collision
-						continue; 
+					if (data.sphere == null) { // Body - plane
+
+						continue;
+					} else {
+						
+					}
 
 					// FIXME: move somewhere else
 					const double e = 0.8;
+					const double mu = 0.8;
 
-					var other = data.body;
+					var other = data.sphere;
 					var u = other.v - body.v;
 					var r = other.x - body.x;
-					var u_n = -e * Vec3.Dot (u, r) * r.UnitVector;
+					var u_n = Vec3.Dot (u, r) * r.UnitVector;
 					var r_a = data.point - body.x;
 					var r_b = data.point - other.x;
 
@@ -295,22 +300,35 @@ namespace PE
 					rbx [2, 0] = -r_b [1];
 					rbx [2, 1] = r_b [0];
 
-					var I_a = new Mat3 ();
-					var I_b = new Mat3 ();
-					var M_a = new Mat3 ();
-					var M_b = new Mat3 ();
-
-					for (int i = 0; i < 3; i++) {
-						I_a [i, i] = body.I_inv;
-						I_b [i, i] = other.I_inv;
-						M_a [i, i] = body.m_inv;
-						M_b [i, i] = other.m_inv;
-					}
+					var I_a = body.I_inv;
+					var I_b = other.I_inv;
+					var M_a = body.m_inv;
+					var M_b = other.I_inv;
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
 					Mat3 K_inv = K.Inverse;
-					Vec3 J = K_inv * (u_n - u);
+					Vec3 u_p = -e * u_n;
+					Vec3 J = K_inv * (u_p - u);
+
+					var j_n = Vec3.Dot (J, data.normal) * data.normal;
+					var j_t = J - j_n;
+					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
+
+					if (!in_allowed_friction_cone) {
+						Vec3 n = data.normal;
+						Vec3 t = j_t.UnitVector;
+						var j = -(1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
+						J = j * n - mu * j * t;
+					}
+
+					body.v.Add (body.m_inv[0, 0] * J);
+					body.omega.Add (body.I_inv[0, 0] * Vec3.Cross (r_a, J));
+					other.v.Add (-other.m_inv[0, 0] * J);
+					other.omega.Add (-other.I_inv[0, 0] * Vec3.Cross (r_b, J));
 				}
+
+				if (idx == 1)
+					continue;
 
 				body.v.Add (dt * body.m_inv * body.f);
 				body.x.Add (dt * body.v);

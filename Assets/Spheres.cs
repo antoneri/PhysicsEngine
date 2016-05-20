@@ -6,9 +6,9 @@ using PE;
 
 public class Spheres : MonoBehaviour {
 
-	private List<RigidBody> bodies = new List<RigidBody> ();
+	private List<Sphere> spheres = new List<Sphere> ();
 	private List<Transform> children = new List<Transform> ();
-
+	
 	double mass = 1;
 	double radius = 0.5;
 
@@ -16,18 +16,17 @@ public class Spheres : MonoBehaviour {
 	void Start () {
 		foreach (Transform child in transform) {
 			children.Add (child);
-			var I = 2 / 5 * mass * radius * radius;
-			bodies.Add (new RigidBody (child.position, mass, I));
+			spheres.Add (new Sphere (child.position, radius, mass));
 		}
 
-		Engine.instance.RigidBodies = bodies;
+		Engine.instance.Spheres = spheres;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		for (int i = 0; i < children.Count; i++) {
-			children[i].position = bodies [i].x;
-			children[i].transform.rotation = bodies [i].q;
+			children[i].position = spheres [i].x;
+			children[i].transform.rotation = spheres [i].q;
 		}
 	}
 }
