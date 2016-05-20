@@ -35,7 +35,7 @@ namespace PE
 			tau = new Vec3 ();
 
 			m_inv = 1 / m;
-			I_inv = 1 / I_inv;
+			I_inv = 1 / I;
 		}
 
 		public override List<Intersection> Collides (IEnumerable<Particle> ps)

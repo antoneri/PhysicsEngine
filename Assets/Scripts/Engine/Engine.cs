@@ -250,8 +250,8 @@ namespace PE
 			if (rigidBodies == null)
 				return;
 
-			for (int i = 0; i < rigidBodies.Count; i++) {
-				RigidBody body = rigidBodies [i];
+			for (int idx = 0; idx < rigidBodies.Count; idx++) {
+				RigidBody body = rigidBodies [idx];
 
 				intersections.Clear ();
 
@@ -261,24 +261,55 @@ namespace PE
 					intersections.AddRange (entity.Collider.Collides (body));
 				}
 
-				for (int j = i + 1; j < rigidBodies.Count; j++) {
+				for (int j = idx + 1; j < rigidBodies.Count; j++) {
 					intersections.AddRange (body.Collides (rigidBodies[j]));
 				}
 
 				foreach (Intersection data in intersections) {
-					if (data.body == null)
-						continue;
+					if (data.body == null) // No body-body collision
+						continue; 
 
+					// FIXME: move somewhere else
 					const double e = 0.8;
 
 					var other = data.body;
 					var u = other.v - body.v;
 					var r = other.x - body.x;
 					var u_n = -e * Vec3.Dot (u, r) * r.UnitVector;
-					var r_a = body.x - data.point;
-					var r_b = other.x - data.point;
-					var K = 0; // TODO
-					var J = K * (u_n - u);
+					var r_a = data.point - body.x;
+					var r_b = data.point - other.x;
+
+					var rax = new Mat3 ();
+					rax [0, 1] = -r_a [2];
+					rax [0, 2] = r_a [1];
+					rax [1, 0] = r_a [2];
+					rax [1, 2] = -r_a [0];
+					rax [2, 0] = -r_a [1];
+					rax [2, 1] = r_a [0];
+
+					var rbx = new Mat3 ();
+					rbx [0, 1] = -r_b [2];
+					rbx [0, 2] = r_b [1];
+					rbx [1, 0] = r_b [2];
+					rbx [1, 2] = -r_b [0];
+					rbx [2, 0] = -r_b [1];
+					rbx [2, 1] = r_b [0];
+
+					var I_a = new Mat3 ();
+					var I_b = new Mat3 ();
+					var M_a = new Mat3 ();
+					var M_b = new Mat3 ();
+
+					for (int i = 0; i < 3; i++) {
+						I_a [i, i] = body.I_inv;
+						I_b [i, i] = other.I_inv;
+						M_a [i, i] = body.m_inv;
+						M_b [i, i] = other.m_inv;
+					}
+
+					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
+					Mat3 K_inv = K.Inverse;
+					Vec3 J = K_inv * (u_n - u);
 				}
 
 				body.v.Add (dt * body.m_inv * body.f);
