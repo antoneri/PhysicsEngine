@@ -252,27 +252,26 @@ namespace PE
 
 			for (int idx = 0; idx < spheres.Count; idx++) {
 				Sphere body = spheres [idx];
+			
+				body.f.Set (body.m * g); // TODO remove
 
 				intersections.Clear ();
-
-				body.f.Set (body.m * g);
 
 				foreach (Entity entity in entities) {
 					intersections.AddRange (entity.Collider.Collides (body));
 				}
 
+				foreach (Intersection data in intersections) {
+					// TODO
+				}
+
+				intersections.Clear ();
+
 				for (int j = idx + 1; j < spheres.Count; j++) {
-					intersections.AddRange (body.Collides (spheres[j]));
+					intersections.AddRange (body.Collider.Collides (spheres[j]));
 				}
 
 				foreach (Intersection data in intersections) {
-					if (data.sphere == null) { // Body - plane
-
-						continue;
-					} else {
-						
-					}
-
 					// FIXME: move somewhere else
 					const double e = 0.8;
 					const double mu = 0.8;
@@ -306,9 +305,7 @@ namespace PE
 					var M_b = other.I_inv;
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
-					Mat3 K_inv = K.Inverse;
-					Vec3 u_p = -e * u_n;
-					Vec3 J = K_inv * (u_p - u);
+					Vec3 J = K.Inverse * (-e * u_n - u);
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
@@ -321,10 +318,10 @@ namespace PE
 						J = j * n - mu * j * t;
 					}
 
-					body.v.Add (body.m_inv[0, 0] * J);
-					body.omega.Add (body.I_inv[0, 0] * Vec3.Cross (r_a, J));
-					other.v.Add (-other.m_inv[0, 0] * J);
-					other.omega.Add (-other.I_inv[0, 0] * Vec3.Cross (r_b, J));
+					body.v.Add (body.m_inv * J);
+					body.omega.Add (body.I_inv * Vec3.Cross (r_a, J));
+					other.v.Add (-other.m_inv * J);
+					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 				}
 
 				if (idx == 1)

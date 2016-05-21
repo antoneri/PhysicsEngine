@@ -9,8 +9,8 @@ public class Spheres : MonoBehaviour {
 	private List<Sphere> spheres = new List<Sphere> ();
 	private List<Transform> children = new List<Transform> ();
 	
-	double mass = 1;
-	double radius = 0.5;
+	public double mass = 1;
+	public double radius = 0.5;
 
 	// Use this for initialization
 	void Start () {
