@@ -4,13 +4,13 @@ namespace PE
 {
 	public class Mat3
 	{
-		private double[,] items = new double[3,3];
+		private double[,] items = new double[3, 3];
 
 		public Mat3 ()
 		{
 		}
 
-		public double this[int i, int j] {
+		public double this [int i, int j] {
 			get {
 				return items [i, j];
 			}
@@ -22,8 +22,8 @@ namespace PE
 		public double Determinant {
 			get {
 				return this [0, 0] * (this [1, 1] * this [2, 2] - this [2, 1] * this [1, 2])
-					- this [0, 1] * (this [1, 0] * this [2, 2] - this [1, 2] * this [2, 0])
-					+ this [0, 2] * (this [1, 0] * this [2, 1] - this [1, 1] * this [2, 0]);
+				- this [0, 1] * (this [1, 0] * this [2, 2] - this [1, 2] * this [2, 0])
+				+ this [0, 2] * (this [1, 0] * this [2, 1] - this [1, 1] * this [2, 0]);
 			}
 		}
 
@@ -31,7 +31,7 @@ namespace PE
 			get {
 				var d = 1 / Determinant;
 
-				if (double.IsNaN(d)) {
+				if (double.IsNaN (d)) {
 					throw new DivideByZeroException ("Determinant is zero!");
 				}
 
@@ -63,34 +63,41 @@ namespace PE
 
 		public static Mat3 Identity {
 			get {
-				return Diag(1);
+				return Diag (1);
 			}
 		}
 
-		public static Mat3 Diag(double value) {
-			return Diag(value, value, value);
+		public static Mat3 Diag (double value)
+		{
+			return Diag (value, value, value);
 		}
-        
-        public static Mat3 SkewSymmetric(Vec3 v)
-        {
-            Mat3 M = new Mat3();
-            M[0, 1] = -v[2]; M[0, 2] = v[1];
-            M[1, 0] = v[2]; M[1, 2] = -v[0];
-            M[2, 0] = -v[1]; M[2, 1] = v[0];
-            
-            return M;
-        }
 
-		public static Mat3 Diag(double i, double j, double k) {
-			var diag = new Mat3();
+		public static Mat3 SkewSymmetric (Vec3 v)
+		{
+			Mat3 M = new Mat3 ();
+
+			M [0, 1] = -v [2];
+			M [0, 2] = v [1];
+			M [1, 0] = v [2];
+			M [1, 2] = -v [0];
+			M [2, 0] = -v [1];
+			M [2, 1] = v [0];
+            
+			return M;
+		}
+
+		public static Mat3 Diag (double i, double j, double k)
+		{
+			var diag = new Mat3 ();
 			diag [0, 0] = i;
 			diag [1, 1] = j;
 			diag [2, 2] = k;
 			return diag;
 		}
 
-		public static Mat3 operator+(Mat3 lhs, Mat3 rhs) {
-			var result = new Mat3();
+		public static Mat3 operator+ (Mat3 lhs, Mat3 rhs)
+		{
+			var result = new Mat3 ();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
@@ -101,8 +108,9 @@ namespace PE
 			return result;
 		}
 
-		public static Mat3 operator-(Mat3 lhs, Mat3 rhs) {
-			var result = new Mat3();
+		public static Mat3 operator- (Mat3 lhs, Mat3 rhs)
+		{
+			var result = new Mat3 ();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
@@ -113,12 +121,14 @@ namespace PE
 			return result;
 		}
 
-		public static Mat3 operator-(Mat3 mat) {
+		public static Mat3 operator- (Mat3 mat)
+		{
 			return -1 * mat;
 		}
 
-		public static Mat3 operator*(Mat3 lhs, Mat3 rhs) {
-			var result = new Mat3();
+		public static Mat3 operator* (Mat3 lhs, Mat3 rhs)
+		{
+			var result = new Mat3 ();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
@@ -133,8 +143,9 @@ namespace PE
 			return result;
 		}
 
-		public static Vec3 operator*(Mat3 lhs, Vec3 rhs) {
-			var result = new Vec3();
+		public static Vec3 operator* (Mat3 lhs, Vec3 rhs)
+		{
+			var result = new Vec3 ();
 
 			for (int i = 0; i < 3; i++) {
 				double sum = 0;
@@ -147,12 +158,14 @@ namespace PE
 			return result;
 		}
 
-		public static Vec3 operator*(Vec3 lhs, Mat3 rhs) {
+		public static Vec3 operator* (Vec3 lhs, Mat3 rhs)
+		{
 			return rhs * lhs;
 		}
 
-		public static Mat3 operator*(double lhs, Mat3 rhs) {
-			var result = new Mat3();
+		public static Mat3 operator* (double lhs, Mat3 rhs)
+		{
+			var result = new Mat3 ();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {

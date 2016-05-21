@@ -260,43 +260,7 @@ namespace PE
 				foreach (Entity entity in entities) {
 					intersections.AddRange (entity.Collider.Collides (body));
 				}
-
-				// Collision with plane
-				foreach (Intersection data in intersections) {
-					const double e = 0.8;
-					const double mu = 0.8;
-
-					var other = data.entity;
-					var u = other.v - body.v;
-					var r = data.point - body.x;
-					var u_n = Vec3.Dot (u, r) * r.UnitVector;
-					var r_a = data.point - body.x;
-
-                    var rax = Mat3.SkewSymmetric(r_a);
-
-                    var I_a = body.I_inv;
-					var M_a = body.m_inv;
-
-					Mat3 K = M_a - rax * I_a * rax;
-					Vec3 J = K.Inverse * (-e * u_n - u);
-
-					var j_n = Vec3.Dot (J, data.normal) * data.normal;
-					var j_t = J - j_n;
-					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
-
-					if (!in_allowed_friction_cone) {
-						Vec3 n = data.normal;
-						Vec3 t = j_t.UnitVector;
-						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
-						J = j * n - mu * j * t;
-					}
-
-					body.v.Add (body.m_inv * J);
-					body.omega.Add (body.I_inv * Vec3.Cross (r_a, J));
-				}
-
-				intersections.Clear ();
-
+	
 				for (int j = idx + 1; j < spheres.Count; j++) {
 					intersections.AddRange (body.Collider.Collides (spheres [j]));
 				}
@@ -305,16 +269,15 @@ namespace PE
 					const double e = 0.8;
 					const double mu = 0.8;
 
-					Sphere other = data.entity as Sphere;
+					Entity other = data.entity;
 					var u = other.v - body.v;
 					var r = other.x - body.x;
 					var u_n = Vec3.Dot (u, r) * r.UnitVector;
 					var r_a = data.point - body.x;
 					var r_b = data.point - other.x;
 
-					var rax = Mat3.SkewSymmetric(r_a);
-
-					var rbx = Mat3.SkewSymmetric(r_b);
+					var rax = Mat3.SkewSymmetric (r_a);
+					var rbx = Mat3.SkewSymmetric (r_b);
 
 					var I_a = body.I_inv;
 					var I_b = other.I_inv;
@@ -346,7 +309,6 @@ namespace PE
 
 				body.v.Add (dt * body.m_inv * body.f);
 				body.x.Add (dt * body.v);
-
 			}
 		}
 
