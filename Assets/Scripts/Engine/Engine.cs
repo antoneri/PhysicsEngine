@@ -146,6 +146,7 @@ namespace PE
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
+
 				intersections.Clear ();
 				CheckCollisions (rope);
 				HandleCollisions ();
@@ -156,7 +157,6 @@ namespace PE
 				/* Constant parameters in SPOOK */
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
-				//var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
 				var n = rope.Count;
 				List<Constraint> C = rope.constraints;
@@ -165,21 +165,10 @@ namespace PE
 				// Inverse Mass matrix
 				var M_inv = new Vec3Matrix (n, n);
 
-				// All forces
+				// All forces, velocities, generalized positions
 				var f = new Vec3Vector (n);
-				// All velocities
 				var W = new Vec3Vector (n);
-				// All generalized positions
 				var q = new Vec3Vector (C.Count);
-
-				// Set Jacobians
-				//            for (int i = 0; i < n-1; i++) {
-				//	Particle pi = rope [i];
-				//	Particle pj = rope [i + 1];
-				//	Vec3 u = (pi.x - pj.x).UnitVector;
-				//	G [i, i] = u;   
-				//	G [i, i+1] = -u;
-				//}
 
 				// Set Jacobians
 				for (int i = 0; i < C.Count; i++) {
@@ -191,16 +180,6 @@ namespace PE
 					G [i, body_i] = jac [0];
 					G [i, body_j] = jac [1];
 				}
-
-				// Set constraints q
-				//var L = 2;
-				//for (int i = 0; i < n-1; i++)
-				//{
-				//    Particle pi = rope[i];
-				//    Particle pj = rope[i + 1];
-
-				//    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
-				//}
 
 				// Set constraints q
 				for (int i = 0; i < C.Count; i++) {
@@ -225,14 +204,9 @@ namespace PE
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
-				//uint max_iter = 10;
 				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
                 
 				var fc = G.Transpose * lambda;
-
-				//Debug.Log("fc: " + fc + "\n");
-				//Debug.Log(("lambda: " + lambda));
-				//Debug.Log("GT: " + G.Transpose);
 
 				// Integrate
 				for (int i = 0; i < n; i++) {
@@ -250,19 +224,17 @@ namespace PE
 			if (spheres == null)
 				return;
 
-			for (int idx = 0; idx < spheres.Count; idx++) {
-				Sphere body = spheres [idx];
+			for (int i = 0; i < spheres.Count; i++) {
+				Sphere sphere = spheres [i];
 			
-				body.f.Set (body.m * g); // TODO remove
-
 				intersections.Clear ();
 
 				foreach (Entity entity in entities) {
-					intersections.AddRange (entity.Collider.Collides (body));
+					intersections.AddRange (entity.Collider.Collides (sphere));
 				}
 	
-				for (int j = idx + 1; j < spheres.Count; j++) {
-					intersections.AddRange (body.Collider.Collides (spheres [j]));
+				for (int j = i + 1; j < spheres.Count; j++) {
+					intersections.AddRange (sphere.Collider.Collides (spheres [j]));
 				}
 
 				foreach (Intersection data in intersections) {
@@ -270,18 +242,18 @@ namespace PE
 					const double mu = 0.8;
 
 					Entity other = data.entity;
-					var u = other.v - body.v;
-					var r = other.x - body.x;
+					var u = other.v - sphere.v;
+					var r = other.x - sphere.x;
 					var u_n = Vec3.Dot (u, r) * r.UnitVector;
-					var r_a = data.point - body.x;
+					var r_a = data.point - sphere.x;
 					var r_b = data.point - other.x;
 
 					var rax = Mat3.SkewSymmetric (r_a);
 					var rbx = Mat3.SkewSymmetric (r_b);
 
-					var I_a = body.I_inv;
+					var I_a = sphere.I_inv;
 					var I_b = other.I_inv;
-					var M_a = body.m_inv;
+					var M_a = sphere.m_inv;
 					var M_b = other.I_inv;
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
@@ -298,17 +270,11 @@ namespace PE
 						J = j * n - mu * j * t;
 					}
 
-					body.v.Add (body.m_inv * J);
-					body.omega.Add (body.I_inv * Vec3.Cross (r_a, J));
+					sphere.v.Add (sphere.m_inv * J);
+					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
 					other.v.Add (-other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 				}
-
-				if (idx == 1)
-					continue;
-
-				body.v.Add (dt * body.m_inv * body.f);
-				body.x.Add (dt * body.v);
 			}
 		}
 
