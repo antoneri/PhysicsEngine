@@ -176,6 +176,11 @@ namespace PE
 			return result;
 		}
 
+        public static Mat3 operator* (Mat3 lhs, double rhs)
+        {
+            return rhs * lhs;
+        }
+
 		public override string ToString ()
 		{
 			var sb = new System.Text.StringBuilder ();

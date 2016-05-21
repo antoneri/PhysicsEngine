@@ -11,7 +11,7 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
         [TestMethod]
         public void Vec3MatrixVectorMultTest1()
         {
-            Matrix<Vec3> M = new Matrix<Vec3>(2, 2);
+            Vec3Matrix M = new Vec3Matrix(2, 2);
             M[0, 0] = new Vec3(1, 1, 1); M[0, 1] = new Vec3(0, 0, 0);
             M[1, 0] = new Vec3(0, 0, 0); M[1, 1] = new Vec3(1, 1, 1);
 
@@ -26,15 +26,15 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
         [TestMethod]
         public void Vec3MatrixMatrixMultTest1()
         {
-            Matrix<Vec3> M1 = new Matrix<Vec3>(2, 2);
+            Vec3Matrix M1 = new Vec3Matrix(2, 2);
             M1[0, 0] = new Vec3(1, 1, 1); M1[0, 1] = new Vec3(0, 0, 0);
             M1[1, 0] = new Vec3(0, 0, 0); M1[1, 1] = new Vec3(1, 1, 1);
 
-            Matrix<Vec3> M2 = new Matrix<Vec3>(2, 2);
+            Vec3Matrix M2 = new Vec3Matrix(2, 2);
             M2[0, 0] = new Vec3(1, 2, 3); M2[0, 1] = new Vec3(3, 2, 1);
             M2[1, 0] = new Vec3(1, 2, 3); M2[1, 1] = new Vec3(3, 2, 1);
 
-            Matrix<Vec3> M3 = M1 * M2;
+            Vec3Matrix M3 = M1 * M2;
 
             Assert.AreEqual(M2, M3);
 
@@ -60,15 +60,15 @@ namespace physicsEngine.CSharpTests.Assets.Scripts.Tools
         [TestMethod]
         public void Vec3MatrixTransposeTest1()
         {
-            Matrix<Vec3> M = new Matrix<Vec3>(2, 2);
+            Vec3Matrix M = new Vec3Matrix(2, 2);
             M[0, 0] = new Vec3(1, 1, 1); M[0, 1] = new Vec3(1, 2, 1);
             M[1, 0] = new Vec3(2, 1, 2); M[1, 1] = new Vec3(1, 1, 1);
 
-            Matrix<Vec3> C = new Matrix<Vec3>(2, 2);
+            Vec3Matrix C = new Vec3Matrix(2, 2);
             C[0, 0] = new Vec3(1, 1, 1); C[0, 1] = new Vec3(2, 1, 2);
             C[1, 0] = new Vec3(1, 2, 1); C[1, 1] = new Vec3(1, 1, 1);
 
-            Matrix<Vec3> T = M.Transpose;
+            Vec3Matrix T = M.Transpose;
             Console.Write("C(" + C + ")  T(" + T + ")");
             Assert.AreEqual(C, T);
         }

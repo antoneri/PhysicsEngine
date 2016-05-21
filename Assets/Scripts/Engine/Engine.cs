@@ -161,9 +161,9 @@ namespace PE
 				var n = rope.Count;
 				List<Constraint> C = rope.constraints;
 				// Constraint Jacobian matrix
-				var G = new Matrix<Vec3> (C.Count, n);
+				var G = new Vec3Matrix(C.Count, n);
 				// Inverse Mass matrix
-				var M_inv = new Matrix<Vec3> (n, n);
+				var M_inv = new Vec3Matrix (n, n);
 
 				// All forces
 				var f = new Vec3Vector (n);
