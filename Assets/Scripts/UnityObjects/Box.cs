@@ -19,7 +19,7 @@ public class Box : MonoBehaviour
 
 		//growColliderBox();
 
-		PE.Engine.instance.AddEntity (box);
+		Engine.instance.AddEntity (box);
 	}
 	
 	// Update is called once per frame

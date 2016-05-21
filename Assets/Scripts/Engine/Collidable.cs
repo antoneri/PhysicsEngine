@@ -12,7 +12,6 @@ namespace PE
 		public Collider Collider { get; set; }
 
 		public bool Static { get; set; }
-
 	}
 }
 
