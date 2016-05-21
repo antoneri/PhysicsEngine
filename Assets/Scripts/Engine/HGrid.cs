@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System;
 
+/* This implementation is taken from Christer Ericsons book 
+ * Real Time Collision Detection (2005)
+*/
+
 namespace PE
 {
     public class HGrid
     {
 
-        const int NUM_BUCKETS = 10;
+        const int NUM_BUCKETS = 1024;
         const int HGRID_MAX_LEVELS = 32;
         const float MIN_CELL_SIZE = 1;
 
@@ -43,6 +47,11 @@ namespace PE
             tick = 0;
         }
 
+        public bool isEmpty()
+        {
+            return occupiedLevelsMask == 0;
+        }
+
         public void AddObject(HGridObject obj)
         {
             // Find lowest level where object fully fits inside cell, taking RATIO into account
@@ -71,6 +80,38 @@ namespace PE
             // Mark this level as having one more object. Also indicate level is in use
             objectsAtLevel[level]++;
             occupiedLevelsMask |= (uint)(1 << level);
+        }
+
+        public void RemoveObject(HGridObject obj)
+        {
+            // One less object on this grid level. Mark level as unused if no objects left
+            if (--objectsAtLevel[obj.level] == 0)
+                occupiedLevelsMask &= (uint)~(1 << obj.level);
+
+            // Now scan through list and unlink object ’obj’
+            int bucket = obj.bucket;
+            HGridObject p = objectBucket[bucket];
+
+            // Special-case updating list header when object is first in list            if (p == obj)
+            {
+                objectBucket[bucket] = p.pNextObject;
+                return;
+            }
+
+            // Traverse rest of list, unlinking ’obj’ when found
+            while (p != null)
+            {
+                // Keep q as trailing pointer to previous element
+                HGridObject q = p;
+                p = p.pNextObject;
+                if (p == obj)
+                {
+                    q.pNextObject = p.pNextObject; // unlink by bypassing
+                    return;
+                }
+            }
+
+            throw new Exception("Object does not exist in HGrid"); // No such object in hgrid
         }
 
 
@@ -103,7 +144,7 @@ namespace PE
                 // the maximum object overlap: size * SPHERE_TO_CELL_RATIO
 
                 float delta = obj.radius + size * SPHERE_TO_CELL_RATIO + EPSILON;
-                float ooSize = 1.0f / size;
+                float ooSize = 1.0f / size; /* Not sure about this */
                 int x1 = (int)Math.Floor((pos.x - delta) * ooSize);
                 int y1 = (int)Math.Floor((pos.y - delta) * ooSize);
                 //int z1 = (int)Math.Floor((pos.z - delta) * ooSize);
