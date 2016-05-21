@@ -224,19 +224,17 @@ namespace PE
 			if (spheres == null)
 				return;
 
-			for (int idx = 0; idx < spheres.Count; idx++) {
-				Sphere body = spheres [idx];
+			for (int i = 0; i < spheres.Count; i++) {
+				Sphere sphere = spheres [i];
 			
-				body.f.Set (body.m * g); // TODO remove
-
 				intersections.Clear ();
 
 				foreach (Entity entity in entities) {
-					intersections.AddRange (entity.Collider.Collides (body));
+					intersections.AddRange (entity.Collider.Collides (sphere));
 				}
 	
-				for (int j = idx + 1; j < spheres.Count; j++) {
-					intersections.AddRange (body.Collider.Collides (spheres [j]));
+				for (int j = i + 1; j < spheres.Count; j++) {
+					intersections.AddRange (sphere.Collider.Collides (spheres [j]));
 				}
 
 				foreach (Intersection data in intersections) {
@@ -244,18 +242,18 @@ namespace PE
 					const double mu = 0.8;
 
 					Entity other = data.entity;
-					var u = other.v - body.v;
-					var r = other.x - body.x;
+					var u = other.v - sphere.v;
+					var r = other.x - sphere.x;
 					var u_n = Vec3.Dot (u, r) * r.UnitVector;
-					var r_a = data.point - body.x;
+					var r_a = data.point - sphere.x;
 					var r_b = data.point - other.x;
 
 					var rax = Mat3.SkewSymmetric (r_a);
 					var rbx = Mat3.SkewSymmetric (r_b);
 
-					var I_a = body.I_inv;
+					var I_a = sphere.I_inv;
 					var I_b = other.I_inv;
-					var M_a = body.m_inv;
+					var M_a = sphere.m_inv;
 					var M_b = other.I_inv;
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
@@ -272,17 +270,11 @@ namespace PE
 						J = j * n - mu * j * t;
 					}
 
-					body.v.Add (body.m_inv * J);
-					body.omega.Add (body.I_inv * Vec3.Cross (r_a, J));
+					sphere.v.Add (sphere.m_inv * J);
+					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
 					other.v.Add (-other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 				}
-
-				if (idx == 1)
-					continue;
-
-				body.v.Add (dt * body.m_inv * body.f);
-				body.x.Add (dt * body.v);
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace PE
 {
@@ -17,5 +18,7 @@ namespace PE
 		public Mat3 I = new Mat3 ();
 		public Mat3 m_inv = new Mat3 ();
 		public Mat3 I_inv = new Mat3 ();
+
+		List<Constraint> constraints = new List<Constraint> ();
 	}
 }
