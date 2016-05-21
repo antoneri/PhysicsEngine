@@ -136,11 +136,12 @@ namespace PE
 			double d = Math.Abs (dist) - sphere.r;
 
 			if (d < 0) {
+				plane.self.x = sphere.x - (dist - sphere.r) * plane.normal;
 				intersections.Add (new Intersection {
 					entity = plane.self,
 					distance = -d,
 					normal = plane.normal,
-					point = sphere.x - (dist - sphere.r) * plane.normal
+					point = plane.self.x
 				});
 			}
 
