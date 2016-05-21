@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Entity : PE.Collidable
+namespace PE
 {
+	public class Entity : Collidable
+	{
+	}
 }
