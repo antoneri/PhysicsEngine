@@ -4,23 +4,20 @@ using PE;
 
 namespace PE
 {
-	public class Particle
+	public class Particle : Entity
 	{
-		public Vec3 x;
-		public Vec3 v;
-		public Vec3 f;
-		public double m;
-		public double m_inv;
+		public new double m;
+		public new double m_inv;
 		/* Radius */
 		public double r;
 		/* Density */
 		public double p;
 		public double age = 0;
-        public double lifetime = 0;
+		public double lifetime = 0;
 
-        public Particle ()
-        {
-        }
+		public Particle ()
+		{
+		}
 
 		public Particle (Vec3 x, double mass) : this (x, new Vec3 (), mass)
 		{
@@ -34,16 +31,15 @@ namespace PE
 		{
 			this.x = x;
 			this.v = v;
-			f = new Vec3 ();
 			m = mass;
 			m_inv = 1 / mass;
 			r = radius;
 			p = density;
 		}
 
-        public Particle(Vec3 x, Vec3 v, double mass, double radius, double density, double lifetime) : this (x, v, mass, radius, density)
-        {
-            this.lifetime = lifetime;
-        }
-    }
+		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density, double lifetime) : this (x, v, mass, radius, density)
+		{
+			this.lifetime = lifetime;
+		}
+	}
 }

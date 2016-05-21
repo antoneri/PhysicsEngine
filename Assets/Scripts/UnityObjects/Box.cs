@@ -15,7 +15,6 @@ public class Box : MonoBehaviour
 		Vector3 max = transform.position + transform.lossyScale * 0.5f;
 
 		box.Collider = new AABB (min, max);
-		box.Static = true;
 
 		//growColliderBox();
 

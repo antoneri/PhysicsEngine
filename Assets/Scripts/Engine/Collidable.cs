@@ -6,12 +6,9 @@ namespace PE
 	{
 		public Collidable ()
 		{
-			Static = false;
 		}
 
 		public Collider Collider { get; set; }
-
-		public bool Static { get; set; }
 	}
 }
 

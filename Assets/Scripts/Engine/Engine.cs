@@ -16,10 +16,12 @@ namespace PE
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
 		public Vector3 wind = new Vector3 (0, 0, 0);
-        public uint solver_iterations = 10;
+		public uint solver_iterations = 10;
 
-		private const double AIR_P = 1.18; // Air density
-		private const double AIR_u = 1.002; // Air viscosity
+		private const double AIR_P = 1.18;
+		// Air density
+		private const double AIR_u = 1.002;
+		// Air viscosity
 
 		private List<ParticleSystem> particleSystems = new List<ParticleSystem> ();
 		private List<Entity> entities = new List<Entity> ();
@@ -108,7 +110,7 @@ namespace PE
 				foreach (var spring in particles.Neighbors) {
 					var f = spring.Force;
 					spring.p2.f.Add (f);
-					f.Negate();
+					f.Negate ();
 					spring.p1.f.Add (f);
 				}
 
@@ -144,11 +146,11 @@ namespace PE
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
-                intersections.Clear();
-                CheckCollisions(rope);
-                HandleCollisions();
+				intersections.Clear ();
+				CheckCollisions (rope);
+				HandleCollisions ();
 
-                //double k = 1000; /* Spring constant for system */
+				//double k = 1000; /* Spring constant for system */
 				double d = 3; /* Number of timesteps to stabilize the constraint */
 
 				/* Constant parameters in SPOOK */
@@ -157,60 +159,58 @@ namespace PE
 				//var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
 				var n = rope.Count;
-                List<Constraint> C = rope.constraints;
-                // Constraint Jacobian matrix
-                var G = new Matrix<Vec3> (C.Count, n);
-                // Inverse Mass matrix
-                var M_inv = new Matrix<Vec3>(n, n);
+				List<Constraint> C = rope.constraints;
+				// Constraint Jacobian matrix
+				var G = new Matrix<Vec3> (C.Count, n);
+				// Inverse Mass matrix
+				var M_inv = new Matrix<Vec3> (n, n);
 
-                // All forces
-                var f = new Vec3Vector(n);
-                // All velocities
-                var W = new Vec3Vector(n);
-                // All generalized positions
-                var q = new Vec3Vector(C.Count);
+				// All forces
+				var f = new Vec3Vector (n);
+				// All velocities
+				var W = new Vec3Vector (n);
+				// All generalized positions
+				var q = new Vec3Vector (C.Count);
 
-                // Set Jacobians
-                //            for (int i = 0; i < n-1; i++) {
-                //	Particle pi = rope [i];
-                //	Particle pj = rope [i + 1];
-                //	Vec3 u = (pi.x - pj.x).UnitVector;
-                //	G [i, i] = u;   
-                //	G [i, i+1] = -u;
-                //}
+				// Set Jacobians
+				//            for (int i = 0; i < n-1; i++) {
+				//	Particle pi = rope [i];
+				//	Particle pj = rope [i + 1];
+				//	Vec3 u = (pi.x - pj.x).UnitVector;
+				//	G [i, i] = u;   
+				//	G [i, i+1] = -u;
+				//}
 
-                // Set Jacobians
-                for (int i = 0; i < C.Count; i++)
-                {
-                    var c = C[i];
-                    int body_i = c.body_i;
-                    int body_j = c.body_j;
+				// Set Jacobians
+				for (int i = 0; i < C.Count; i++) {
+					var c = C [i];
+					int body_i = c.body_i;
+					int body_j = c.body_j;
 
-                    Vec3[] jac = c.getJacobians(rope);
-                    G[i, body_i] = jac[0];
-                    G[i, body_j] = jac[1];
-                }
+					Vec3[] jac = c.getJacobians (rope);
+					G [i, body_i] = jac [0];
+					G [i, body_j] = jac [1];
+				}
 
-                // Set constraints q
-                //var L = 2;
-                //for (int i = 0; i < n-1; i++)
-                //{
-                //    Particle pi = rope[i];
-                //    Particle pj = rope[i + 1];
+				// Set constraints q
+				//var L = 2;
+				//for (int i = 0; i < n-1; i++)
+				//{
+				//    Particle pi = rope[i];
+				//    Particle pj = rope[i + 1];
 
-                //    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
-                //}
+				//    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
+				//}
 
-                // Set constraints q
-                for (int i = 0; i < C.Count; i++)
-                {
-                    var c = C[i];
-                    Vec3 g = c.getConstraint(rope);
-                    q[i] = g;
-                }
+				// Set constraints q
+				for (int i = 0; i < C.Count; i++) {
+					var c = C [i];
+					Vec3 g = c.getConstraint (rope);
+					q [i] = g;
+				}
 
-                // Set values to M, f, W
-                for (int i = 0; i < n; i++) {
+				// Set values to M, f, W
+				for (int i = 0; i < n; i++) {
 					M_inv [i, i] = new Vec3 (rope [i].m_inv);
 					f [i] = rope [i].f;
 					W [i] = rope [i].v;
@@ -219,29 +219,29 @@ namespace PE
 				Matrix<Vec3> S = G * M_inv * G.Transpose;
 
 				for (int i = 0; i < S.Rows; i++) {
-                    var e = 4 / (dt * dt * C[i].k * (1 + 4 * d));
-                    S [i, i].Add(e);
+					var e = 4 / (dt * dt * C [i].k * (1 + 4 * d));
+					S [i, i].Add (e);
 				}
-                Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
+				Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
 				//uint max_iter = 10;
-                Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
+				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
                 
 				var fc = G.Transpose * lambda;
 
-                //Debug.Log("fc: " + fc + "\n");
-                //Debug.Log(("lambda: " + lambda));
-                //Debug.Log("GT: " + G.Transpose);
+				//Debug.Log("fc: " + fc + "\n");
+				//Debug.Log(("lambda: " + lambda));
+				//Debug.Log("GT: " + G.Transpose);
 
-                // Integrate
-                for (int i = 0; i < n; i++) {
+				// Integrate
+				for (int i = 0; i < n; i++) {
 					Particle p = rope [i];
-                    p.v = p.v + p.m_inv * fc[i] + dt * p.m_inv * p.f;
+					p.v = p.v + p.m_inv * fc [i] + dt * p.m_inv * p.f;
 					p.x = p.x + dt * p.v;
 				}
 
-                AdjustIntersections();
+				AdjustIntersections ();
 			}
 		}
 
@@ -261,22 +261,57 @@ namespace PE
 					intersections.AddRange (entity.Collider.Collides (body));
 				}
 
+				// Collision with plane
 				foreach (Intersection data in intersections) {
-					// TODO
+					const double e = 0.8;
+					const double mu = 0.8;
+
+					var other = data.entity;
+					var u = other.v - body.v;
+					var r = data.point - body.x;
+					var u_n = Vec3.Dot (u, r) * r.UnitVector;
+					var r_a = data.point - body.x;
+
+					var rax = new Mat3 ();
+					rax [0, 1] = -r_a [2];
+					rax [0, 2] = r_a [1];
+					rax [1, 0] = r_a [2];
+					rax [1, 2] = -r_a [0];
+					rax [2, 0] = -r_a [1];
+					rax [2, 1] = r_a [0];
+
+					var I_a = body.I_inv;
+					var M_a = body.m_inv;
+
+					Mat3 K = M_a - rax * I_a * rax;
+					Vec3 J = K.Inverse * (-e * u_n - u);
+
+					var j_n = Vec3.Dot (J, data.normal) * data.normal;
+					var j_t = J - j_n;
+					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
+
+					if (!in_allowed_friction_cone) {
+						Vec3 n = data.normal;
+						Vec3 t = j_t.UnitVector;
+						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
+						J = j * n - mu * j * t;
+					}
+
+					body.v.Add (body.m_inv * J);
+					body.omega.Add (body.I_inv * Vec3.Cross (r_a, J));
 				}
 
 				intersections.Clear ();
 
 				for (int j = idx + 1; j < spheres.Count; j++) {
-					intersections.AddRange (body.Collider.Collides (spheres[j]));
+					intersections.AddRange (body.Collider.Collides (spheres [j]));
 				}
 
 				foreach (Intersection data in intersections) {
-					// FIXME: move somewhere else
 					const double e = 0.8;
 					const double mu = 0.8;
 
-					var other = data.sphere;
+					Sphere other = data.entity as Sphere;
 					var u = other.v - body.v;
 					var r = other.x - body.x;
 					var u_n = Vec3.Dot (u, r) * r.UnitVector;
@@ -314,7 +349,7 @@ namespace PE
 					if (!in_allowed_friction_cone) {
 						Vec3 n = data.normal;
 						Vec3 t = j_t.UnitVector;
-						var j = -(1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
+						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
 						J = j * n - mu * j * t;
 					}
 
@@ -400,8 +435,8 @@ namespace PE
 		{
 			foreach (Intersection data in intersections) {
 				double e = 0.8;
-				var v = data.particle.v;
-				data.particle.v = v - (1 + e) * Vec3.Dot (v, data.normal) * data.normal;
+				var v = data.entity.v;
+				data.entity.v = v - (1 + e) * Vec3.Dot (v, data.normal) * data.normal;
 			}
 		}
 
@@ -409,7 +444,7 @@ namespace PE
 		{
 			/* Adjust collided particles */
 			foreach (Intersection data in intersections) {
-				var p = data.particle;
+				var p = data.entity as Particle;
 				if (Vec3.Dot (p.v, data.normal) < 0) {
 					p.v.SetZero ();
 				}
