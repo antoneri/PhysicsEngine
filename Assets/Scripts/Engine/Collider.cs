@@ -212,3 +212,23 @@ public class AABB : Collider
 		return CollisionNotImplemented;
 	}
 }
+
+public class SphereCollider : Collider
+{
+	public Sphere self;
+
+	public SphereCollider(Sphere sphere)
+	{
+		this.self = sphere;
+	}
+
+	public override List<Intersection> Collides (IEnumerable<PE.Particle> ps)
+	{
+		return CollisionNotImplemented;
+	}
+
+	public override List<Intersection> Collides (Sphere other)
+	{
+		return Collides (self, other);
+	}
+}
