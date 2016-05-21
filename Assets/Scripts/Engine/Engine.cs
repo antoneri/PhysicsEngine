@@ -272,15 +272,9 @@ namespace PE
 					var u_n = Vec3.Dot (u, r) * r.UnitVector;
 					var r_a = data.point - body.x;
 
-					var rax = new Mat3 ();
-					rax [0, 1] = -r_a [2];
-					rax [0, 2] = r_a [1];
-					rax [1, 0] = r_a [2];
-					rax [1, 2] = -r_a [0];
-					rax [2, 0] = -r_a [1];
-					rax [2, 1] = r_a [0];
+                    var rax = Mat3.SkewSymmetric(r_a);
 
-					var I_a = body.I_inv;
+                    var I_a = body.I_inv;
 					var M_a = body.m_inv;
 
 					Mat3 K = M_a - rax * I_a * rax;
@@ -318,21 +312,9 @@ namespace PE
 					var r_a = data.point - body.x;
 					var r_b = data.point - other.x;
 
-					var rax = new Mat3 ();
-					rax [0, 1] = -r_a [2];
-					rax [0, 2] = r_a [1];
-					rax [1, 0] = r_a [2];
-					rax [1, 2] = -r_a [0];
-					rax [2, 0] = -r_a [1];
-					rax [2, 1] = r_a [0];
+					var rax = Mat3.SkewSymmetric(r_a);
 
-					var rbx = new Mat3 ();
-					rbx [0, 1] = -r_b [2];
-					rbx [0, 2] = r_b [1];
-					rbx [1, 0] = r_b [2];
-					rbx [1, 2] = -r_b [0];
-					rbx [2, 0] = -r_b [1];
-					rbx [2, 1] = r_b [0];
+					var rbx = Mat3.SkewSymmetric(r_b);
 
 					var I_a = body.I_inv;
 					var I_b = other.I_inv;

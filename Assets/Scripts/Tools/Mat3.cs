@@ -70,6 +70,16 @@ namespace PE
 		public static Mat3 Diag(double value) {
 			return Diag(value, value, value);
 		}
+        
+        public static Mat3 SkewSymmetric(Vec3 v)
+        {
+            Mat3 M = new Mat3();
+            M[0, 1] = -v[2]; M[0, 2] = v[1];
+            M[1, 0] = v[2]; M[1, 2] = -v[0];
+            M[2, 0] = -v[1]; M[2, 1] = v[0];
+            
+            return M;
+        }
 
 		public static Mat3 Diag(double i, double j, double k) {
 			var diag = new Mat3();
