@@ -146,6 +146,7 @@ namespace PE
 				foreach (var p in rope) {
 					p.f.Set (p.m * g);
 				}
+
 				intersections.Clear ();
 				CheckCollisions (rope);
 				HandleCollisions ();
@@ -156,7 +157,6 @@ namespace PE
 				/* Constant parameters in SPOOK */
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
-				//var e = new Vec3(4 / (dt * dt * k * (1 + 4 * d)));
 
 				var n = rope.Count;
 				List<Constraint> C = rope.constraints;
@@ -165,21 +165,10 @@ namespace PE
 				// Inverse Mass matrix
 				var M_inv = new Matrix<Vec3> (n, n);
 
-				// All forces
+				// All forces, velocities, generalized positions
 				var f = new Vec3Vector (n);
-				// All velocities
 				var W = new Vec3Vector (n);
-				// All generalized positions
 				var q = new Vec3Vector (C.Count);
-
-				// Set Jacobians
-				//            for (int i = 0; i < n-1; i++) {
-				//	Particle pi = rope [i];
-				//	Particle pj = rope [i + 1];
-				//	Vec3 u = (pi.x - pj.x).UnitVector;
-				//	G [i, i] = u;   
-				//	G [i, i+1] = -u;
-				//}
 
 				// Set Jacobians
 				for (int i = 0; i < C.Count; i++) {
@@ -191,16 +180,6 @@ namespace PE
 					G [i, body_i] = jac [0];
 					G [i, body_j] = jac [1];
 				}
-
-				// Set constraints q
-				//var L = 2;
-				//for (int i = 0; i < n-1; i++)
-				//{
-				//    Particle pi = rope[i];
-				//    Particle pj = rope[i + 1];
-
-				//    q[i] = new Vec3((pi.x - pj.x).SqLength - L); //0.5 * (Math.Pow ((pi.x - pj.x).SqLength, 2) - L);
-				//}
 
 				// Set constraints q
 				for (int i = 0; i < C.Count; i++) {
@@ -225,14 +204,9 @@ namespace PE
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 				// Solve for lambda
-				//uint max_iter = 10;
 				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
                 
 				var fc = G.Transpose * lambda;
-
-				//Debug.Log("fc: " + fc + "\n");
-				//Debug.Log(("lambda: " + lambda));
-				//Debug.Log("GT: " + G.Transpose);
 
 				// Integrate
 				for (int i = 0; i < n; i++) {
