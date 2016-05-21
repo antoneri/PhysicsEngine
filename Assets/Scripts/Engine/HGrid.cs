@@ -7,7 +7,7 @@ namespace PE
     public class HGrid
     {
 
-        const int NUM_BUCKETS = 1024;
+        const int NUM_BUCKETS = 10;
         const int HGRID_MAX_LEVELS = 32;
         const float MIN_CELL_SIZE = 1;
 
@@ -133,8 +133,8 @@ namespace PE
                         {
                             if (p != obj)
                             {
-                                float dist2 = (float)Math.Sqrt(pos.x - p.pos.x) + (float)Math.Sqrt(pos.y - p.pos.y);
-                                if (dist2 <= (float)Math.Sqrt(obj.radius + p.radius + EPSILON))
+                                float dist2 = (float)(pos - p.pos).SqLength;
+                                if (dist2 <= (float)Math.Pow(obj.radius + p.radius + EPSILON, 2))
                                 {
                                     collisions.Add(p.rb);
                                 }
