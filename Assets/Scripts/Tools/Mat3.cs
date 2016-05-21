@@ -30,6 +30,11 @@ namespace PE
 		public Mat3 Inverse {
 			get {
 				var d = 1 / Determinant;
+
+				if (double.IsNaN(d)) {
+					throw new DivideByZeroException ("Determinant is zero!");
+				}
+
 				var inverse = new Mat3 ();
 				inverse [0, 0] = (this [1, 1] * this [2, 2] - this [2, 1] * this [1, 2]) * d;
 				inverse [0, 1] = -(this [0, 1] * this [2, 2] - this [0, 2] * this [2, 1]) * d;
