@@ -5,12 +5,10 @@ using PE;
 
 public class Ground : MonoBehaviour
 {
-	private Entity ground;
-
 	// Use this for initialization
 	void Start ()
 	{
-		ground = new Entity ();
+		Entity ground = new RigidBody ();
 		ground.m_inv = Mat3.Diag (0);
 		ground.I_inv = Mat3.Diag (0);
 
