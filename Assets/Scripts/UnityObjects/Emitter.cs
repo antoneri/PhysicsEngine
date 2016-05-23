@@ -7,19 +7,21 @@ public class Emitter : MonoBehaviour
 {
 	private PE.ParticleSystem ps = new PE.ParticleSystem (true);
 
-    public float lifetime = 10;
+	public float lifetime = 10;
 	public float rate = 10;
 	public float radius = 0.4f;
 	public float particleSize = 0.1f;
-    public float density = 2.0f;
+	public float density = 2.0f;
 
-    private float lastTime = 0;
+	private float lastTime = 0;
 
+	#pragma warning disable 0414
 	// For debugging
 	private int particleCount = 0;
 
 	private readonly Color startColor = Color.blue;
 	private readonly Color endColor = new Color (0, 0, 0, 0);
+	#pragma warning restore 0414
 
 	private const int MAX_PARTICLES = 1000000;
 	private ParticleSystem.Particle[] unityParticles = new ParticleSystem.Particle[MAX_PARTICLES];
@@ -45,8 +47,8 @@ public class Emitter : MonoBehaviour
 		if (elapsed >= 1 / rate) {
 			var particlesToEmit = Mathf.CeilToInt (elapsed / (1 / rate));
 
-            float r = particleSize / 2;
-            float mass = density * 4 * Mathf.PI * r * r * r / 3;
+			float r = particleSize / 2;
+			float mass = density * 4 * Mathf.PI * r * r * r / 3;
             
 			for (var i = 0; i < particlesToEmit; i++) {
 				// Add a random perturbation to initial position and velocity
@@ -70,9 +72,9 @@ public class Emitter : MonoBehaviour
 		for (int i = 0; i < numParticles; i++) {
 			var p = ps [i];
 
-            unityParticles[i] = new ParticleSystem.Particle() {
-                position = (Vector3)p.x - transform.position,
-                startColor = startColor,//Color.Lerp (startColor, endColor, 0.5f*(float)p.age),
+			unityParticles [i] = new ParticleSystem.Particle () {
+				position = (Vector3)p.x - transform.position,
+				startColor = startColor,//Color.Lerp (startColor, endColor, 0.5f*(float)p.age),
 				startSize = particleSize,
 			};
 		}

@@ -27,9 +27,9 @@ namespace PE
 			this.z = z;
 		}
 
-        public Vec3 (Vec3 v) : this (v.x, v.y, v.z)
-        {
-        }
+		public Vec3 (Vec3 v) : this (v.x, v.y, v.z)
+		{
+		}
 
 		/*
 		 * Getters and setters
@@ -68,13 +68,11 @@ namespace PE
 		 * Vector properties
 		 */
 
-        public int Size
-        {
-            get
-            {
-                return 3;
-            }
-        }
+		public int Size {
+			get {
+				return 3;
+			}
+		}
 
 		public double Length {
 			get {
@@ -168,14 +166,14 @@ namespace PE
 			z += v.z;
 		}
 
-        public void Add(double k)
-        {
-            x += k;
-            y += k;
-            z += k;
-        }
+		public void Add (double k)
+		{
+			x += k;
+			y += k;
+			z += k;
+		}
 
-        public void Negate ()
+		public void Negate ()
 		{
 			x = -x;
 			y = -y;
@@ -241,25 +239,28 @@ namespace PE
 			return "[" + x + ", " + y + ", " + z + "]";
 		}
 
-        public override bool Equals(object obj)
-        {
+		public override bool Equals (object obj)
+		{
 
-            Vec3 v = obj as Vec3;
-            if (v == null)
-            {
-                return false;
-            }
+			Vec3 v = obj as Vec3;
+			if (v == null) {
+				return false;
+			}
 
-            for (int i = 0; i < v.Size; i++)
-            {
-                if (Math.Abs(v[i] - this[i]) > 0.0000001) {
-                    return false;
-                }
+			for (int i = 0; i < v.Size; i++) {
+				if (Math.Abs (v [i] - this [i]) > 0.0000001) {
+					return false;
+				}
 
-            }
+			}
 
-            return true;
-        }
-    }
+			return true;
+		}
+
+		public override int GetHashCode ()
+		{
+			return base.GetHashCode ();
+		}
+	}
 }
 
