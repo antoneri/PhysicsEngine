@@ -228,6 +228,9 @@ namespace PE
 			var collisionMatrices = new List<Mat3> ();
 			var collisionObjects = new List<Entity> ();
 
+            var contactObjects = new List<Entity>();
+            var contactIntersectionData = new List<Intersection>();
+
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
@@ -293,15 +296,15 @@ namespace PE
 				intersectionData.AddRange (intersections);
 
 				foreach (Intersection data in intersections) {
-					const double e = 0.4;
+					const double e = 1;
 					const double mu = 0.5;
 
 					Entity other = data.entity;
-					var u = other.v - sphere.v;
-					var r = other.x - sphere.x;
-					var u_n = Vec3.Dot (u, r) * r.UnitVector;
-					var r_a = data.point - sphere.x;
-					var r_b = data.point - other.x;
+					var u = sphere.v - other.v;
+					var r = sphere.x - other.x;
+                    var u_n = u * data.normal;//Vec3.Dot (u, r) * r.UnitVector;
+					var r_a = sphere.x - data.point;
+					var r_b = other.x - data.point;
 
 					var rax = Mat3.SkewSymmetric (r_a);
 					var rbx = Mat3.SkewSymmetric (r_b);
@@ -325,65 +328,100 @@ namespace PE
 						Vec3 t = j_t.UnitVector;
 						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
 						J = j * n - mu * j * t;
-					}
+                    }
 
-					// FIXME changed the signs here
-					sphere.v.Add (-sphere.m_inv * J);
-					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
-					other.v.Add (other.m_inv * J);
-					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
+                    Debug.Log("J: " + J);
+                    Debug.Log("v: " + sphere.v);
+
+                    // FIXME changed the signs here
+                    sphere.v.Add(sphere.m_inv * J);
+                    sphere.omega.Add(sphere.I_inv * Vec3.Cross(r_a, J));
+                    other.v.Add(-other.m_inv * J);
+                    other.omega.Add(-other.I_inv * Vec3.Cross(r_b, J));
+
+                    var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
+                    if (normalVelocityDiff < 0.1)
+                    {
+                        // Add to contact matrix
+                        if (!contactObjects.Contains(sphere))
+                            contactObjects.Add(sphere);
+
+                        if (!contactObjects.Contains(other))
+                            contactObjects.Add(other);
+
+                        data.i = collisionObjects.FindIndex(s => {
+                            return s == sphere;
+                        });
+
+                        data.j = collisionObjects.FindIndex(s => {
+                            return s == other;
+                        });
+
+                        contactIntersectionData.Add(data);
+                    }
 				}
 			}
 
-			double d = 3;
-			double a = 4 / (dt * (1 + 4 * d));
-			double b = (4 * d) / (1 + 4 * d);
+            if (contactObjects.Count > 0)
+            {
+                Debug.Log("Contact");
+                double d = 3;
+                double a = 4 / (dt * (1 + 4 * d));
+                double b = (4 * d) / (1 + 4 * d);
 
-			var M = intersectionData.Count;
-			var N = collisionObjects.Count;
+                var M = contactIntersectionData.Count;
+                var N = contactObjects.Count;
 
-			var G = new Vec3Matrix (M, N);
-			var CollisionMatrix = new Mat3Matrix (N, N);
-			var f = new Vec3Vector (N);
-			var W = new Vec3Vector (N);
-			var q = new Vec3Vector (M);
+                var G = new Vec3Matrix(M, N);
+                var CollisionMatrix = new Mat3Matrix(M, M);
+                var f = new Vec3Vector(N);
+                var W = new Vec3Vector(N);
+                var q = new Vec3Vector(M);
 
-			// Jacobian
-			for (int i = 0; i < M; i++) {
-				int body_i = intersectionData [i].i;
-				int body_j = intersectionData [i].j;
-				G [i, body_i] = intersectionData [i].normal;
-				G [i, body_j] = -intersectionData [i].normal;
-			}
+                // Jacobian
+                for (int i = 0; i < M; i++)
+                {
+                    int body_i = contactIntersectionData[i].i;
+                    int body_j = contactIntersectionData[i].j;
+                    G[i, body_i] = contactIntersectionData[i].normal;
+                    G[i, body_j] = -contactIntersectionData[i].normal;
+                    CollisionMatrix[i, i] = contactObjects[i].K;
+                }
 
-			// Set constraints q
-			for (int i = 0; i < M; i++) {
-				q [i] = intersectionData [i].distance * intersectionData [i].normal;
-			}
+                // Set constraints q
+                for (int i = 0; i < M; i++)
+                {
+                    q[i] = contactIntersectionData[i].distance * contactIntersectionData[i].normal;
+                }
 
-			// Set values to M, f, W
-			for (int i = 0; i < N; i++) {
-				CollisionMatrix [i, i] = collisionObjects [i].K;
-				f [i] = collisionObjects [i].f;
-				W [i] = collisionObjects [i].v;
-			}
+                // Set values to M, f, W
+                for (int i = 0; i < N; i++)
+                {
+                    f[i] = contactObjects[i].f;
+                    W[i] = contactObjects[i].v;
+                }
 
-			var S = G * (CollisionMatrix * G.Transpose);
+                var S = G.Transpose * (CollisionMatrix * G);
 
-			for (int i = 0; i < S.Rows; i++) {
-				var e = 4 / (dt * dt * 1000 * (1 + 4 * d));
-				S [i, i].Add (e);
-			}
+                for (int i = 0; i < S.Rows; i++)
+                {
+                    var e = 4 / (dt * dt * 1000 * (1 + 4 * d));
+                    S[i, i].Add(e);
+                }
 
-			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (CollisionMatrix * f));
+                Vec3Vector B = -a * q - b * (G * W) - dt * (G * f);
 
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
+                Vec3Vector lambda = Solver.GaussSeidel(S, B, solver_iterations);
 
-			var fc = G.Transpose * lambda;
+                var fc = G.Transpose * lambda;
 
-			for (int i = 0; i < collisionObjects.Count; i++) {
-				collisionObjects [i].v.Add (-collisionObjects [i].m_inv * fc [i]); // Wat
-			}
+                for (int i = 0; i < contactObjects.Count; i++)
+                {
+                    contactObjects[i].v.Add(contactObjects[i].m_inv * fc[i]); // Wat
+                }
+            }
+
+			
 
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere s = spheres [i];
