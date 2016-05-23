@@ -236,8 +236,9 @@ namespace PE
 			
 				// Add gravity
 				sphere.f.Set (sphere.m * g);
+                sphere.v.Add(0.5 * dt * sphere.m_inv * sphere.f);
 
-				intersections.Clear ();
+                intersections.Clear ();
 
 				for (int j = i + 1; j < spheres.Count; j++) {
 					var data = sphere.Collider.Collides (spheres [j]);
@@ -296,7 +297,7 @@ namespace PE
 				intersectionData.AddRange (intersections);
 
 				foreach (Intersection data in intersections) {
-					const double e = 1;
+					const double e = 0.8;
 					const double mu = 0.5;
 
 					Entity other = data.entity;
@@ -315,7 +316,7 @@ namespace PE
 					var M_b = other.I_inv;
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
-					Vec3 J = K.Inverse * (-e * u_n - u);
+					Vec3 J = (-e * u_n - u);
 					sphere.K = K;
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
@@ -332,6 +333,7 @@ namespace PE
 
                     Debug.Log("J: " + J);
                     Debug.Log("v: " + sphere.v);
+                    
 
                     // FIXME changed the signs here
                     sphere.v.Add(sphere.m_inv * J);
@@ -339,6 +341,7 @@ namespace PE
                     other.v.Add(-other.m_inv * J);
                     other.omega.Add(-other.I_inv * Vec3.Cross(r_b, J));
 
+                    Debug.Log("dv: " + (sphere.v - other.v));
                     var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
                     if (normalVelocityDiff < 0.1)
                     {
@@ -425,7 +428,7 @@ namespace PE
 
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere s = spheres [i];
-				s.v.Add (dt * s.m_inv * s.f);
+				s.v.Add (0.5 * dt * s.m_inv * s.f);
 				s.x.Add (dt * s.v);
 			}
 		}
