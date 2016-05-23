@@ -226,10 +226,9 @@ namespace PE
 
 			var intersectionData = new List<Intersection> ();
 			var collisionMatrices = new List<Mat3> ();
+			var collisionObjects = new List<Entity> ();
 
-            var collisionObjects = new List<Entity>();
-
-            for (int i = 0; i < spheres.Count; i++) {
+			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
 				// Add gravity
@@ -239,63 +238,63 @@ namespace PE
 
 				for (int j = i + 1; j < spheres.Count; j++) {
 					var data = sphere.Collider.Collides (spheres [j]);
+
 					data.ForEach (each => {
 						each.self = sphere;
-                        if (collisionObjects.Contains(sphere))
-                        {
-                            each.i = collisionObjects.FindIndex(s => { return s == sphere; });
-                        } else
-                        {
-                            each.i = collisionObjects.Count;
-                            collisionObjects.Add(sphere);
-                        }
 
-                        if (collisionObjects.Contains(sphere))
-                        {
-                            each.j = collisionObjects.FindIndex(s => { return s == sphere; });
-                        }
-                        else
-                        {
-                            each.j = collisionObjects.Count;
-                            collisionObjects.Add(sphere);
-                        }
+						if (!collisionObjects.Contains (sphere))
+							collisionObjects.Add (sphere);
 
+						if (!collisionObjects.Contains (spheres [j]))
+							collisionObjects.Add (spheres [j]);
+
+						each.i = collisionObjects.FindIndex (s => {
+							return s == sphere;
+						});
+
+						each.j = collisionObjects.FindIndex (s => {
+							return s == spheres [j];
+						});
+
+						if (i == j) {
+							throw new Exception ("Indices i and j point to the same object!");
+						}
 					});
+
 					intersections.AddRange (data);
 				}
 
 				foreach (Entity entity in entities) {
+					entity.v.SetZero ();
+
 					var data = entity.Collider.Collides (sphere);
+
 					data.ForEach (each => {
 						each.self = sphere;
-                        if (collisionObjects.Contains(sphere))
-                        {
-                            each.i = collisionObjects.FindIndex(s => { return s == sphere; });
-                        }
-                        else
-                        {
-                            each.i = collisionObjects.Count;
-                            collisionObjects.Add(sphere);
-                        }
 
-                        if (collisionObjects.Contains(data[0].entity))
-                        {
-                            each.j = collisionObjects.FindIndex(s => { return s == data[0].entity; });
-                        }
-                        else
-                        {
-                            each.j = collisionObjects.Count;
-                            collisionObjects.Add(data[0].entity);
-                        }
-                    });
+						if (!collisionObjects.Contains (sphere))
+							collisionObjects.Add (sphere);
+
+						if (!collisionObjects.Contains (each.entity))
+							collisionObjects.Add (each.entity);
+
+						each.i = collisionObjects.FindIndex (s => {
+							return s == sphere;
+						});
+
+						each.j = collisionObjects.FindIndex (s => {
+							return s == each.entity;
+						});
+					});
+
 					intersections.AddRange (data);
 				}
 
 				intersectionData.AddRange (intersections);
 
 				foreach (Intersection data in intersections) {
-					const double e = 0.8;
-					const double mu = 0.8;
+					const double e = 0.4;
+					const double mu = 0.5;
 
 					Entity other = data.entity;
 					var u = other.v - sphere.v;
@@ -314,7 +313,7 @@ namespace PE
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
 					Vec3 J = K.Inverse * (-e * u_n - u);
-					collisionMatrices.Add (K); // Save the collision matrix
+					sphere.K = K;
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
@@ -328,9 +327,10 @@ namespace PE
 						J = j * n - mu * j * t;
 					}
 
-					sphere.v.Add (sphere.m_inv * J);
+					// FIXME changed the signs here
+					sphere.v.Add (-sphere.m_inv * J);
 					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
-					other.v.Add (-other.m_inv * J);
+					other.v.Add (other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 				}
 			}
@@ -339,8 +339,8 @@ namespace PE
 			double a = 4 / (dt * (1 + 4 * d));
 			double b = (4 * d) / (1 + 4 * d);
 
-			var N = collisionObjects.Count;
 			var M = intersectionData.Count;
+			var N = collisionObjects.Count;
 
 			var G = new Vec3Matrix (M, N);
 			var CollisionMatrix = new Mat3Matrix (N, N);
@@ -349,7 +349,7 @@ namespace PE
 			var q = new Vec3Vector (M);
 
 			// Jacobian
-			for (int i = 0; i < intersectionData.Count; i++) {
+			for (int i = 0; i < M; i++) {
 				int body_i = intersectionData [i].i;
 				int body_j = intersectionData [i].j;
 				G [i, body_i] = intersectionData [i].normal;
@@ -357,15 +357,15 @@ namespace PE
 			}
 
 			// Set constraints q
-			for (int i = 0; i < intersectionData.Count; i++) {
-				q [i] = new Vec3 (intersectionData [i].distance);
+			for (int i = 0; i < M; i++) {
+				q [i] = intersectionData [i].distance * intersectionData [i].normal;
 			}
 
 			// Set values to M, f, W
 			for (int i = 0; i < N; i++) {
-				CollisionMatrix [i, i] = collisionMatrices [i];
-				f [i] = collisionObjects[i].f;
-				W [i] = collisionObjects[i].v;
+				CollisionMatrix [i, i] = collisionObjects [i].K;
+				f [i] = collisionObjects [i].f;
+				W [i] = collisionObjects [i].v;
 			}
 
 			var S = G * (CollisionMatrix * G.Transpose);
@@ -381,20 +381,14 @@ namespace PE
 
 			var fc = G.Transpose * lambda;
 
-            //foreach (var data in intersectionData) {
-            //	data.self.v += data.self.m_inv * fc [data.i];
-            //	data.entity.v += data.entity.m_inv * fc [data.j];
-            //}
+			for (int i = 0; i < collisionObjects.Count; i++) {
+				collisionObjects [i].v.Add (-collisionObjects [i].m_inv * fc [i]); // Wat
+			}
 
-            for (int i = 0; i < collisionObjects.Count; i++)
-            {
-                collisionObjects[i].v += collisionObjects[i].m_inv * fc [i];
-            }
-
-            for (int i = 0; i < spheres.Count; i++) {
-				Sphere s = spheres[i];
-				s.v = s.v + dt * s.m_inv * s.f;
-				s.x = s.x + dt * s.v;
+			for (int i = 0; i < spheres.Count; i++) {
+				Sphere s = spheres [i];
+				s.v.Add (dt * s.m_inv * s.f);
+				s.x.Add (dt * s.v);
 			}
 		}
 

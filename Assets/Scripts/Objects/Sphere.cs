@@ -23,7 +23,7 @@ namespace PE
 			this.x = x;
 			this.r = r;
 
-			this.m = Mat3.Diag(m);
+			this.m = Mat3.Diag (m);
 			m_inv = Mat3.Diag (1.0 / m);
 
 			I = Mat3.Diag (i);

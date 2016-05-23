@@ -19,6 +19,8 @@ namespace PE
 		public Mat3 m_inv = new Mat3 ();
 		public Mat3 I_inv = new Mat3 ();
 
+		public Mat3 K = Mat3.Diag (1);
+
 		List<Constraint> constraints = new List<Constraint> ();
 	}
 }
