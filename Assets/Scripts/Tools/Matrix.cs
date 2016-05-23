@@ -383,6 +383,31 @@ namespace PE
             return nM;
         }
 
+        public static Vec3Matrix operator *(Mat3Matrix M1, Vec3Matrix M2)
+        {
+            if (M1.Cols != M2.Rows)
+            {
+                throw new InvalidOperationException("Invalid dimensions");
+            }
+
+            Vec3Matrix nM = new Vec3Matrix(M1.Rows, M2.Cols);
+
+            for (int i = 0; i < M1.Rows; i++)
+            {
+                for (int j = 0; j < M2.Cols; j++)
+                {
+                    Vec3 e = new Vec3();
+                    for (int k = 0; k < M1.Cols; k++)
+                    {
+                        e = e + M1[i, k] * M2[k, j];
+                    }
+                    nM[i, j] = e;
+                }
+            }
+
+            return nM;
+        }
+
     }
 
 }
