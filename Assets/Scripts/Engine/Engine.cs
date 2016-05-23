@@ -235,12 +235,31 @@ namespace PE
 
 				intersections.Clear ();
 
+                var collisionObjects = new List<Entity>();
+
 				for (int j = i + 1; j < spheres.Count; j++) {
 					var data = sphere.Collider.Collides (spheres [j]);
 					data.ForEach (each => {
 						each.self = sphere;
-						each.i = i;
-						each.j = j;
+                        if (collisionObjects.Contains(sphere))
+                        {
+                            each.i = collisionObjects.FindIndex(s => { return s == sphere; });
+                        } else
+                        {
+                            each.i = collisionObjects.Count;
+                            collisionObjects.Add(sphere);
+                        }
+
+                        if (collisionObjects.Contains(sphere))
+                        {
+                            each.j = collisionObjects.FindIndex(s => { return s == sphere; });
+                        }
+                        else
+                        {
+                            each.j = collisionObjects.Count;
+                            collisionObjects.Add(sphere);
+                        }
+
 					});
 					intersections.AddRange (data);
 				}
@@ -249,9 +268,26 @@ namespace PE
 					var data = entity.Collider.Collides (sphere);
 					data.ForEach (each => {
 						each.self = sphere;
-						each.i = i;
-						each.j = intersections.Count;
-					});
+                        if (collisionObjects.Contains(sphere))
+                        {
+                            each.i = collisionObjects.FindIndex(s => { return s == sphere; });
+                        }
+                        else
+                        {
+                            each.i = collisionObjects.Count;
+                            collisionObjects.Add(sphere);
+                        }
+
+                        if (collisionObjects.Contains(data[0].entity))
+                        {
+                            each.j = collisionObjects.FindIndex(s => { return s == data[0].entity; });
+                        }
+                        else
+                        {
+                            each.j = collisionObjects.Count;
+                            collisionObjects.Add(data[0].entity);
+                        }
+                    });
 					intersections.AddRange (data);
 				}
 
