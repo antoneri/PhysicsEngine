@@ -161,7 +161,7 @@ namespace PE
 				var n = rope.Count;
 				List<Constraint> C = rope.constraints;
 				// Constraint Jacobian matrix
-				var G = new Vec3Matrix(C.Count, n);
+				var G = new Vec3Matrix (C.Count, n);
 				// Inverse Mass matrix
 				var M_inv = new Vec3Matrix (n, n);
 
@@ -224,18 +224,38 @@ namespace PE
 			if (spheres == null)
 				return;
 
+			var intersectionData = new List<Intersection> ();
+			var collisionMatrices = new List<Mat3> ();
+
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
+				// Add gravity
+				sphere.f.Set (sphere.m * g);
+
 				intersections.Clear ();
 
-				foreach (Entity entity in entities) {
-					intersections.AddRange (entity.Collider.Collides (sphere));
-				}
-	
 				for (int j = i + 1; j < spheres.Count; j++) {
-					intersections.AddRange (sphere.Collider.Collides (spheres [j]));
+					var data = sphere.Collider.Collides (spheres [j]);
+					data.ForEach (each => {
+						each.self = sphere;
+						each.i = i;
+						each.j = j;
+					});
+					intersections.AddRange (data);
 				}
+
+				foreach (Entity entity in entities) {
+					var data = entity.Collider.Collides (sphere);
+					data.ForEach (each => {
+						each.self = sphere;
+						each.i = i;
+						each.j = intersections.Count;
+					});
+					intersections.AddRange (data);
+				}
+
+				intersectionData.AddRange (intersections);
 
 				foreach (Intersection data in intersections) {
 					const double e = 0.8;
@@ -258,9 +278,11 @@ namespace PE
 
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
 					Vec3 J = K.Inverse * (-e * u_n - u);
+					collisionMatrices.Add (K); // Save the collision matrix
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
+
 					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
 
 					if (!in_allowed_friction_cone) {
@@ -275,6 +297,63 @@ namespace PE
 					other.v.Add (-other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 				}
+			}
+
+			double d = 3;
+			double a = 4 / (dt * (1 + 4 * d));
+			double b = (4 * d) / (1 + 4 * d);
+
+			var N = collisionMatrices.Count;
+			var M = intersectionData.Count;
+
+			var G = new Vec3Matrix (M, N);
+			var CollisionMatrix = new Mat3Matrix (N, N);
+			var f = new Vec3Vector (N);
+			var W = new Vec3Vector (N);
+			var q = new Vec3Vector (M);
+
+			// Jacobian
+			for (int i = 0; i < intersectionData.Count; i++) {
+				int body_i = intersectionData [i].i;
+				int body_j = intersectionData [i].j;
+				G [i, body_i] = intersectionData [i].normal;
+				G [i, body_j] = -intersectionData [i].normal;
+			}
+
+			// Set constraints q
+			for (int i = 0; i < intersectionData.Count; i++) {
+				q [i] = new Vec3 (intersectionData [i].distance);
+			}
+
+			// Set values to M, f, W
+			for (int i = 0; i < N; i++) {
+				CollisionMatrix [i, i] = collisionMatrices [i];
+				f [i] = spheres [i].f;
+				W [i] = spheres [i].v;
+			}
+
+			var S = G * (CollisionMatrix * G.Transpose);
+
+			for (int i = 0; i < S.Rows; i++) {
+				var e = 4 / (dt * dt * 1000 * (1 + 4 * d));
+				S [i, i].Add (e);
+			}
+
+			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (CollisionMatrix * f));
+
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
+
+			var fc = G.Transpose * lambda;
+
+			foreach (var data in intersectionData) {
+				data.self.v += data.self.m_inv * fc [data.i];
+				data.entity.v += data.entity.m_inv * fc [data.j];
+			}
+
+			for (int i = 0; i < spheres.Count; i++) {
+				Sphere s = spheres [i];
+				s.v = s.v + dt * s.m_inv * s.f;
+				s.x = s.x + dt * s.v;
 			}
 		}
 

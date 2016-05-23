@@ -5,12 +5,15 @@ using System;
 
 namespace PE
 {
-	public struct Intersection
+	public class Intersection
 	{
+		public Entity self;
 		public Entity entity;
 		public double distance;
 		public Vec3 normal;
 		public Vec3 point;
+		public int i;
+		public int j;
 
 		public override string ToString ()
 		{
