@@ -227,15 +227,15 @@ namespace PE
 			var intersectionData = new List<Intersection> ();
 			var collisionMatrices = new List<Mat3> ();
 
-			for (int i = 0; i < spheres.Count; i++) {
+            var collisionObjects = new List<Entity>();
+
+            for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
 				// Add gravity
 				sphere.f.Set (sphere.m * g);
 
 				intersections.Clear ();
-
-                var collisionObjects = new List<Entity>();
 
 				for (int j = i + 1; j < spheres.Count; j++) {
 					var data = sphere.Collider.Collides (spheres [j]);
@@ -339,7 +339,7 @@ namespace PE
 			double a = 4 / (dt * (1 + 4 * d));
 			double b = (4 * d) / (1 + 4 * d);
 
-			var N = collisionMatrices.Count;
+			var N = collisionObjects.Count;
 			var M = intersectionData.Count;
 
 			var G = new Vec3Matrix (M, N);
