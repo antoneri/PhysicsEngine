@@ -364,8 +364,8 @@ namespace PE
 			// Set values to M, f, W
 			for (int i = 0; i < N; i++) {
 				CollisionMatrix [i, i] = collisionMatrices [i];
-				f [i] = spheres [i].f;
-				W [i] = spheres [i].v;
+				f [i] = collisionObjects[i].f;
+				W [i] = collisionObjects[i].v;
 			}
 
 			var S = G * (CollisionMatrix * G.Transpose);
@@ -381,13 +381,18 @@ namespace PE
 
 			var fc = G.Transpose * lambda;
 
-			foreach (var data in intersectionData) {
-				data.self.v += data.self.m_inv * fc [data.i];
-				data.entity.v += data.entity.m_inv * fc [data.j];
-			}
+            //foreach (var data in intersectionData) {
+            //	data.self.v += data.self.m_inv * fc [data.i];
+            //	data.entity.v += data.entity.m_inv * fc [data.j];
+            //}
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere s = spheres [i];
+            for (int i = 0; i < collisionObjects.Count; i++)
+            {
+                collisionObjects[i].v += collisionObjects[i].m_inv * fc [i];
+            }
+
+            for (int i = 0; i < spheres.Count; i++) {
+				Sphere s = spheres[i];
 				s.v = s.v + dt * s.m_inv * s.f;
 				s.x = s.x + dt * s.v;
 			}
