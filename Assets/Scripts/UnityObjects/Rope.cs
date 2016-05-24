@@ -10,6 +10,7 @@ namespace PE
 
 		public double mass_last_particle = 1;
 		public double spring_k = 1000;
+		public bool integrate_top_to_bottom = true;
 
 		ParticleSystem particles = new ParticleSystem ();
 
@@ -33,6 +34,10 @@ namespace PE
 			}
 
 			particles [NUM_PARTICLES - 1].m = mass_last_particle;
+
+			if (!integrate_top_to_bottom) {
+				particles.Reverse ();
+			}
 
 			List<Constraint> constraints = new List<Constraint> ();
 			constraints.Add (new PositionConstraint (0, 0, startPos));
