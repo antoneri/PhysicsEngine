@@ -18,9 +18,6 @@ public class Emitter : MonoBehaviour
 	#pragma warning disable 0414
 	// For debugging
 	private int particleCount = 0;
-
-	private readonly Color startColor = Color.blue;
-	private readonly Color endColor = new Color (0, 0, 0, 0);
 	#pragma warning restore 0414
 
 	private const int MAX_PARTICLES = 1000000;
@@ -29,7 +26,7 @@ public class Emitter : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		PE.Engine.instance.AddParticleSystem (ps);
+		PE.Engine.instance.ParticleSystem = ps;
 	}
 	
 	// Update is called once per frame
@@ -74,7 +71,7 @@ public class Emitter : MonoBehaviour
 
 			unityParticles [i] = new ParticleSystem.Particle () {
 				position = (Vector3)p.x - transform.position,
-				startColor = startColor,//Color.Lerp (startColor, endColor, 0.5f*(float)p.age),
+				startColor = Color.blue,
 				startSize = particleSize,
 			};
 		}

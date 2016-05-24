@@ -82,7 +82,7 @@ namespace PE
 
 			particles.Neighbors = neighbors;
 			
-			Engine.instance.AddParticleMesh (particles);
+			Engine.instance.Cloth = particles;
 		}
 	
 		// Update is called once per frame

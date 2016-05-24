@@ -24,7 +24,7 @@ namespace PE
 			lineRenderer.SetVertexCount (NUM_PARTICLES);
 			lineRenderer.SetWidth (0.1f, 0.1f);
 
-			var startPos = new Vec3 (-3, 15, 0);
+			var startPos = new Vec3 (-3, 10, 0);
 			var dx = new Vec3 (-0.25, -0.25, 0);
 			var mass = 1.0;
 
@@ -44,7 +44,7 @@ namespace PE
 
 			particles.constraints = constraints;
 
-			Engine.instance.AddRope (particles);
+			Engine.instance.Rope = particles;
 		}
 
 		// Update is called once per frame
