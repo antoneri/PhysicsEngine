@@ -2,109 +2,106 @@
 using System.Collections.Generic;
 using System;
 
-namespace PE {
-    public abstract class Constraint {
+namespace PE
+{
+	public abstract class Constraint
+	{
+		public int body_i;
+		public int body_j;
+		public double k = 1000;
 
-        public int body_i;
-        public int body_j;
-        public double k = 1000;
+		public Constraint (int body_i, int body_j)
+		{
+			this.body_i = body_i;
+			this.body_j = body_j;
+		}
 
-        public Constraint(int body_i, int body_j)
-        {
-            this.body_i = body_i;
-            this.body_j = body_j;
-        }
-        public Constraint(int body_i, int body_j, double k) : this (body_i, body_j)
-        {
-            this.k = k;
-        }
+		public Constraint (int body_i, int body_j, double k) : this (body_i, body_j)
+		{
+			this.k = k;
+		}
 
-        abstract public Vec3 getConstraint(List<Particle> ps);
-        abstract public Vec3[] getJacobians(List<Particle> ps);
-    }
+		abstract public Vec3 getConstraint (List<Particle> ps);
 
-    public class DistanceConstraint : Constraint
-    {
-        private double L;
-        public DistanceConstraint(int body_i, int body_j, double length, double k) : base(body_i, body_j, k)
-        {
-            L = length;
-        }
+		abstract public Vec3[] getJacobians (List<Particle> ps);
+	}
 
-        public DistanceConstraint(int body_i, int body_j, double length) : base(body_i, body_j)
-        {
-            L = length;
-        }
+	public class DistanceConstraint : Constraint
+	{
+		private double L;
 
-        public override Vec3 getConstraint(List<Particle> ps)
-        {
+		public DistanceConstraint (int body_i, int body_j, double length, double k) : base (body_i, body_j, k)
+		{
+			L = length;
+		}
 
-            Particle pi = ps[body_i];
-            Particle pj = ps[body_j];
+		public DistanceConstraint (int body_i, int body_j, double length) : base (body_i, body_j)
+		{
+			L = length;
+		}
 
-            Vec3 g = new Vec3((pi.x - pj.x).SqLength - L);
+		public override Vec3 getConstraint (List<Particle> ps)
+		{
+			Particle pi = ps [body_i];
+			Particle pj = ps [body_j];
+			Vec3 xij = pi.x - pj.x;
 
-            return g;
-        }
+			return new Vec3 (xij.SqLength - L);
+		}
 
-        public override Vec3[] getJacobians(List<Particle> ps)
-        {
-            Particle pi = ps[body_i];
-            Particle pj = ps[body_j];
-            Vec3 u = (pi.x - pj.x).UnitVector;
+		public override Vec3[] getJacobians (List<Particle> ps)
+		{
+			Particle pi = ps [body_i];
+			Particle pj = ps [body_j];
+			Vec3 u = (pi.x - pj.x).UnitVector;
 
-            Vec3[] G = new Vec3[2];
-            G[0] = u;
-            G[1] = -u;
+			Vec3[] G = new Vec3[2];
+			G [0] = u;
+			G [1] = -u;
 
-            return G;
-        }
-    }
+			return G;
+		}
+	}
 
-    public class PositionConstraint : Constraint
-    {
+	public class PositionConstraint : Constraint
+	{
+		private Vec3 x;
 
-        private Vec3 p;
+		public PositionConstraint (int body_i, int body_j, Vec3 position, double k) : base (body_i, body_j, k)
+		{
+			x = position;
+		}
 
-        public PositionConstraint(int body_i, int body_j, Vec3 position, double k) : base(body_i, body_j, k)
-        {
-            p = position;
-        }
+		public PositionConstraint (int body_i, int body_j, Vec3 position) : base (body_i, body_j)
+		{
+			x = position;
+		}
 
-        public PositionConstraint(int body_i, int body_j, Vec3 position) : base(body_i, body_j)
-        {
-            p = position;
-        }
+		public override Vec3 getConstraint (List<Particle> ps)
+		{
+			Particle pi = ps [body_i];
 
-        public override Vec3 getConstraint(List<Particle> ps)
-        {
-            Particle pi = ps[body_i];
+			return new Vec3 ((x - pi.x).SqLength);
+		}
 
-            Vec3 g = new Vec3((p - pi.x).SqLength);
+		public override Vec3[] getJacobians (List<Particle> ps)
+		{
+			Particle pi = ps [body_i];
+			Vec3 dx = x - pi.x;
 
-            return g;
-        }
+			Vec3 u;
 
-        public override Vec3[] getJacobians(List<Particle> ps)
-        {
-            Particle pi = ps[body_i];
-            Vec3 dp = p - pi.x;
+			if (dx.SqLength == 0) {
+				u = new Vec3 ();
+			} else {
+				u = dx.UnitVector;
+			}
 
-            Vec3 u;
-            if (dp.SqLength == 0)
-            {
-                u = new Vec3(0);
-            } else
-            {
-                u = dp.UnitVector;
-            }
+			Vec3[] G = new Vec3[2];
+			G [0] = -u;
+			G [1] = -u;
 
-            Vec3[] G = new Vec3[2];
-            G[0] = -u;
-            G[1] = -u;
-
-            return G;
-        }
-    }
-
+			return G;
+		}
+	}
 }

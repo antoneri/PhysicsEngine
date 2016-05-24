@@ -86,18 +86,9 @@ namespace PE
 		 */
 		public void FixedUpdate ()
 		{
-			for (int i = 0; i < clothTimeSteps; i++) {
-				ClothUpdate (clothDeltaTime);
-			}
-
-			CheckCollisions (cloth);
-			HandleCollisions ();
-			AdjustIntersections ();
-
+			ClothUpdate (clothDeltaTime);
 			RopeUpdate (Time.fixedDeltaTime);
-
 			SpheresUpdate (Time.fixedDeltaTime);
-
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
 
@@ -105,42 +96,44 @@ namespace PE
 		{
 			if (cloth == null)
 				return;
-			
-			// Reset forces
-			foreach (var p in cloth) {
-				p.f.SetZero ();					
-			}
 
-			// Compute spring forces
-			foreach (var spring in cloth.Neighbors) {
-				var f = spring.Force;
-				spring.p2.f.Add (f);
-				f.Negate ();
-				spring.p1.f.Add (f);
-			}
-
-			for (int i = 0; i < cloth.Size; i++) {
-				var p = cloth [i];
-				if (i == 0) {
-					// TODO Add upwards force instead
-					//continue;
+			for (int step = 0; step < clothTimeSteps; step++) {
+				// Reset forces
+				foreach (var p in cloth) {
+					p.f.SetZero ();					
 				}
 
-				// Add gravity
-				p.f.Add (p.m * g);
-
-				// Add air friction forces
-				if (p.v.Length != 0) {
-					double air_fric = -1e-2;
-					var f_air = air_fric * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
-					p.f.Add (f_air);
+				// Compute spring forces
+				foreach (var spring in cloth.Neighbors) {
+					var f = spring.Force;
+					spring.p2.f.Add (f);
+					f.Negate ();
+					spring.p1.f.Add (f);
 				}
 
-				// Integrate
-				p.v.Add (dt * p.m_inv * p.f);
-				p.x.Add (dt * p.v);
+				for (int i = 0; i < cloth.Size; i++) {
+					var p = cloth [i];
 
+					// Add gravity
+					p.f.Add (p.m * g);
+
+					// Add air friction forces
+					if (p.v.SqLength > 0.00001) { // Arbitrary cutoff
+						double air_fric = -1e-2;
+						var f_air = air_fric * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
+						p.f.Add (f_air);
+					}
+
+					// Integrate
+					p.v.Add (dt * p.m_inv * p.f);
+					p.x.Add (dt * p.v);
+				}
 			}
+
+			intersections.Clear ();
+			CheckCollisions (cloth);
+			HandleCollisions ();
+			AdjustIntersections ();
 		}
 
 		private void RopeUpdate (double dt)
@@ -158,7 +151,7 @@ namespace PE
 			HandleCollisions ();
 
 			//double k = 1000; /* Spring constant for system */
-			double d = 3; /* Number of timesteps to stabilize the constraint */
+			const double d = 3; /* Number of timesteps to stabilize the constraint */
 
 			/* Constant parameters in SPOOK */
 			double a = 4 / (dt * (1 + 4 * d));
@@ -176,22 +169,15 @@ namespace PE
 			var W = new Vec3Vector (n);
 			var q = new Vec3Vector (C.Count);
 
-			// Set Jacobians
 			for (int i = 0; i < C.Count; i++) {
+				// Set Jacobians
 				var c = C [i];
-				int body_i = c.body_i;
-				int body_j = c.body_j;
-
 				Vec3[] jac = c.getJacobians (rope);
-				G [i, body_i] = jac [0];
-				G [i, body_j] = jac [1];
-			}
+				G [i, c.body_i] = jac [0];
+				G [i, c.body_j] = jac [1];
 
-			// Set constraints q
-			for (int i = 0; i < C.Count; i++) {
-				var c = C [i];
-				Vec3 g = c.getConstraint (rope);
-				q [i] = g;
+				// Set constraints q
+				q [i] = c.getConstraint (rope);
 			}
 
 			// Set values to M, f, W

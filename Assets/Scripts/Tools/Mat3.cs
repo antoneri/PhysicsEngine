@@ -27,6 +27,9 @@ namespace PE
 			get {
 				return diagonal;
 			}
+			set {
+				diagonal = value;
+			}
 		}
 
 		public double Determinant {
@@ -242,21 +245,43 @@ namespace PE
 
 		public void Add (Mat3 other)
 		{
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					this [i, j] += other [i, j];
+			if (other.Diagonal) {
+				for (int i = 0; i < 3; i++) {
+					this [i, i] += other [i, i];
+				}
+			} else {
+				for (int i = 0; i < 3; i++) {
+					for (int j = 0; j < 3; j++) {
+						this [i, j] += other [i, j];
+					}
 				}
 			}
 		}
 
 		public void Subtract (Mat3 other)
 		{
+			if (other.Diagonal) {
+				for (int i = 0; i < 3; i++) {
+					this [i, i] -= other [i, i];
+				}
+			} else {
+				for (int i = 0; i < 3; i++) {
+					for (int j = 0; j < 3; j++) {
+						this [i, j] -= other [i, j];
+					}
+				}
+			}
+		}
+
+		public void Set (Mat3 other)
+		{
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
-					this [i, j] -= other [i, j];
+					this [i, j] = other [i, j];
 				}
 			}
 
+			this.Diagonal = other.Diagonal;
 		}
 
 		public override string ToString ()
