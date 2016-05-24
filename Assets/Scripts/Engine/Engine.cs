@@ -292,7 +292,7 @@ namespace PE
                     {
                         Vec3 n = data.normal;
                         Vec3 t = j_t.UnitVector;
-                        var j = (1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
+                        var j = -(1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
                         J = j * n - mu * j * t;
                     }
 
