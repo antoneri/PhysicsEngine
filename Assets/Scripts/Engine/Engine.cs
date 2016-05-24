@@ -279,6 +279,7 @@ namespace PE
 					var r_a = sphere.x - data.point;
 					var r_b = other.x - data.point;
 
+                    /* Check if contact is a separating contact */
 					if (Vec3.Dot (u, data.normal) > 0)
 						continue; /* Separating */
 
@@ -290,38 +291,38 @@ namespace PE
 					var M_a = sphere.m_inv;
 					var M_b = other.m_inv;
 
-					//Debug.Log("normal: " + data.normal);
+                    //Debug.Log("normal: " + data.normal);
 
-					Mat3 K = M_a + M_b - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
+                    Mat3 K = M_a + M_b;// - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
 					Vec3 J = (M_a + M_b).Inverse * (-e * u_n - u);
 					sphere.K = K;
-					contactCollisionMatrices.Add (K);
-
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
 
 					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
 
-					if (!in_allowed_friction_cone) {
-						Vec3 n = data.normal;
-						Vec3 t = j_t.UnitVector;
-						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
-						J = j * n - mu * j * t;
-					}
+                    if (!in_allowed_friction_cone)
+                    {
+                        Vec3 n = data.normal;
+                        Vec3 t = j_t.UnitVector;
+                        var j = (1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
+                        J = j * n - mu * j * t;
+                    }
 
-					// FIXME changed the signs here
-					sphere.v.Add (sphere.m_inv * J);
+                    // FIXME changed the signs here
+                    sphere.v.Add (sphere.m_inv * J);
 					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
 					other.v.Add (-other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 
-					//Debug.Log("J: " + J);
+                    //Debug.Log("J: " + J);
 
-					//var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
-					var contactTest = Vec3.Dot (data.normal, sphere.v);
-					//Debug.Log("contactTest: " + contactTest);
-					if (contactTest <= 0.1) { /* Resting contact */
+                    var u_new = sphere.v - other.v;
+                    var contactTest = Vec3.Dot (data.normal, u);
+                    //Debug.Log("contactTest: " + contactTest);
+                    /* Check if contact is a resting contact */
+                    if (contactTest >= -0.2) { /* Resting contact */
 						// Add to contact matrix
 						if (!contactObjects.Contains (other))
 							contactObjects.Add (other);
@@ -338,7 +339,8 @@ namespace PE
 						});
 
 						contactIntersectionData.Add (data);
-					}
+                        contactCollisionMatrices.Add(K);
+                    }
 				}
 			}
 
@@ -348,9 +350,9 @@ namespace PE
 			}
 
 			if (contactObjects.Count > 0) {
-				//Debug.Log("Contact");
+				//Debug.Log("Contact objects: " + contactObjects.Count);
 				double d = 3;
-				double k = 100;
+				double k = 500;
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
 
@@ -362,13 +364,14 @@ namespace PE
 				var dW = new Vec3Vector (N);
 				var W = new Vec3Vector (N);
 				var q = new Vec3Vector (M);
+                var M_inv = new Mat3Matrix(N, N);
 
-				// Jacobian
-				for (int i = 0; i < M; i++) {
+                // Jacobian
+                for (int i = 0; i < M; i++) {
 					int body_i = contactIntersectionData [i].i;
 					int body_j = contactIntersectionData [i].j;
-					G [i, body_i] = contactIntersectionData [i].normal;
-					G [i, body_j] = -contactIntersectionData [i].normal;
+					G [i, body_i] = -contactIntersectionData [i].normal;
+					G [i, body_j] = contactIntersectionData [i].normal;
 					CollisionMatrix [i, i] = contactCollisionMatrices [i];
 				}
 
@@ -381,16 +384,20 @@ namespace PE
 				for (int i = 0; i < N; i++) {
 					dW [i] = contactObjects [i].m_inv * contactObjects [i].f;
 					W [i] = contactObjects [i].v;
+                    M_inv[i,i] = contactObjects[i].m_inv;
 				}
 
-				var S = G.Transpose * (CollisionMatrix * G);
-
-				for (int i = 0; i < S.Rows; i++) {
+                //var S = G.Transpose * (M_inv * G);
+                var S = G * M_inv * G.Transpose;
+                for (int i = 0; i < S.Rows; i++) {
 					var e = 4 / (dt * dt * k * (1 + 4 * d));
 					S [i, i].Add (e);
 				}
 
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
+
+                //Debug.Log("S: " + S);
+                //Debug.Log("B: " + B);
 
 				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
 				//Debug.Log("Lambda: " + lambda);
@@ -398,7 +405,7 @@ namespace PE
 				for (int i = 0; i < lambda.Size; i++) {
 					for (int j = 0; j < 3; j++) {
 						if (lambda [i] [j] < 0) {
-							lambda [i] [j] = 0; /*Debug.Log("Negative lambda");*/
+							//lambda [i] [j] = 0; Debug.Log("Negative lambda");
 						}
 					}
 				}
@@ -407,7 +414,7 @@ namespace PE
 				//Debug.Log("fc " + fc);
 				//Debug.Log("fc: " + fc);
 				for (int i = 0; i < contactObjects.Count; i++) {
-					contactObjects [i].v.Add (contactObjects [i].m_inv * fc [i]); // Wat
+					contactObjects [i].v.Add (contactObjects[i].m_inv * fc [i]); // Wat
 				}
 			}
 

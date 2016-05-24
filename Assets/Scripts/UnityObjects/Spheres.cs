@@ -18,7 +18,7 @@ public class Spheres : MonoBehaviour {
 			children.Add (child);
 			spheres.Add (new Sphere (child.position, radius, mass));
 		}
-
+        //spheres[0].m_inv = new Mat3();
 		Engine.instance.Spheres = spheres;
 	}
 	

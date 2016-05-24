@@ -380,7 +380,62 @@ namespace PE
 
 			return M;
 		}
-	}
+
+        public static Vec3Matrix operator *(Vec3Matrix M1, Mat3Matrix M2)
+        {
+            if (M1.Cols != M2.Rows)
+            {
+                throw new InvalidOperationException("Invalid dimensions");
+            }
+
+            Vec3Matrix M = new Vec3Matrix(M1.Rows, M2.Cols);
+
+            if (M1.Diagonal && M2.Diagonal)
+            {
+                for (int i = 0; i < M1.Rows; i++)
+                {
+                    M[i, i] = M1[i, i] * M2[i, i];
+                }
+            }
+            else if (M1.Diagonal)
+            {
+                for (int i = 0; i < M1.Rows; i++)
+                {
+                    for (int j = 0; j < M2.Cols; j++)
+                    {
+                        M[i, j] = M1[i, i] * M2[i, j];
+                    }
+                }
+            }
+            else if (M2.Diagonal)
+            {
+                for (int i = 0; i < M1.Rows; i++)
+                {
+                    for (int j = 0; j < M2.Cols; j++)
+                    {
+                        M[i, j] = M1[i, j] * M2[j, j];
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < M1.Rows; i++)
+                {
+                    for (int j = 0; j < M2.Cols; j++)
+                    {
+                        var e = new Vec3();
+                        for (int k = 0; k < M1.Cols; k++)
+                        {
+                            e.Add(M1[i, k] * M2[k, j]);
+                        }
+                        M[i, j] = e;
+                    }
+                }
+            }
+
+            return M;
+        }
+    }
 
 }
 
