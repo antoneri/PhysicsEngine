@@ -228,6 +228,7 @@ namespace PE
 
             var contactObjects = new List<Entity>();
             var contactIntersectionData = new List<Intersection>();
+            var contactCollisionMatrices = new List<Mat3>();
 
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
@@ -269,9 +270,11 @@ namespace PE
 					Entity other = data.entity;
 					var u = sphere.v - other.v;
 					var r = sphere.x - other.x;
-                    var u_n = u * data.normal;//Vec3.Dot (u, r) * r.UnitVector;
+                    var u_n = Vec3.Dot(u, data.normal) * data.normal;//Vec3.Dot (u, r) * r.UnitVector;
 					var r_a = sphere.x - data.point;
 					var r_b = other.x - data.point;
+
+                    if (Vec3.Dot(u, data.normal) > 0) continue; /* Separating */
 
 					var rax = Mat3.SkewSymmetric (r_a);
 					var rbx = Mat3.SkewSymmetric (r_b);
@@ -279,15 +282,17 @@ namespace PE
 					var I_a = sphere.I_inv;
 					var I_b = other.I_inv;
 					var M_a = sphere.m_inv;
-					var M_b = other.I_inv;
+					var M_b = other.m_inv;
 
                     //Debug.Log("normal: " + data.normal);
 
-					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
-					Vec3 J = K.Inverse * (-e * u_n - u);
+					Mat3 K = M_a + M_b - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
+					Vec3 J = (M_a + M_b).Inverse * (-e * u_n - u);
 					sphere.K = K;
+                    contactCollisionMatrices.Add(K);
 
-					var j_n = Vec3.Dot (J, data.normal) * data.normal;
+
+                    var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
 
 					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
@@ -309,15 +314,15 @@ namespace PE
 
                     //var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
                     var contactTest = Vec3.Dot(data.normal, sphere.v);
-                    //Debug.Log("contact: " + contactTest);
-                    if (contactTest <= 0.1)
+                    //Debug.Log("contactTest: " + contactTest);
+                    if (contactTest <= 0.1) /* Resting contact */
                     {
                         // Add to contact matrix
-                        if (!contactObjects.Contains(sphere))
-                            contactObjects.Add(sphere);
-
                         if (!contactObjects.Contains(other))
                             contactObjects.Add(other);
+
+                        if (!contactObjects.Contains(sphere))
+                            contactObjects.Add(sphere);
 
                         data.i = contactObjects.FindIndex(s => {
                             return s == sphere;
@@ -342,7 +347,7 @@ namespace PE
             {
                 //Debug.Log("Contact");
                 double d = 3;
-                double k = 1000;
+                double k = 100;
                 double a = 4 / (dt * (1 + 4 * d));
                 double b = (4 * d) / (1 + 4 * d);
 
@@ -351,7 +356,7 @@ namespace PE
 
                 var G = new Vec3Matrix(M, N);
                 var CollisionMatrix = new Mat3Matrix(M, M);
-                var f = new Vec3Vector(N);
+                var dW = new Vec3Vector(N);
                 var W = new Vec3Vector(N);
                 var q = new Vec3Vector(M);
 
@@ -360,9 +365,9 @@ namespace PE
                 {
                     int body_i = contactIntersectionData[i].i;
                     int body_j = contactIntersectionData[i].j;
-                    G[i, body_i] = contactIntersectionData[i].normal;
-                    G[i, body_j] = -contactIntersectionData[i].normal;
-                    CollisionMatrix[i, i] = contactObjects[i].K;
+                    G[i, body_i] = -contactIntersectionData[i].normal;
+                    G[i, body_j] = contactIntersectionData[i].normal;
+                    CollisionMatrix[i, i] = contactCollisionMatrices[i];
                 }
 
                 // Set constraints q
@@ -374,7 +379,7 @@ namespace PE
                 // Set values to M, f, W
                 for (int i = 0; i < N; i++)
                 {
-                    f[i] = contactObjects[i].f;
+                    dW[i] = contactObjects[i].m_inv * contactObjects[i].f;
                     W[i] = contactObjects[i].v;
                 }
 
@@ -386,11 +391,21 @@ namespace PE
                     S[i, i].Add(e);
                 }
 
-                Vec3Vector B = -a * q - b * (G * W) - dt * (G * f);
+                Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
 
                 Vec3Vector lambda = Solver.GaussSeidel(S, B, solver_iterations);
+                //Debug.Log("Lambda: " + lambda);
+                /* If lambda has zero values, clamp to zero */
+                for (int i = 0; i < lambda.Size; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (lambda[i][j] < 0) { lambda[i][j] = 0; /*Debug.Log("Negative lambda");*/ }
+                    }
+                }
 
                 var fc = G.Transpose * lambda;
+                //Debug.Log("fc " + fc);
                 //Debug.Log("fc: " + fc);
                 for (int i = 0; i < contactObjects.Count; i++)
                 {
