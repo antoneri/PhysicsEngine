@@ -86,18 +86,9 @@ namespace PE
 		 */
 		public void FixedUpdate ()
 		{
-			for (int i = 0; i < clothTimeSteps; i++) {
-				ClothUpdate (clothDeltaTime);
-			}
-
-			CheckCollisions (cloth);
-			HandleCollisions ();
-			AdjustIntersections ();
-
+			ClothUpdate (clothDeltaTime);
 			RopeUpdate (Time.fixedDeltaTime);
-
 			SpheresUpdate (Time.fixedDeltaTime);
-
 			ParticleUpdate (Time.fixedDeltaTime);
 		}
 
@@ -105,42 +96,43 @@ namespace PE
 		{
 			if (cloth == null)
 				return;
-			
-			// Reset forces
-			foreach (var p in cloth) {
-				p.f.SetZero ();					
-			}
 
-			// Compute spring forces
-			foreach (var spring in cloth.Neighbors) {
-				var f = spring.Force;
-				spring.p2.f.Add (f);
-				f.Negate ();
-				spring.p1.f.Add (f);
-			}
-
-			for (int i = 0; i < cloth.Size; i++) {
-				var p = cloth [i];
-				if (i == 0) {
-					// TODO Add upwards force instead
-					//continue;
+			for (int step = 0; step < clothTimeSteps; step++) {
+				// Reset forces
+				foreach (var p in cloth) {
+					p.f.SetZero ();					
 				}
 
-				// Add gravity
-				p.f.Add (p.m * g);
-
-				// Add air friction forces
-				if (p.v.Length != 0) {
-					double air_fric = -1e-2;
-					var f_air = air_fric * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
-					p.f.Add (f_air);
+				// Compute spring forces
+				foreach (var spring in cloth.Neighbors) {
+					var f = spring.Force;
+					spring.p2.f.Add (f);
+					f.Negate ();
+					spring.p1.f.Add (f);
 				}
 
-				// Integrate
-				p.v.Add (dt * p.m_inv * p.f);
-				p.x.Add (dt * p.v);
+				for (int i = 0; i < cloth.Size; i++) {
+					var p = cloth [i];
 
+					// Add gravity
+					p.f.Add (p.m * g);
+
+					// Add air friction forces
+					if (p.v.Length != 0) {
+						double air_fric = -1e-2;
+						var f_air = air_fric * Vec3.Dot (p.v, p.v) * p.v.UnitVector;
+						p.f.Add (f_air);
+					}
+
+					// Integrate
+					p.v.Add (dt * p.m_inv * p.f);
+					p.x.Add (dt * p.v);
+				}
 			}
+
+			CheckCollisions (cloth);
+			HandleCollisions ();
+			AdjustIntersections ();
 		}
 
 		private void RopeUpdate (double dt)
