@@ -240,6 +240,25 @@ namespace PE
 			return rhs * lhs;
 		}
 
+		public void Add (Mat3 other)
+		{
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					this [i, j] += other [i, j];
+				}
+			}
+		}
+
+		public void Subtract (Mat3 other)
+		{
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					this [i, j] -= other [i, j];
+				}
+			}
+
+		}
+
 		public override string ToString ()
 		{
 			var sb = new System.Text.StringBuilder ();

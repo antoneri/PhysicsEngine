@@ -181,7 +181,7 @@ namespace PE
 				for (int i = 0; i < M.Rows; i++) {
 					Vec3 e = new Vec3 ();
 					for (int j = 0; j < M.Cols; j++) {
-						e = e + M [i, j] * v [j];
+						e.Add (M [i, j] * v [j]);
 					}
 					vec [i] = e;
 				}
@@ -206,7 +206,7 @@ namespace PE
 				for (int i = 0; i < M.Rows; i++) {
 					var e = new Vec3 ();
 					for (int j = 0; j < M.Cols; j++) {
-						e = e + M [i, j] * v [j];
+						e.Add (M [i, j] * v [j]);
 					}
 					vec [i] = e;
 				}
@@ -244,7 +244,7 @@ namespace PE
 					for (int j = 0; j < M2.Cols; j++) {
 						var e = new Vec3 ();
 						for (int k = 0; k < M1.Cols; k++) {
-							e = e + M1 [i, k] * M2 [k, j];
+							e.Add (M1 [i, k] * M2 [k, j]);
 						}
 						M [i, j] = e;
 					}
@@ -294,7 +294,7 @@ namespace PE
 				for (int i = 0; i < M.Rows; i++) {
 					Vec3 e = new Vec3 ();
 					for (int j = 0; j < M.Cols; j++) {
-						e = e + M [i, j] * v [j];
+						e.Add (M [i, j] * v [j]);
 					}
 					vec [i] = e;
 				}
@@ -332,7 +332,7 @@ namespace PE
 					for (int j = 0; j < M2.Cols; j++) {
 						var e = new Mat3 ();
 						for (int k = 0; k < M1.Cols; k++) {
-							e = e + M1 [i, k] * M2 [k, j];
+							e.Add (M1 [i, k] * M2 [k, j]);
 						}
 						M [i, j] = e;
 					}
@@ -371,7 +371,7 @@ namespace PE
 					for (int j = 0; j < M2.Cols; j++) {
 						var e = new Vec3 ();
 						for (int k = 0; k < M1.Cols; k++) {
-							e = e + M1 [i, k] * M2 [k, j];
+							e.Add (M1 [i, k] * M2 [k, j]);
 						}
 						M [i, j] = e;
 					}
