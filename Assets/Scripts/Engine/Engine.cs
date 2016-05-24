@@ -367,8 +367,8 @@ namespace PE
 				for (int i = 0; i < M; i++) {
 					int body_i = contactIntersectionData [i].i;
 					int body_j = contactIntersectionData [i].j;
-					G [i, body_i] = -contactIntersectionData [i].normal;
-					G [i, body_j] = contactIntersectionData [i].normal;
+					G [i, body_i] = contactIntersectionData [i].normal;
+					G [i, body_j] = -contactIntersectionData [i].normal;
 					CollisionMatrix [i, i] = contactCollisionMatrices [i];
 				}
 
