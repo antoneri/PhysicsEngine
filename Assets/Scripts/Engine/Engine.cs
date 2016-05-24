@@ -225,8 +225,6 @@ namespace PE
 				return;
 
 			var intersectionData = new List<Intersection> ();
-			var collisionMatrices = new List<Mat3> ();
-			var collisionObjects = new List<Entity> ();
 
             var contactObjects = new List<Entity>();
             var contactIntersectionData = new List<Intersection>();
@@ -245,24 +243,6 @@ namespace PE
 
 					data.ForEach (each => {
 						each.self = sphere;
-
-						if (!collisionObjects.Contains (sphere))
-							collisionObjects.Add (sphere);
-
-						if (!collisionObjects.Contains (spheres [j]))
-							collisionObjects.Add (spheres [j]);
-
-						each.i = collisionObjects.FindIndex (s => {
-							return s == sphere;
-						});
-
-						each.j = collisionObjects.FindIndex (s => {
-							return s == spheres [j];
-						});
-
-						if (i == j) {
-							throw new Exception ("Indices i and j point to the same object!");
-						}
 					});
 
 					intersections.AddRange (data);
@@ -275,20 +255,6 @@ namespace PE
 
 					data.ForEach (each => {
 						each.self = sphere;
-
-						if (!collisionObjects.Contains (sphere))
-							collisionObjects.Add (sphere);
-
-						if (!collisionObjects.Contains (each.entity))
-							collisionObjects.Add (each.entity);
-
-						each.i = collisionObjects.FindIndex (s => {
-							return s == sphere;
-						});
-
-						each.j = collisionObjects.FindIndex (s => {
-							return s == each.entity;
-						});
 					});
 
 					intersections.AddRange (data);
@@ -315,8 +281,10 @@ namespace PE
 					var M_a = sphere.m_inv;
 					var M_b = other.I_inv;
 
+                    //Debug.Log("normal: " + data.normal);
+
 					Mat3 K = M_a + M_b - (rax * I_a * rax + rbx * I_b * rbx);
-					Vec3 J = (-e * u_n - u);
+					Vec3 J = K.Inverse * (-e * u_n - u);
 					sphere.K = K;
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
@@ -331,19 +299,18 @@ namespace PE
 						J = j * n - mu * j * t;
                     }
 
-                    Debug.Log("J: " + J);
-                    Debug.Log("v: " + sphere.v);
-                    
-
                     // FIXME changed the signs here
                     sphere.v.Add(sphere.m_inv * J);
                     sphere.omega.Add(sphere.I_inv * Vec3.Cross(r_a, J));
                     other.v.Add(-other.m_inv * J);
                     other.omega.Add(-other.I_inv * Vec3.Cross(r_b, J));
 
-                    Debug.Log("dv: " + (sphere.v - other.v));
-                    var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
-                    if (normalVelocityDiff < 0.1)
+                    //Debug.Log("J: " + J);
+
+                    //var normalVelocityDiff = (data.normal * (sphere.v - other.v)).Length;
+                    var contactTest = Vec3.Dot(data.normal, sphere.v);
+                    //Debug.Log("contact: " + contactTest);
+                    if (contactTest <= 0.1)
                     {
                         // Add to contact matrix
                         if (!contactObjects.Contains(sphere))
@@ -352,11 +319,11 @@ namespace PE
                         if (!contactObjects.Contains(other))
                             contactObjects.Add(other);
 
-                        data.i = collisionObjects.FindIndex(s => {
+                        data.i = contactObjects.FindIndex(s => {
                             return s == sphere;
                         });
 
-                        data.j = collisionObjects.FindIndex(s => {
+                        data.j = contactObjects.FindIndex(s => {
                             return s == other;
                         });
 
@@ -365,10 +332,17 @@ namespace PE
 				}
 			}
 
+            for (int i = 0; i < spheres.Count; i++)
+            {
+                Sphere s = spheres[i];
+                s.v.Add(0.5 * dt * s.m_inv * s.f);
+            }
+
             if (contactObjects.Count > 0)
             {
-                Debug.Log("Contact");
+                //Debug.Log("Contact");
                 double d = 3;
+                double k = 1000;
                 double a = 4 / (dt * (1 + 4 * d));
                 double b = (4 * d) / (1 + 4 * d);
 
@@ -408,7 +382,7 @@ namespace PE
 
                 for (int i = 0; i < S.Rows; i++)
                 {
-                    var e = 4 / (dt * dt * 1000 * (1 + 4 * d));
+                    var e = 4 / (dt * dt * k * (1 + 4 * d));
                     S[i, i].Add(e);
                 }
 
@@ -417,21 +391,20 @@ namespace PE
                 Vec3Vector lambda = Solver.GaussSeidel(S, B, solver_iterations);
 
                 var fc = G.Transpose * lambda;
-
+                //Debug.Log("fc: " + fc);
                 for (int i = 0; i < contactObjects.Count; i++)
                 {
                     contactObjects[i].v.Add(contactObjects[i].m_inv * fc[i]); // Wat
                 }
             }
 
-			
+            for (int i = 0; i < spheres.Count; i++)
+            {
+                Sphere s = spheres[i];
+                s.x.Add(dt * s.v);
+            }
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere s = spheres [i];
-				s.v.Add (0.5 * dt * s.m_inv * s.f);
-				s.x.Add (dt * s.v);
-			}
-		}
+        }
 
 		private void ParticleUpdate (double dt)
 		{
