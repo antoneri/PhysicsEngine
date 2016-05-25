@@ -21,7 +21,9 @@ namespace PE
 		private const double AIR_P = 1.18;
 		// Air density
 		private const double AIR_u = 1.002;
-		// Air viscosity
+        // Air viscosity
+
+        HGrid hgrid = new HGrid();
 
 		private List<Entity> entities = new List<Entity> ();
 
@@ -221,6 +223,9 @@ namespace PE
 			var contactIntersectionData = new List<Intersection> ();
 			var contactCollisionMatrices = new List<Mat3> ();
 
+            /* Build up broad phase collision hash grid */
+            var hgridObjects = AddSpheresToHGrid();
+
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
@@ -230,17 +235,34 @@ namespace PE
 
 				intersections.Clear ();
 
-				for (int j = i + 1; j < spheres.Count; j++) {
-					var data = sphere.Collider.Collides (spheres [j]);
+                /* Broad phase collision detection againt other spheres */
+                List<Sphere> collisions = hgrid.CheckObjAgainstGrid(hgridObjects[i]);
+                hgrid.RemoveObject(hgridObjects[i]);
+                foreach (var s in collisions)
+                {
+                    var data = sphere.Collider.Collides(s);
 
-					data.ForEach (each => {
-						each.self = sphere;
-					});
+                    data.ForEach(each =>
+                    {
+                        each.self = sphere;
+                    });
 
-					intersections.AddRange (data);
-				}
+                    intersections.AddRange(data);
+                }
 
-				foreach (Entity entity in entities) {
+                //for (int j = i + 1; j < spheres.Count; j++)
+                //{
+                //    var data = sphere.Collider.Collides(spheres[j]);
+
+                //    data.ForEach(each =>
+                //    {
+                //        each.self = sphere;
+                //    });
+
+                //    intersections.AddRange(data);
+                //}
+
+                foreach (Entity entity in entities) {
 					entity.v.SetZero ();
 
 					var data = entity.Collider.Collides (sphere);
@@ -499,6 +521,20 @@ namespace PE
 		}
 
 
+        List<HGridObject> AddSpheresToHGrid()
+        {
+            List<HGridObject> objects = new List<HGridObject>();
+
+            for (int i = 0; i < spheres.Count; i++)
+            {
+                Sphere sphere = spheres[i];
+                HGridObject obj = new HGridObject(sphere, sphere.x, (float)sphere.r);
+                hgrid.AddObject(obj);
+                objects.Add(obj);
+            }
+
+            return objects;
+        }
 
 	}
 

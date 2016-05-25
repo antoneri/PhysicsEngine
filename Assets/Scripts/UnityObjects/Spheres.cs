@@ -16,7 +16,9 @@ public class Spheres : MonoBehaviour {
 	void Start () {
 		foreach (Transform child in transform) {
 			children.Add (child);
-			spheres.Add (new Sphere (child.position, radius, mass));
+            //Debug.Log("lossy scale: " + child.lossyScale);
+            var avgScale = (child.lossyScale.x + child.lossyScale.y + child.lossyScale.z) / 3;
+            spheres.Add (new Sphere (child.position, avgScale/2, mass*avgScale));
 		}
         //spheres[0].m_inv = new Mat3();
 		Engine.instance.Spheres = spheres;
