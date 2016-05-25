@@ -29,17 +29,17 @@ namespace PE
 
 		public abstract List<Intersection> Collides (Sphere b);
 
-		public static List<Intersection> Collides (IEnumerable<PE.Particle> ps, Plane pl)
+		public static List<Intersection> Collides (IEnumerable<PE.Particle> ps, PlaneCollider pl)
 		{
 			List<Intersection> intersections = new List<Intersection> ();
 			foreach (var p in ps) {
 				double d = Math.Abs (Vec3.Dot (p.x, pl.normal) - pl.d);
-				if (d < Plane.thickness) {
+				if (d < PlaneCollider.thickness) {
 					Intersection data = new Intersection {
 						entity = p,
-						distance = Plane.thickness - d,
+						distance = PlaneCollider.thickness - d,
 						normal = pl.normal,
-						point = (p.x - (Vec3.Dot (pl.normal, p.x) + pl.d) * pl.normal) + Plane.thickness * pl.normal
+						point = (p.x - (Vec3.Dot (pl.normal, p.x) + pl.d) * pl.normal) + PlaneCollider.thickness * pl.normal
 					};
 					intersections.Add (data);
 				}
@@ -131,7 +131,7 @@ namespace PE
 			return sqDist;
 		}
 
-		public static List<Intersection> Collides (Sphere sphere, Plane plane)
+		public static List<Intersection> Collides (Sphere sphere, PlaneCollider plane)
 		{
 			var intersections = new List<Intersection> ();
 
@@ -170,15 +170,16 @@ namespace PE
 		}
 	}
 
-	public class Plane : Collider
+	public class PlaneCollider : Collider
 	{
-		public Entity self;
+		public RigidBody self;
 		public Vec3 normal;
 		public double d;
 		public const double thickness = 0.3;
 
-		public Plane (Vec3 normal, double d)
+		public PlaneCollider (RigidBody self, Vec3 normal, double d)
 		{
+			this.self = self;
 			this.normal = normal;
 			this.d = d;
 		}
