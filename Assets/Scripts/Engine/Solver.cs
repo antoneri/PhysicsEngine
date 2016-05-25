@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.IO;
 using System.Collections;
 
 namespace PE
@@ -13,21 +14,20 @@ namespace PE
 	{
 		const double ERROR_THRESH = 0.001;
 
-		public static Vec3Vector GaussSeidel (Vec3Matrix S, Vec3Vector B, uint iterations, IterationDirection direction = IterationDirection.forward, string logfile = "output.txt")
+		public static Vec3Vector GaussSeidel (Vec3Matrix S, Vec3Vector B, uint iterations, IterationDirection direction = IterationDirection.forward, TextWriter logFile = null)
 		{
 			Vec3Vector lambda = new Vec3Vector (B.Size);
 
-			using (var dataFile = new System.IO.StreamWriter (logfile)) {
-				
-				for (int i = 0; i < iterations; i++) {
-					double absError = GaussSeidelIterate (S, lambda, B, direction);
-					//Debug.Log ("Solver error: " + absError + " at iteration " + i);
+			for (int i = 0; i < iterations; i++) {
+				double absError = GaussSeidelIterate (S, lambda, B, direction);
 
-					dataFile.WriteLine (i + " " + absError);
+				//Debug.Log ("Solver error: " + absError + " at iteration " + i);
+				if (logFile != null) {
+					logFile.WriteLine (i + " " + absError);
+				}
 
-					if (absError < ERROR_THRESH) {
-						break;
-					}
+				if (absError < ERROR_THRESH) {
+					break;
 				}
 			}
 
