@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -37,6 +38,14 @@ namespace PE
 
 		private List<Intersection> intersections = new List<Intersection> (10000);
 
+		/*
+		 * Logging and data collection
+		 */
+		string ropeDataFile = "rope-convergence.txt";
+		StreamWriter ropeData;
+		int timesteps = 0;
+		const int timestepLimit = 500;
+
 		void Awake ()
 		{
 			if (instance == null)
@@ -52,6 +61,9 @@ namespace PE
 		{
 			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
 			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
+
+			File.Create (ropeDataFile).Close ();
+			ropeData = File.AppendText (ropeDataFile);
 		}
 
 		/*
@@ -91,6 +103,15 @@ namespace PE
 		 */
 		public void FixedUpdate ()
 		{
+			if (timesteps < timestepLimit)
+				timesteps++;
+			else if (timesteps == timestepLimit) {
+				timesteps++;
+				Debug.Log ("Sample complete!");
+				ropeData.Close ();
+				ropeData = null;
+			}
+
 			ClothUpdate (clothDeltaTime);
 			RopeUpdate (Time.fixedDeltaTime);
 			SpheresUpdate (Time.fixedDeltaTime);
@@ -199,7 +220,7 @@ namespace PE
 
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations, iterationDirection, "rope-convergence.txt");
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations, iterationDirection, ropeData);
             
 			Vec3Vector fc = G.Transpose * lambda;
 
