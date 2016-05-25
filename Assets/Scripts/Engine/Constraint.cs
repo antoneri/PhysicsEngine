@@ -61,18 +61,23 @@ namespace PE
 
 			return G;
 		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[DistanceConstraint: L={0}]", L);
+		}
 	}
 
 	public class PositionConstraint : Constraint
 	{
 		private Vec3 x;
 
-		public PositionConstraint (int body_i, int body_j, Vec3 position, double k) : base (body_i, body_j, k)
+		public PositionConstraint (int body_i, Vec3 position, double k) : base (body_i, body_i, k)
 		{
 			x = position;
 		}
 
-		public PositionConstraint (int body_i, int body_j, Vec3 position) : base (body_i, body_j)
+		public PositionConstraint (int body_i, Vec3 position) : base (body_i, body_i)
 		{
 			x = position;
 		}
@@ -102,6 +107,11 @@ namespace PE
 			G [1] = -u;
 
 			return G;
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[PositionConstraint: x={0}]", x);
 		}
 	}
 }
