@@ -162,7 +162,7 @@ namespace PE
 					entity = b,
 					distance = Math.Abs(Math.Sqrt (sqdist) - a.r - b.r),
 					normal = (a.x - b.x).UnitVector,
-					point = -(a.x * a.r - b.x * b.r) / (a.r + b.r)
+					point = a.x - (a.x * a.r - b.x * b.r) / (a.r + b.r)
 				});
 			}
 

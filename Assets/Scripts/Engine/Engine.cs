@@ -250,7 +250,7 @@ namespace PE
 
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
-			
+
 				// Add gravity and take a half timestep
 				sphere.f.Set (sphere.m * g);
 				sphere.v.Add (0.5 * dt * sphere.m_inv * sphere.f);
@@ -289,9 +289,14 @@ namespace PE
 
 				foreach (Intersection data in intersections) {
 					const double e = 0.8;
-					const double mu = 0.5;
+					const double mu = 0.1;
 
-					Entity other = data.entity;
+                    //Debug.Log("Normal: " + data.normal);
+                    //Debug.Log("Point: " + data.point);
+                    //Debug.Log("Penetration: " + data.distance);
+                    //Debug.Log("Pos: " + sphere.x);
+
+                    Entity other = data.entity;
 					var u = sphere.v - other.v;
 					var r = sphere.x - other.x;
 					var u_n = Vec3.Dot (u, data.normal) * data.normal;
@@ -318,28 +323,37 @@ namespace PE
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
 
-					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
+                    bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
 
 					if (!in_allowed_friction_cone) {
+                        //Debug.Log("Friction cone");
 						Vec3 n = data.normal;
 						Vec3 t = j_t.UnitVector;
 						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
-						J = j * n - mu * j * t;
-					}
+						J = j * n + mu * j * t;
 
-					sphere.v.Add (sphere.m_inv * J);
-					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
-					other.v.Add (-other.m_inv * J);
-					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
+                        sphere.v.Add(-sphere.m_inv * J);
+                        sphere.omega.Add(-sphere.I_inv * Vec3.Cross(r_a, J));
+                        other.v.Add(other.m_inv * J);
+                        other.omega.Add(other.I_inv * Vec3.Cross(r_b, J));
+                    } else
+                    {
+                        sphere.v.Add(sphere.m_inv * J);
+                        sphere.omega.Add(sphere.I_inv * Vec3.Cross(r_a, J));
+                        other.v.Add(-other.m_inv * J);
+                        other.omega.Add(-other.I_inv * Vec3.Cross(r_b, J));
+                    }
+
+					
 
 					//Debug.Log("J: " + J);
 
 					var u_new = sphere.v - other.v;
-					var contactTest = Vec3.Dot (data.normal, u);
+					var contactTest = Vec3.Dot (data.normal, u_new);
 					//Debug.Log("contactTest: " + contactTest);
 
 					/* Check if contact is a resting contact */
-					if (contactTest >= -0.2) {
+					if (contactTest <= 0.1) {
 						// Add to contact matrix
 						if (!contactObjects.Contains (other))
 							contactObjects.Add (other);
@@ -391,7 +405,7 @@ namespace PE
 
 				// Set constraints q
 				for (int i = 0; i < M; i++) {
-					q [i] = contactIntersectionData [i].distance * contactIntersectionData [i].normal;
+					q [i] = -contactIntersectionData [i].distance * contactIntersectionData [i].normal;
 				}
 
 				// Set values to M, f, W
