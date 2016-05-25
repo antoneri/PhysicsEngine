@@ -21,6 +21,8 @@ public class Spheres : MonoBehaviour
 			spheres.Add (new Sphere (child.position, avgScale / 2, mass * avgScale));
 		}
 
+        //spheres[1].m_inv = new Mat3();
+
 		Engine.instance.Spheres = spheres;
 	}
 	

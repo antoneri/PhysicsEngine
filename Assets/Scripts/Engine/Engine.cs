@@ -289,9 +289,9 @@ namespace PE
 					var M_a = sphere.m_inv;
 					var M_b = other.m_inv;
 
-					//Debug.Log("normal: " + data.normal);
+                    //Debug.Log("normal: " + data.normal);
 
-					Mat3 K = M_a + M_b - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
+                    Mat3 K = M_a + M_b;// - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
 					Vec3 J = (M_a + M_b).Inverse * (-e * u_n - u);
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
@@ -345,7 +345,7 @@ namespace PE
 			if (contactObjects.Count > 0) {
 				//Debug.Log("Contact objects: " + contactObjects.Count);
 				double d = 3;
-				double k = 500;
+				double k = 100;
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
 
@@ -363,8 +363,8 @@ namespace PE
 				for (int i = 0; i < M; i++) {
 					int body_i = contactIntersectionData [i].i;
 					int body_j = contactIntersectionData [i].j;
-					G [i, body_i] = -contactIntersectionData [i].normal;
-					G [i, body_j] = contactIntersectionData [i].normal;
+					G [i, body_i] = contactIntersectionData [i].normal;
+					G [i, body_j] = -contactIntersectionData [i].normal;
 					CollisionMatrix [i, i] = contactCollisionMatrices [i];
 				}
 

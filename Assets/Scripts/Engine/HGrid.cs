@@ -92,7 +92,8 @@ namespace PE
             int bucket = obj.bucket;
             HGridObject p = objectBucket[bucket];
 
-            // Special-case updating list header when object is first in list            if (p == obj)
+            // Special-case updating list header when object is first in list
+            if (p == obj)
             {
                 objectBucket[bucket] = p.pNextObject;
                 return;
