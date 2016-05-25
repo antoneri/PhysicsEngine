@@ -8,10 +8,11 @@ namespace PE
 	{
 		public new double m;
 		public new double m_inv;
-		/* Radius */
+
+		// Radius and density
 		public double r;
-		/* Density */
 		public double p;
+
 		public double age = 0;
 		public double lifetime = 0;
 
@@ -40,6 +41,16 @@ namespace PE
 		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density, double lifetime) : this (x, v, mass, radius, density)
 		{
 			this.lifetime = lifetime;
+		}
+
+		public double Mass {
+			get {
+				return m;
+			}
+			set {
+				m = value;
+				m_inv = 1 / value;
+			}
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace PE
 			lineRenderer.SetVertexCount (NUM_PARTICLES);
 			lineRenderer.SetWidth (0.1f, 0.1f);
 
-			var startPos = new Vec3 (-3, 10, 0);
+			var startPos = new Vec3 (-3, 15, 0);
 			var dx = new Vec3 (-0.25, -0.25, 0);
 			var mass = 1.0;
 
@@ -32,7 +32,7 @@ namespace PE
 				particles.Add (new Particle (startPos + i * dx, mass));
 			}
 
-			particles [NUM_PARTICLES - 1].m = mass_last_particle;
+			particles [NUM_PARTICLES - 1].Mass = mass_last_particle;
 
 			List<Constraint> constraints = new List<Constraint> ();
 			constraints.Add (new PositionConstraint (0, 0, startPos));

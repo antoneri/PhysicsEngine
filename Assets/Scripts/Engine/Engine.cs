@@ -161,15 +161,15 @@ namespace PE
 			double a = 4 / (dt * (1 + 4 * d));
 			double b = (4 * d) / (1 + 4 * d);
 
-			var n = rope.Count;
+			var N = rope.Count;
 			List<Constraint> C = rope.constraints;
 
-			var G = new Vec3Matrix (C.Count, n); // Constraint Jacobian matrix
-			var M_inv = new Vec3Matrix (n, n); // Inverse Mass matrix
+			var G = new Vec3Matrix (C.Count, N); // Constraint Jacobian matrix
+			var M_inv = new Mat3Matrix (N, N); // Inverse Mass matrix
 
 			// All forces, velocities, generalized positions
-			var f = new Vec3Vector (n);
-			var W = new Vec3Vector (n);
+			var f = new Vec3Vector (N);
+			var W = new Vec3Vector (N);
 			var q = new Vec3Vector (C.Count);
 
 			for (int i = 0; i < C.Count; i++) {
@@ -184,18 +184,19 @@ namespace PE
 			}
 
 			// Set values to M, f, W
-			for (int i = 0; i < n; i++) {
-				M_inv [i, i] = new Vec3 (rope [i].m_inv);
+			for (int i = 0; i < N; i++) {
+				M_inv [i, i] = Mat3.Diag (rope [i].m_inv);
 				f [i] = rope [i].f;
 				W [i] = rope [i].v;
 			}
-				
+
 			Vec3Matrix S = G * M_inv * G.Transpose;
 
 			for (int i = 0; i < S.Rows; i++) {
 				var e = 4 / (dt * dt * C [i].k * (1 + 4 * d));
 				S [i, i].Add (e);
 			}
+
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
 			// Solve for lambda
@@ -204,7 +205,7 @@ namespace PE
 			var fc = G.Transpose * lambda;
 
 			// Integrate
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < N; i++) {
 				Particle p = rope [i];
 				p.v = p.v + p.m_inv * fc [i] + dt * p.m_inv * p.f;
 				p.x = p.x + dt * p.v;
