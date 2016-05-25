@@ -49,6 +49,12 @@ namespace PE
 		// Update is called once per frame
 		void Update ()
 		{
+			particles [NUM_PARTICLES - 1].Mass = mass_last_particle;
+
+			foreach (var constraint in particles.constraints) {
+				constraint.k = spring_k;
+			}
+
 			for (int i = 0; i < NUM_PARTICLES; i++) {
 				lineVertices [i] = particles [i].x;
 			}

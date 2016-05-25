@@ -20,7 +20,7 @@ namespace PE
 		 */
 		public Vector3 wind = new Vector3 (0, 0, 0);
 		public uint solver_iterations = 10;
-		public bool integrate_rope_top_to_bottom = true;
+		public IterationDirection iterationDirection = IterationDirection.forward;
 
 		// Air density and viscosity
 		private const double AIR_P = 1.18;
@@ -199,10 +199,9 @@ namespace PE
 
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
-			// Solve for lambda
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations, iterationDirection, "rope-convergence.txt");
             
-			var fc = G.Transpose * lambda;
+			Vec3Vector fc = G.Transpose * lambda;
 
 			// Integrate
 			for (int i = 0; i < N; i++) {

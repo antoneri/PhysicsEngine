@@ -25,11 +25,11 @@ namespace PE
 	{
 		public readonly List<Intersection> CollisionNotImplemented = new List<Intersection> ();
 
-		public abstract List<Intersection> Collides (IEnumerable<PE.Particle> ps);
+		public abstract List<Intersection> Collides (IEnumerable<Particle> ps);
 
 		public abstract List<Intersection> Collides (Sphere b);
 
-		public static List<Intersection> Collides (IEnumerable<PE.Particle> ps, PlaneCollider pl)
+		public static List<Intersection> Collides (IEnumerable<Particle> ps, PlaneCollider pl)
 		{
 			List<Intersection> intersections = new List<Intersection> ();
 			foreach (var p in ps) {
@@ -47,7 +47,7 @@ namespace PE
 			return intersections;
 		}
 
-		public static List<Intersection> Collides (IEnumerable<PE.Particle> ps, AABB b)
+		public static List<Intersection> Collides (IEnumerable<Particle> ps, AABB b)
 		{
 			List<Intersection> intersections = new List<Intersection> ();
 			foreach (var p in ps) {
@@ -70,7 +70,6 @@ namespace PE
 		}
 
 		/* AABB intersect data */
-
 		public static Vec3 PointNormalAABB (Vec3 p, AABB b)
 		{
 			Vec3 normal = new Vec3 ();
@@ -184,7 +183,7 @@ namespace PE
 			this.d = d;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<PE.Particle> ps)
+		public override List<Intersection> Collides (IEnumerable<Particle> ps)
 		{
 			return Collides (ps, this);
 		}
@@ -197,7 +196,6 @@ namespace PE
 
 	public class AABB : Collider
 	{
-
 		public Vec3 min;
 		public Vec3 max;
 
@@ -207,7 +205,7 @@ namespace PE
 			this.max = max;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<PE.Particle> ps)
+		public override List<Intersection> Collides (IEnumerable<Particle> ps)
 		{
 			return Collides (ps, this);
 		}
@@ -227,7 +225,7 @@ namespace PE
 			this.self = sphere;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<PE.Particle> ps)
+		public override List<Intersection> Collides (IEnumerable<Particle> ps)
 		{
 			return CollisionNotImplemented;
 		}

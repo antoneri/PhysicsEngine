@@ -133,6 +133,18 @@ namespace PE
 			}
 		}
 
+		public Vec3Vector Clone {
+			get {
+				var clone = new Vec3Vector (Size);
+
+				for (int i = 0; i < Size; i++) {
+					clone [i] = new Vec3 (this [i]);
+				}
+
+				return clone;
+			}
+		}
+
 		public double Norm {
 			get {
 				return Math.Sqrt (Dot (this, this));
