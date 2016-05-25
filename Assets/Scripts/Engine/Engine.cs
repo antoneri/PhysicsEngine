@@ -15,15 +15,18 @@ namespace PE
 
 		private readonly Vec3 g = new Vec3 (0, -9.82, 0);
 
+		/*
+		 * Visible in engine inspector
+		 */
 		public Vector3 wind = new Vector3 (0, 0, 0);
 		public uint solver_iterations = 10;
+		public bool integrate_rope_top_to_bottom = true;
 
+		// Air density and viscosity
 		private const double AIR_P = 1.18;
-		// Air density
 		private const double AIR_u = 1.002;
-        // Air viscosity
 
-        HGrid hgrid = new HGrid();
+		private HGrid hgrid = new HGrid ();
 
 		private List<Entity> entities = new List<Entity> ();
 
@@ -41,7 +44,7 @@ namespace PE
 			else if (instance != this)
 				Destroy (gameObject);
 
-			//Sets this to not be destroyed when reloading scene
+			// Don't destroy when reloading scene
 			DontDestroyOnLoad (gameObject);
 		}
 
@@ -152,8 +155,7 @@ namespace PE
 			CheckCollisions (rope);
 			HandleCollisions ();
 
-			//double k = 1000; /* Spring constant for system */
-			const double d = 3; /* Number of timesteps to stabilize the constraint */
+			const double d = 3; // Number of timesteps to stabilize the constraint
 
 			/* Constant parameters in SPOOK */
 			double a = 4 / (dt * (1 + 4 * d));
@@ -161,10 +163,9 @@ namespace PE
 
 			var n = rope.Count;
 			List<Constraint> C = rope.constraints;
-			// Constraint Jacobian matrix
-			var G = new Vec3Matrix (C.Count, n);
-			// Inverse Mass matrix
-			var M_inv = new Vec3Matrix (n, n);
+
+			var G = new Vec3Matrix (C.Count, n); // Constraint Jacobian matrix
+			var M_inv = new Vec3Matrix (n, n); // Inverse Mass matrix
 
 			// All forces, velocities, generalized positions
 			var f = new Vec3Vector (n);
@@ -189,7 +190,7 @@ namespace PE
 				W [i] = rope [i].v;
 			}
 				
-			Matrix<Vec3> S = G * M_inv * G.Transpose;
+			Vec3Matrix S = G * M_inv * G.Transpose;
 
 			for (int i = 0; i < S.Rows; i++) {
 				var e = 4 / (dt * dt * C [i].k * (1 + 4 * d));
@@ -223,53 +224,42 @@ namespace PE
 			var contactIntersectionData = new List<Intersection> ();
 			var contactCollisionMatrices = new List<Mat3> ();
 
-            /* Build up broad phase collision hash grid */
-            var hgridObjects = AddSpheresToHGrid();
+			/* Build up broad phase collision hash grid */
+			var hgridObjects = AddSpheresToHGrid ();
 
 			for (int i = 0; i < spheres.Count; i++) {
 				Sphere sphere = spheres [i];
 			
-				// Add gravity
+				// Add gravity and take a half timestep
 				sphere.f.Set (sphere.m * g);
 				sphere.v.Add (0.5 * dt * sphere.m_inv * sphere.f);
 
 				intersections.Clear ();
 
-                /* Broad phase collision detection againt other spheres */
-                List<Sphere> collisions = hgrid.CheckObjAgainstGrid(hgridObjects[i]);
-                hgrid.RemoveObject(hgridObjects[i]);
-                foreach (var s in collisions)
-                {
-                    var data = sphere.Collider.Collides(s);
+				/* Broad phase collision detection againt other spheres */
+				List<Sphere> collisions = hgrid.CheckObjAgainstGrid (hgridObjects [i]);
+				hgrid.RemoveObject (hgridObjects [i]);
 
-                    data.ForEach(each =>
-                    {
-                        each.self = sphere;
-                    });
+				foreach (var s in collisions) {
+					var data = sphere.Collider.Collides (s);
 
-                    intersections.AddRange(data);
-                }
+					foreach (var d in data) {
+						d.self = sphere;
+					}
 
-                //for (int j = i + 1; j < spheres.Count; j++)
-                //{
-                //    var data = sphere.Collider.Collides(spheres[j]);
-
-                //    data.ForEach(each =>
-                //    {
-                //        each.self = sphere;
-                //    });
-
-                //    intersections.AddRange(data);
-                //}
-
-                foreach (Entity entity in entities) {
-					entity.v.SetZero ();
+					intersections.AddRange (data);
+				}
+					
+				foreach (Entity entity in entities) {
+					// FIXME not needed?
+					// This is here so that the ground doesn't accumulate velocity
+					entity.v.SetZero (); 
 
 					var data = entity.Collider.Collides (sphere);
 
-					data.ForEach (each => {
-						each.self = sphere;
-					});
+					foreach (var d in data) {
+						d.self = sphere;
+					}
 
 					intersections.AddRange (data);
 				}
@@ -283,13 +273,13 @@ namespace PE
 					Entity other = data.entity;
 					var u = sphere.v - other.v;
 					var r = sphere.x - other.x;
-					var u_n = Vec3.Dot (u, data.normal) * data.normal;//Vec3.Dot (u, r) * r.UnitVector;
+					var u_n = Vec3.Dot (u, data.normal) * data.normal;
 					var r_a = sphere.x - data.point;
 					var r_b = other.x - data.point;
 
-                    /* Check if contact is a separating contact */
+					/* Check if contact is a separating contact */
 					if (Vec3.Dot (u, data.normal) > 0)
-						continue; /* Separating */
+						continue;
 
 					var rax = Mat3.SkewSymmetric (r_a);
 					var rbx = Mat3.SkewSymmetric (r_b);
@@ -299,38 +289,36 @@ namespace PE
 					var M_a = sphere.m_inv;
 					var M_b = other.m_inv;
 
-                    //Debug.Log("normal: " + data.normal);
+					//Debug.Log("normal: " + data.normal);
 
-                    Mat3 K = M_a + M_b;// - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
+					Mat3 K = M_a + M_b - (rax * I_a * rax.Transpose + rbx * I_b * rbx.Transpose);
 					Vec3 J = (M_a + M_b).Inverse * (-e * u_n - u);
-					sphere.K = K;
 
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
 
 					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
 
-                    if (!in_allowed_friction_cone)
-                    {
-                        Vec3 n = data.normal;
-                        Vec3 t = j_t.UnitVector;
-                        var j = -(1 + e) * u_n.Length / Vec3.Dot(n * K, n - mu * t);
-                        J = j * n - mu * j * t;
-                    }
+					if (!in_allowed_friction_cone) {
+						Vec3 n = data.normal;
+						Vec3 t = j_t.UnitVector;
+						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
+						J = j * n - mu * j * t;
+					}
 
-                    // FIXME changed the signs here
-                    sphere.v.Add (sphere.m_inv * J);
+					sphere.v.Add (sphere.m_inv * J);
 					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
 					other.v.Add (-other.m_inv * J);
 					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 
-                    //Debug.Log("J: " + J);
+					//Debug.Log("J: " + J);
 
-                    var u_new = sphere.v - other.v;
-                    var contactTest = Vec3.Dot (data.normal, u);
-                    //Debug.Log("contactTest: " + contactTest);
-                    /* Check if contact is a resting contact */
-                    if (contactTest >= -0.2) { /* Resting contact */
+					var u_new = sphere.v - other.v;
+					var contactTest = Vec3.Dot (data.normal, u);
+					//Debug.Log("contactTest: " + contactTest);
+
+					/* Check if contact is a resting contact */
+					if (contactTest >= -0.2) {
 						// Add to contact matrix
 						if (!contactObjects.Contains (other))
 							contactObjects.Add (other);
@@ -347,14 +335,11 @@ namespace PE
 						});
 
 						contactIntersectionData.Add (data);
-                        contactCollisionMatrices.Add(K);
-                    }
+						contactCollisionMatrices.Add (K);
+					}
 				}
-			}
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere s = spheres [i];
-				s.v.Add (0.5 * dt * s.m_inv * s.f);
+				sphere.v.Add (0.5 * dt * sphere.m_inv * sphere.f);
 			}
 
 			if (contactObjects.Count > 0) {
@@ -372,10 +357,10 @@ namespace PE
 				var dW = new Vec3Vector (N);
 				var W = new Vec3Vector (N);
 				var q = new Vec3Vector (M);
-                var M_inv = new Mat3Matrix(N, N);
+				var M_inv = new Mat3Matrix (N, N);
 
-                // Jacobian
-                for (int i = 0; i < M; i++) {
+				// Jacobian
+				for (int i = 0; i < M; i++) {
 					int body_i = contactIntersectionData [i].i;
 					int body_j = contactIntersectionData [i].j;
 					G [i, body_i] = -contactIntersectionData [i].normal;
@@ -392,45 +377,47 @@ namespace PE
 				for (int i = 0; i < N; i++) {
 					dW [i] = contactObjects [i].m_inv * contactObjects [i].f;
 					W [i] = contactObjects [i].v;
-                    M_inv[i,i] = contactObjects[i].m_inv;
+					M_inv [i, i] = contactObjects [i].m_inv;
 				}
 
-                //var S = G.Transpose * (M_inv * G);
-                var S = G * M_inv * G.Transpose;
-                for (int i = 0; i < S.Rows; i++) {
+				//Vec3Matrix S = G.Transpose * (M_inv * G);
+				Vec3Matrix S = G * M_inv * G.Transpose;
+
+				for (int i = 0; i < S.Rows; i++) {
 					var e = 4 / (dt * dt * k * (1 + 4 * d));
 					S [i, i].Add (e);
 				}
 
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
 
-                //Debug.Log("S: " + S);
-                //Debug.Log("B: " + B);
+				//Debug.Log("S: " + S);
+				//Debug.Log("B: " + B);
 
 				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
 				//Debug.Log("Lambda: " + lambda);
-				/* If lambda has zero values, clamp to zero */
-				for (int i = 0; i < lambda.Size; i++) {
+
+				/* If lambda has negative values, clamp to zero */
+				foreach (Vec3 elem in lambda) {
 					for (int j = 0; j < 3; j++) {
-						if (lambda [i] [j] < 0) {
-							//lambda [i] [j] = 0; Debug.Log("Negative lambda");
+						if (elem [j] < 0) {
+							elem [j] = 0;
+							Debug.Log ("Negative lambda");
 						}
 					}
 				}
 
 				var fc = G.Transpose * lambda;
+
 				//Debug.Log("fc " + fc);
 				//Debug.Log("fc: " + fc);
 				for (int i = 0; i < contactObjects.Count; i++) {
-					contactObjects [i].v.Add (contactObjects[i].m_inv * fc [i]); // Wat
+					contactObjects [i].v.Add (contactObjects [i].m_inv * fc [i]);
 				}
 			}
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere s = spheres [i];
-				s.x.Add (dt * s.v);
+			foreach (var sphere in spheres) {
+				sphere.x.Add (dt * sphere.v);
 			}
-
 		}
 
 		private void ParticleUpdate (double dt)
@@ -438,20 +425,13 @@ namespace PE
 			if (particleSystem == null)
 				return;
 			
-			/* Clear forces */
+			// Clear forces
 			foreach (var p in particleSystem) {
 				p.f.SetZero ();
 			}
 
 			// Create particles at emitter
-			// (Remove particles at sinks or when they expire in time)
 			particleSystem.Update ();
-
-			// Do inter-particle collision detection and construct a
-			// neighbour list – or use a fixed interaction list (cloth).
-
-			// Loop over neighbour lists and compute interaction forces.
-			// Accumulate the forces.Use Newton’s third law.
 
 			// Accumulate external forces from e.g.gravity.
 			// Accumulate dissipative forces, e.g.drag and viscous drag.
@@ -466,24 +446,17 @@ namespace PE
 				p.f.Add (Fair);
 			}
 				
-			// Find contact sets with external boundaries, e.g.a plane.
-			// Handle external boundary conditions by reflecting the
-			// the velocities.
+			// Find contact sets with external boundaries
 			CheckCollisions (particleSystem);
 			HandleCollisions ();
 
-			// Take a timestep and integrate using e.g.Verlet / Leap Frog
+			// Take a timestep and integrate
 			foreach (var p in particleSystem) {
 				p.v.Add (dt * p.m_inv * p.f);
 				p.x.Add (dt * p.v);
 			}
 
-			/* 
-            If there still are overlaps in the contact set with
-            external boundaries, you could project the positions of
-            the particles to the constraint manifold, e.g.to the
-            surface of the plane. 
-            */
+			// Adjust collided particles
 			AdjustIntersections ();
 		}
 
@@ -507,7 +480,6 @@ namespace PE
 
 		private void AdjustIntersections ()
 		{
-			/* Adjust collided particles */
 			foreach (Intersection data in intersections) {
 				var p = data.entity as Particle;
 				if (Vec3.Dot (p.v, data.normal) < 0) {
@@ -521,20 +493,19 @@ namespace PE
 		}
 
 
-        List<HGridObject> AddSpheresToHGrid()
-        {
-            List<HGridObject> objects = new List<HGridObject>();
+		List<HGridObject> AddSpheresToHGrid ()
+		{
+			List<HGridObject> objects = new List<HGridObject> ();
 
-            for (int i = 0; i < spheres.Count; i++)
-            {
-                Sphere sphere = spheres[i];
-                HGridObject obj = new HGridObject(sphere, sphere.x, (float)sphere.r);
-                hgrid.AddObject(obj);
-                objects.Add(obj);
-            }
+			for (int i = 0; i < spheres.Count; i++) {
+				Sphere sphere = spheres [i];
+				HGridObject obj = new HGridObject (sphere, sphere.x, (float)sphere.r);
+				hgrid.AddObject (obj);
+				objects.Add (obj);
+			}
 
-            return objects;
-        }
+			return objects;
+		}
 
 	}
 
