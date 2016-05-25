@@ -35,7 +35,7 @@ namespace PE
 			particles [NUM_PARTICLES - 1].Mass = mass_last_particle;
 
 			List<Constraint> constraints = new List<Constraint> ();
-			constraints.Add (new PositionConstraint (0, startPos));
+			constraints.Add (new PositionConstraint (0, startPos, spring_k));
 
 			for (int i = 0; i < NUM_PARTICLES - 1; i++) {
 				constraints.Add (new DistanceConstraint (i, i + 1, dx.Length, spring_k));
