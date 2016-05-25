@@ -4,7 +4,6 @@ i = rope_convergence(:,1);
 err = rope_convergence(:,2);
 
 group = [
-	0 * ones(sum(i == 0), 1)
 	1 * ones(sum(i == 1), 1)
 	2 * ones(sum(i == 2), 1)
 	3 * ones(sum(i == 3), 1)
@@ -109,7 +108,7 @@ group = [
 
 
 figure(1);
-ax = boxplot(err, group);
+boxplot(err, group);
 title('Convergence of error over number of iterations');
 xlabel('Number of iterations n'), ylabel('Absolute error \delta_n');
 

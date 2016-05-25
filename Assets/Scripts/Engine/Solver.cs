@@ -6,27 +6,28 @@ namespace PE
 {
 	public enum IterationDirection
 	{
-		forward,
-		backward,
+		Forward,
+		Backward,
 	}
 
 	public class Solver
 	{
-		const double ERROR_THRESH = 0.001;
+		private const double errorThreshold = 0.001;
 
-		public static Vec3Vector GaussSeidel (Vec3Matrix S, Vec3Vector B, uint iterations, IterationDirection direction = IterationDirection.forward, TextWriter logFile = null)
+		public static Vec3Vector GaussSeidel (Vec3Matrix S, Vec3Vector B, uint iterations, IterationDirection direction = IterationDirection.Forward, TextWriter logFile = null)
 		{
+			if (logFile == null) {
+				logFile = new NullWriter ();
+			}
+
 			Vec3Vector lambda = new Vec3Vector (B.Size);
 
 			for (int i = 0; i < iterations; i++) {
 				double absError = GaussSeidelIterate (S, lambda, B, direction);
 
-				//Debug.Log ("Solver error: " + absError + " at iteration " + i);
-				if (logFile != null) {
-					logFile.WriteLine (i + " " + absError);
-				}
+				logFile.WriteLine (i + 1 + " " + absError);
 
-				if (absError < ERROR_THRESH) {
+				if (absError < errorThreshold) {
 					break;
 				}
 			}
@@ -34,11 +35,11 @@ namespace PE
 			return lambda;
 		}
 
-		private static double GaussSeidelIterate (Vec3Matrix S, Vec3Vector lambda, Vec3Vector B, IterationDirection direction = IterationDirection.forward)
+		private static double GaussSeidelIterate (Vec3Matrix S, Vec3Vector lambda, Vec3Vector B, IterationDirection direction)
 		{
-			Vec3Vector r = lambda.Clone;
+			Vec3Vector r = lambda.Clone ();
 
-			if (direction == IterationDirection.forward) {
+			if (direction == IterationDirection.Forward) {
 				for (int i = 0; i < lambda.Length; i++) {
 					Vec3 sum = new Vec3 ();
 
@@ -63,6 +64,18 @@ namespace PE
 			}
 	
 			return (lambda - r).Norm;
+		}
+	}
+
+	public class NullWriter : TextWriter
+	{
+		public override System.Text.Encoding Encoding {
+			get { return System.Text.Encoding.Default; }
+		}
+
+		public override void Write (char value)
+		{
+			// No-op
 		}
 	}
 }

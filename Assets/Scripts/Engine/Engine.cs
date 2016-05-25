@@ -21,7 +21,7 @@ namespace PE
 		 */
 		public Vector3 wind = new Vector3 (0, 0, 0);
 		public uint solver_iterations = 10;
-		public IterationDirection iterationDirection = IterationDirection.forward;
+		public IterationDirection iterationDirection = IterationDirection.Forward;
 
 		// Air density and viscosity
 		private const double AIR_P = 1.18;

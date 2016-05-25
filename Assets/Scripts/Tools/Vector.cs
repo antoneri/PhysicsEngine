@@ -133,16 +133,15 @@ namespace PE
 			}
 		}
 
-		public Vec3Vector Clone {
-			get {
-				var clone = new Vec3Vector (Size);
+		public Vec3Vector Clone ()
+		{
+			var clone = new Vec3Vector (Size);
 
-				for (int i = 0; i < Size; i++) {
-					clone [i] = new Vec3 (this [i]);
-				}
-
-				return clone;
+			for (int i = 0; i < Size; i++) {
+				clone [i] = new Vec3 (this [i]);
 			}
+
+			return clone;
 		}
 
 		public double Norm {
