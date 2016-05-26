@@ -260,11 +260,11 @@ namespace PE
 				intersections.Clear ();
 
 				/* Broad phase collision detection againt other spheres */
-				List<Sphere> collisions = hgrid.CheckObjAgainstGrid (hgridObjects [i]);
+				List<Sphere> possibleCollisions = hgrid.CheckObjAgainstGrid (hgridObjects [i]);
 				hgrid.RemoveObject (hgridObjects [i]);
 
-				foreach (var s in collisions) {
-					var data = sphere.Collider.Collides (s);
+				foreach (Sphere other in possibleCollisions) {
+					var data = sphere.Collider.CheckIntersection (other);
 
 					foreach (var d in data) {
 						d.self = sphere;
@@ -278,7 +278,7 @@ namespace PE
 					// This is here so that the ground doesn't accumulate velocity
 					entity.v.SetZero (); 
 
-					var data = entity.Collider.Collides (sphere);
+					var data = entity.Collider.CheckIntersection (sphere);
 
 					foreach (var d in data) {
 						d.self = sphere;
@@ -480,7 +480,7 @@ namespace PE
 			intersections.Clear ();
 
 			foreach (Entity entity in entities) {
-				intersections.AddRange (entity.Collider.Collides (particles));
+				intersections.AddRange (entity.Collider.CheckIntersection (particles));
 			}
 		}
 

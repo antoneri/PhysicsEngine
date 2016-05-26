@@ -23,13 +23,13 @@ namespace PE
 
 	public abstract class Collider
 	{
-		public readonly List<Intersection> CollisionNotImplemented = new List<Intersection> ();
+		public readonly List<Intersection> NoIntersections = new List<Intersection> ();
 
-		public abstract List<Intersection> Collides (IEnumerable<Particle> ps);
+		public abstract List<Intersection> CheckIntersection (IEnumerable<Particle> ps);
 
-		public abstract List<Intersection> Collides (Sphere b);
+		public abstract List<Intersection> CheckIntersection (Sphere b);
 
-		public static List<Intersection> Collides (IEnumerable<Particle> ps, PlaneCollider pl)
+		public static List<Intersection> CheckIntersection (IEnumerable<Particle> ps, PlaneCollider pl)
 		{
 			List<Intersection> intersections = new List<Intersection> ();
 			foreach (var p in ps) {
@@ -47,7 +47,7 @@ namespace PE
 			return intersections;
 		}
 
-		public static List<Intersection> Collides (IEnumerable<Particle> ps, AABB b)
+		public static List<Intersection> CheckIntersection (IEnumerable<Particle> ps, AABB b)
 		{
 			List<Intersection> intersections = new List<Intersection> ();
 			foreach (var p in ps) {
@@ -130,7 +130,7 @@ namespace PE
 			return sqDist;
 		}
 
-		public static List<Intersection> Collides (Sphere sphere, PlaneCollider plane)
+		public static List<Intersection> CheckIntersection (Sphere sphere, PlaneCollider plane)
 		{
 			var intersections = new List<Intersection> ();
 
@@ -150,7 +150,7 @@ namespace PE
 			return intersections;
 		}
 
-		public static List<Intersection> Collides (Sphere a, Sphere b)
+		public static List<Intersection> CheckIntersection (Sphere a, Sphere b)
 		{
 			var intersections = new List<Intersection> ();
 
@@ -183,14 +183,14 @@ namespace PE
 			this.d = d;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<Particle> ps)
+		public override List<Intersection> CheckIntersection (IEnumerable<Particle> ps)
 		{
-			return Collides (ps, this);
+			return CheckIntersection (ps, this);
 		}
 
-		public override List<Intersection> Collides (Sphere sphere)
+		public override List<Intersection> CheckIntersection (Sphere sphere)
 		{
-			return Collides (sphere, this);
+			return CheckIntersection (sphere, this);
 		}
 	}
 
@@ -205,14 +205,14 @@ namespace PE
 			this.max = max;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<Particle> ps)
+		public override List<Intersection> CheckIntersection (IEnumerable<Particle> ps)
 		{
-			return Collides (ps, this);
+			return CheckIntersection (ps, this);
 		}
 
-		public override List<Intersection> Collides (Sphere b)
+		public override List<Intersection> CheckIntersection (Sphere b)
 		{
-			return CollisionNotImplemented;
+			return NoIntersections;
 		}
 	}
 
@@ -225,14 +225,14 @@ namespace PE
 			this.self = sphere;
 		}
 
-		public override List<Intersection> Collides (IEnumerable<Particle> ps)
+		public override List<Intersection> CheckIntersection (IEnumerable<Particle> ps)
 		{
-			return CollisionNotImplemented;
+			return NoIntersections;
 		}
 
-		public override List<Intersection> Collides (Sphere other)
+		public override List<Intersection> CheckIntersection (Sphere other)
 		{
-			return Collides (self, other);
+			return CheckIntersection (self, other);
 		}
 	}
 
