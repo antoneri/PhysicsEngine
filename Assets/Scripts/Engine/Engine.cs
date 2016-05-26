@@ -25,8 +25,9 @@ namespace PE
 		 * Visible in engine inspector
 		 */
 		public Vector3 wind = new Vector3 (0, 0, 0);
-		public uint solver_iterations = 10;
+		public uint solverIterations = 50;
 		public IterationDirection iterationDirection = IterationDirection.Forward;
+		public float mainLoopFrequency = 60f;
 
 		/*
 		 * Engine internals
@@ -63,6 +64,8 @@ namespace PE
 
 		void Start ()
 		{
+			Time.fixedDeltaTime = 1 / mainLoopFrequency;
+
 			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
 			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
 
@@ -107,6 +110,8 @@ namespace PE
 		 */
 		public void FixedUpdate ()
 		{
+			Time.fixedDeltaTime = 1 / mainLoopFrequency;
+
 			if (timesteps < timestepLimit)
 				timesteps++;
 			else if (timesteps == timestepLimit) {
@@ -224,7 +229,7 @@ namespace PE
 
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations, iterationDirection, ropeData);
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, solverIterations, iterationDirection, ropeData);
             
 			Vec3Vector fc = G.Transpose * lambda;
 
@@ -405,7 +410,7 @@ namespace PE
 
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
 
-				Vec3Vector lambda = Solver.GaussSeidel (S, B, solver_iterations);
+				Vec3Vector lambda = Solver.GaussSeidel (S, B, solverIterations);
 
 				/* If lambda has negative values, clamp to zero */
 				foreach (Vec3 elem in lambda) {
@@ -448,10 +453,10 @@ namespace PE
 			foreach (var p in particleSystem) {
 				/* Gravity */
 				p.f.Add (p.m * g);
-                p.v.Add(0.5 * dt * p.m_inv * p.f);
+				p.v.Add (0.5 * dt * p.m_inv * p.f);
 
-                /* Air drag force */
-                double kd = 0.18;
+				/* Air drag force */
+				double kd = 0.18;
 				Vec3 u = p.v - (Vec3)wind;
 				Vec3 Fair = -kd * u;
 				p.f.Add (Fair);
