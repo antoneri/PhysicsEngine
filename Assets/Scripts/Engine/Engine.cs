@@ -448,9 +448,10 @@ namespace PE
 			foreach (var p in particleSystem) {
 				/* Gravity */
 				p.f.Add (p.m * g);
-                
-				/* Air drag force */
-				double kd = 0.18;
+                p.v.Add(0.5 * dt * p.m_inv * p.f);
+
+                /* Air drag force */
+                double kd = 0.18;
 				Vec3 u = p.v - (Vec3)wind;
 				Vec3 Fair = -kd * u;
 				p.f.Add (Fair);
@@ -462,7 +463,7 @@ namespace PE
 
 			// Take a timestep and integrate
 			foreach (var p in particleSystem) {
-				p.v.Add (dt * p.m_inv * p.f);
+				p.v.Add (0.5 * dt * p.m_inv * p.f);
 				p.x.Add (dt * p.v);
 			}
 
