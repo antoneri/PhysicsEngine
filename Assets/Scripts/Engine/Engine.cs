@@ -28,6 +28,10 @@ namespace PE
 		public uint solverIterations = 50;
 		public IterationDirection iterationDirection = IterationDirection.Forward;
 		public float mainLoopFrequency = 60f;
+		public bool simulateCloth = true;
+		public bool simulateParticleSystem = true;
+		public bool simulateRope = true;
+		public bool simulateSpheres = true;
 
 		/*
 		 * Engine internals
@@ -121,10 +125,17 @@ namespace PE
 				ropeData = null;
 			}
 
-			ClothUpdate (clothDeltaTime);
-			RopeUpdate (Time.fixedDeltaTime);
-			SpheresUpdate (Time.fixedDeltaTime);
-			ParticleUpdate (Time.fixedDeltaTime);
+			if (simulateCloth)
+				ClothUpdate (clothDeltaTime);
+
+			if (simulateRope)
+				RopeUpdate (Time.fixedDeltaTime);
+
+			if (simulateSpheres)
+				SpheresUpdate (Time.fixedDeltaTime);
+
+			if (simulateParticleSystem)
+				ParticleUpdate (Time.fixedDeltaTime);
 		}
 
 		public void ClothUpdate (double dt)
