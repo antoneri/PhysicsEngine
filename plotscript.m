@@ -2,6 +2,9 @@ load('rope-convergence.txt');
 rope_convergence = sortrows(rope_convergence);
 i = rope_convergence(:,1);
 err = rope_convergence(:,2);
+sigma = rope_convergence(:,3);
+lnsigma = log(sigma);
+timesteps = 50:10:100;
 
 group = [
 	1 * ones(sum(i == 1), 1)
@@ -111,4 +114,12 @@ figure(1);
 boxplot(err, group);
 title('Convergence of error over number of iterations');
 xlabel('Number of iterations n'), ylabel('Absolute error \delta_n');
+
+figure(2);
+boxplot(sigma, group);
+title('Change in constraint force');
+xlabel('Number of iterations n'), ylabel('\sigma');
+
+[fitresult, gof] = createfit(i, lnsigma);
+fitresult
 

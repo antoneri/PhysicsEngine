@@ -111,7 +111,7 @@ namespace PE
 				timesteps++;
 			else if (timesteps == timestepLimit) {
 				timesteps++;
-				Debug.Log ("Sample complete!");
+				Debug.Log ("Sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
 				ropeData.Close ();
 				ropeData = null;
 			}
