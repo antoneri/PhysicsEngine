@@ -138,9 +138,8 @@ namespace PE
 			double d = Math.Abs (dist) - sphere.r;
 
 			if (d < 0) {
-                //plane.self.x = sphere.x - (dist - sphere.r) * plane.normal;
-                var p = sphere.x - (Vec3.Dot(plane.normal, sphere.x) + plane.d) * plane.normal;
-                intersections.Add (new Intersection {
+				var p = sphere.x - (Vec3.Dot (plane.normal, sphere.x) + plane.d) * plane.normal;
+				intersections.Add (new Intersection {
 					entity = plane.self,
 					distance = -d,
 					normal = plane.normal,
@@ -160,7 +159,7 @@ namespace PE
 			if (sqdist < Math.Pow (a.r + b.r, 2)) {
 				intersections.Add (new Intersection {
 					entity = b,
-					distance = Math.Abs(Math.Sqrt (sqdist) - a.r - b.r),
+					distance = Math.Abs (Math.Sqrt (sqdist) - a.r - b.r),
 					normal = (a.x - b.x).UnitVector,
 					point = a.x - (a.x * a.r - b.x * b.r) / (a.r + b.r)
 				});
