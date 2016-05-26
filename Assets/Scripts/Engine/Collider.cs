@@ -17,7 +17,7 @@ namespace PE
 
 		public override string ToString ()
 		{
-			return distance + "\n" + normal.ToString () + "\n" + point.ToString ();
+			return string.Format ("[Intersection: distance={0}, normal={1}, point={2}]", distance, normal, point);
 		}
 	}
 

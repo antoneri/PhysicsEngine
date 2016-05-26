@@ -23,9 +23,11 @@ namespace PE
 			Vec3Vector lambda = new Vec3Vector (B.Size);
 
 			for (int i = 0; i < iterations; i++) {
-				double absError = GaussSeidelIterate (S, lambda, B, direction);
+				double[] err = GaussSeidelIterate (S, lambda, B, direction);
+				double absError = err [0];
+				double sigma = err [1];
 
-				logFile.WriteLine (i + 1 + " " + absError);
+				logFile.WriteLine (i + 1 + " " + absError + " " + sigma);
 
 				if (absError < errorThreshold) {
 					break;
@@ -35,35 +37,45 @@ namespace PE
 			return lambda;
 		}
 
-		private static double GaussSeidelIterate (Vec3Matrix S, Vec3Vector lambda, Vec3Vector B, IterationDirection direction)
+		private static double[] GaussSeidelIterate (Vec3Matrix S, Vec3Vector lambda, Vec3Vector B, IterationDirection direction)
 		{
-			Vec3Vector r = lambda.Clone ();
+			Vec3Vector lambda_old = lambda.Clone ();
+			double sigma = 0;
+			var deltaLambda = new Vec3 ();
+			var sum = new Vec3 ();
 
 			if (direction == IterationDirection.Forward) {
 				for (int i = 0; i < lambda.Length; i++) {
-					Vec3 sum = new Vec3 ();
+					sum.SetZero ();
 
 					for (int j = 0; j < lambda.Length; j++) {
 						sum += S [i, j] * lambda [j];
 					}
 
-					var deltaLambda = (1.0 / S [i, i]) * (B [i] - sum);
+					deltaLambda.Set ((1.0 / S [i, i]) * (B [i] - sum));
+					sigma += deltaLambda.SqLength;
 					lambda [i] += deltaLambda;
 				}
 			} else {
 				for (int i = lambda.Length - 1; i >= 0; i--) {
-					Vec3 sum = new Vec3 ();
+					sum.SetZero ();
 
 					for (int j = lambda.Length - 1; j >= 0; j--) {
 						sum += S [i, j] * lambda [j];
 					}
 
-					var deltaLambda = (1.0 / S [i, i]) * (B [i] - sum);
+					deltaLambda.Set ((1.0 / S [i, i]) * (B [i] - sum));
+					sigma += deltaLambda.SqLength;
 					lambda [i] += deltaLambda;
 				}
 			}
-	
-			return (lambda - r).Norm;
+
+			var error = new double[2] {
+				(lambda - lambda_old).Norm, // Absolute Error
+				sigma / lambda.Length // Sigma
+			};
+
+			return error;
 		}
 	}
 
