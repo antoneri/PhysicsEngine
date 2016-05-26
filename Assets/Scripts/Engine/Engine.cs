@@ -334,7 +334,7 @@ namespace PE
 					var contactTest = Vec3.Dot (data.normal, u_new);
 
 					/* Check if contact is a resting contact */
-					if (contactTest <= 0.1) {
+					if (contactTest <= 0.3) {
 						// Add to contact matrix
 						if (!contactObjects.Contains (other))
 							contactObjects.Add (other);
@@ -361,7 +361,7 @@ namespace PE
 
 			if (contactObjects.Count > 0) {
 				double d = 3;
-				double k = 100;
+				double k = 1000;
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
 
@@ -412,7 +412,7 @@ namespace PE
 					for (int j = 0; j < 3; j++) {
 						if (elem [j] < 0) {
 							elem [j] = 0;
-							Debug.Log ("Negative lambda");
+							//Debug.Log ("Negative lambda");
 						}
 					}
 				}
