@@ -55,7 +55,7 @@ public class Emitter : MonoBehaviour
 				var coords = Random.insideUnitCircle * radius;
 				initialPosition += coords.x * transform.right + coords.y * transform.up;
 
-				ps.Add (new PE.Particle (initialPosition, initialVelocity, mass, particleSize / 2, density, lifetime));
+				ps.Add (new PE.Particle (initialPosition, initialVelocity, mass, particleSize / 2, lifetime));
 			}
 
 			lastTime = t;

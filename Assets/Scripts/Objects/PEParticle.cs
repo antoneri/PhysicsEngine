@@ -11,7 +11,6 @@ namespace PE
 
 		// Radius and density
 		public double r;
-		public double p;
 
 		public double age = 0;
 		public double lifetime = 0;
@@ -24,21 +23,19 @@ namespace PE
 		{
 		}
 
-		public Particle (Vec3 x, Vec3 v, double mass) : this (x, v, mass, 0, 0)
+		public Particle (Vec3 x, Vec3 v, double mass) : this (x, v, mass, 0)
 		{
 		}
 
-		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density)
+		public Particle (Vec3 x, Vec3 v, double mass, double radius)
 		{
 			this.x = x;
 			this.v = v;
-			m = mass;
-			m_inv = 1 / mass;
+			Mass = mass;
 			r = radius;
-			p = density;
 		}
 
-		public Particle (Vec3 x, Vec3 v, double mass, double radius, double density, double lifetime) : this (x, v, mass, radius, density)
+		public Particle (Vec3 x, Vec3 v, double mass, double radius, double lifetime) : this (x, v, mass, radius)
 		{
 			this.lifetime = lifetime;
 		}
