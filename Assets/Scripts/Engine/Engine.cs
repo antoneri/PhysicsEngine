@@ -316,7 +316,7 @@ namespace PE
 					var j_n = Vec3.Dot (J, data.normal) * data.normal;
 					var j_t = J - j_n;
 
-					bool in_allowed_friction_cone = j_t.Length <= mu * j_n.Length;
+					bool in_allowed_friction_cone = j_t.SqLength < mu * mu * j_n.SqLength;
 
 					if (!in_allowed_friction_cone) {
 						Vec3 n = data.normal;
