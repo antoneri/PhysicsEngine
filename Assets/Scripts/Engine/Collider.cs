@@ -159,7 +159,7 @@ namespace PE
 			if (sqdist < Math.Pow (a.r + b.r, 2)) {
 				intersections.Add (new Intersection {
 					entity = b,
-					distance = Math.Abs (Math.Sqrt (sqdist) - a.r - b.r),
+					distance = Math.Sqrt (sqdist) - a.r - b.r,
 					normal = (a.x - b.x).UnitVector,
 					point = a.x - (a.x * a.r - b.x * b.r) / (a.r + b.r)
 				});
