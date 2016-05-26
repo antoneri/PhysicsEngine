@@ -236,7 +236,7 @@ namespace PE
 
 		public override string ToString ()
 		{
-			return "[" + x + ", " + y + ", " + z + "]";
+			return string.Format ("[Vec3: x={0}, y={1}, z={2}]", x, y, z);
 		}
 
 		public override bool Equals (object obj)
