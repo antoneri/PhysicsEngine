@@ -322,18 +322,13 @@ namespace PE
 						Vec3 n = data.normal;
 						Vec3 t = j_t.UnitVector;
 						var j = -(1 + e) * u_n.Length / Vec3.Dot (n * K, n - mu * t);
-						J = j * n + mu * j * t;
-
-						sphere.v.Add (-sphere.m_inv * J);
-						sphere.omega.Add (-sphere.I_inv * Vec3.Cross (r_a, J));
-						other.v.Add (other.m_inv * J);
-						other.omega.Add (other.I_inv * Vec3.Cross (r_b, J));
-					} else {
-						sphere.v.Add (sphere.m_inv * J);
-						sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
-						other.v.Add (-other.m_inv * J);
-						other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
+						J = -j * n - mu * j * t;
 					}
+
+					sphere.v.Add (sphere.m_inv * J);
+					sphere.omega.Add (sphere.I_inv * Vec3.Cross (r_a, J));
+					other.v.Add (-other.m_inv * J);
+					other.omega.Add (-other.I_inv * Vec3.Cross (r_b, J));
 						
 					var u_new = sphere.v - other.v;
 					var contactTest = Vec3.Dot (data.normal, u_new);
@@ -512,8 +507,7 @@ namespace PE
 		{
 			List<HGridObject> objects = new List<HGridObject> ();
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere sphere = spheres [i];
+			foreach (var sphere in spheres) {
 				HGridObject obj = new HGridObject (sphere, sphere.x, (float)sphere.r);
 				hgrid.AddObject (obj);
 				objects.Add (obj);
