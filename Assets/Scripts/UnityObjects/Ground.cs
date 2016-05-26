@@ -8,7 +8,7 @@ public class Ground : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		var ground = new RigidBody ();
+		var ground = new Entity ();
 		ground.m_inv = Mat3.Diag (0);
 		ground.I_inv = Mat3.Diag (0);
 

@@ -172,12 +172,12 @@ namespace PE
 
 	public class PlaneCollider : Collider
 	{
-		public RigidBody self;
+		public Entity self;
 		public Vec3 normal;
 		public double d;
 		public const double thickness = 0.3;
 
-		public PlaneCollider (RigidBody self, Vec3 normal, double d)
+		public PlaneCollider (Entity self, Vec3 normal, double d)
 		{
 			this.self = self;
 			this.normal = normal;

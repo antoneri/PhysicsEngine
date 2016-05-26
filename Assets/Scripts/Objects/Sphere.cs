@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PE
 {
-	public class Sphere : RigidBody
+	public class Sphere : Entity
 	{
 		public double r;
 
