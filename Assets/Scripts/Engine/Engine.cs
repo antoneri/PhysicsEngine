@@ -25,9 +25,10 @@ namespace PE
 		 * Visible in engine inspector
 		 */
 		public Vector3 wind = new Vector3 (0, 0, 0);
-		public uint solverIterations = 50;
+		public uint maxSolverIterations = 50;
 		public IterationDirection iterationDirection = IterationDirection.Forward;
 		public float mainLoopFrequency = 60f;
+		public double timestepsToStabilizeConstraint = 3;
 		public bool simulateCloth = true;
 		public bool simulateParticleSystem = true;
 		public bool simulateRope = true;
@@ -186,9 +187,8 @@ namespace PE
 			CheckCollisions (Rope);
 			HandleCollisions ();
 
-			const double d = 3; // Number of timesteps to stabilize the constraint
-
 			/* Constant parameters in SPOOK */
+			double d = timestepsToStabilizeConstraint;
 			double a = 4 / (dt * (1 + 4 * d));
 			double b = (4 * d) / (1 + 4 * d);
 
@@ -230,7 +230,7 @@ namespace PE
 
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, solverIterations, iterationDirection, ropeData);
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations, iterationDirection, ropeData);
             
 			Vec3Vector fc = G.Transpose * lambda;
 
@@ -366,7 +366,7 @@ namespace PE
 			}
 
 			if (contactObjects.Count > 0) {
-				double d = 3;
+				double d = timestepsToStabilizeConstraint;
 				double k = 1000;
 				double a = 4 / (dt * (1 + 4 * d));
 				double b = (4 * d) / (1 + 4 * d);
@@ -411,7 +411,7 @@ namespace PE
 
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
 
-				Vec3Vector lambda = Solver.GaussSeidel (S, B, solverIterations);
+				Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations);
 
 				/* If lambda has negative values, clamp to zero */
 				foreach (Vec3 elem in lambda) {
