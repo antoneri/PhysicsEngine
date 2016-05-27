@@ -105,15 +105,6 @@ namespace PE
 		{
 			Time.fixedDeltaTime = 1 / mainLoopFrequency;
 
-			if (timesteps < timestepLimit)
-				timesteps++;
-			else if (timesteps == timestepLimit) {
-				timesteps++;
-				Debug.Log ("Sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
-				ropeData.Close ();
-				ropeData = null;
-			}
-
 			if (simulateCloth)
 				ClothUpdate (clothDeltaTime);
 
@@ -175,7 +166,17 @@ namespace PE
 		{
 			if (Rope == null)
 				return;
-			
+
+			// Data collection
+			if (timesteps < timestepLimit)
+				timesteps++;
+			else if (timesteps == timestepLimit) {
+				timesteps++;
+				Debug.Log ("Sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
+				ropeData.Close ();
+				ropeData = null;
+			}
+
 			// Add gravity
 			foreach (var p in Rope) {
 				p.f.Set (p.m * g);
