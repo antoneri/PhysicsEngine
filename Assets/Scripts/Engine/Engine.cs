@@ -37,14 +37,7 @@ namespace PE
 		 * Engine internals
 		 */
 		private HGrid hgrid = new HGrid ();
-
 		private List<Entity> entities = new List<Entity> ();
-
-		private new ParticleSystem particleSystem;
-		private ParticleMesh cloth;
-		private ParticleSystem rope;
-		private List<Sphere> spheres;
-
 		private List<Intersection> intersections = new List<Intersection> (10000);
 
 		/*
@@ -78,7 +71,7 @@ namespace PE
 		}
 
 		/*
-		 * Setters
+		 * Properties
 		 */
 		public void AddEntity (Entity entity)
 		{
@@ -86,27 +79,23 @@ namespace PE
 		}
 
 		public ParticleSystem ParticleSystem {
-			set {
-				particleSystem = value;
-			}
+			get;
+			set;
 		}
 
 		public ParticleMesh Cloth {
-			set {
-				cloth = value;
-			}
+			get;
+			set;
 		}
 
 		public ParticleSystem Rope {
-			set {
-				rope = value;
-			}
+			get;
+			set;
 		}
 
 		public List<Sphere> Spheres {
-			set {
-				spheres = value;
-			}
+			get;
+			set;
 		}
 
 		/*
@@ -140,25 +129,25 @@ namespace PE
 
 		public void ClothUpdate (double dt)
 		{
-			if (cloth == null)
+			if (Cloth == null)
 				return;
 
 			for (int step = 0; step < clothTimeSteps; step++) {
 				// Reset forces
-				foreach (var p in cloth) {
+				foreach (var p in Cloth) {
 					p.f.SetZero ();					
 				}
 
 				// Compute spring forces
-				foreach (var spring in cloth.Neighbors) {
+				foreach (var spring in Cloth.Neighbors) {
 					var f = spring.Force;
 					spring.p2.f.Add (f);
 					f.Negate ();
 					spring.p1.f.Add (f);
 				}
 
-				for (int i = 0; i < cloth.Size; i++) {
-					var p = cloth [i];
+				for (int i = 0; i < Cloth.Size; i++) {
+					var p = Cloth [i];
 
 					// Add gravity
 					p.f.Add (p.m * g);
@@ -177,23 +166,23 @@ namespace PE
 			}
 
 			intersections.Clear ();
-			CheckCollisions (cloth);
+			CheckCollisions (Cloth);
 			HandleCollisions ();
 			AdjustIntersections ();
 		}
 
 		private void RopeUpdate (double dt)
 		{
-			if (rope == null)
+			if (Rope == null)
 				return;
 			
 			// Add gravity
-			foreach (var p in rope) {
+			foreach (var p in Rope) {
 				p.f.Set (p.m * g);
 			}
 
 			intersections.Clear ();
-			CheckCollisions (rope);
+			CheckCollisions (Rope);
 			HandleCollisions ();
 
 			const double d = 3; // Number of timesteps to stabilize the constraint
@@ -202,8 +191,8 @@ namespace PE
 			double a = 4 / (dt * (1 + 4 * d));
 			double b = (4 * d) / (1 + 4 * d);
 
-			var N = rope.Count;
-			List<Constraint> C = rope.constraints;
+			var N = Rope.Count;
+			List<Constraint> C = Rope.constraints;
 
 			var G = new Vec3Matrix (C.Count, N); // Constraint Jacobian matrix
 			var M_inv = new Mat3Matrix (N, N); // Inverse Mass matrix
@@ -216,19 +205,19 @@ namespace PE
 			for (int i = 0; i < C.Count; i++) {
 				// Set Jacobians
 				var c = C [i];
-				Vec3[] jac = c.getJacobians (rope);
+				Vec3[] jac = c.getJacobians (Rope);
 				G [i, c.body_i] = jac [0];
 				G [i, c.body_j] = jac [1];
 
 				// Set constraints q
-				q [i] = c.getConstraint (rope);
+				q [i] = c.getConstraint (Rope);
 			}
 
 			// Set values to M, f, W
 			for (int i = 0; i < N; i++) {
-				M_inv [i, i] = Mat3.Diag (rope [i].m_inv);
-				f [i] = rope [i].f;
-				W [i] = rope [i].v;
+				M_inv [i, i] = Mat3.Diag (Rope [i].m_inv);
+				f [i] = Rope [i].f;
+				W [i] = Rope [i].v;
 			}
 
 			Vec3Matrix S = G * M_inv * G.Transpose;
@@ -246,7 +235,7 @@ namespace PE
 
 			// Integrate
 			for (int i = 0; i < N; i++) {
-				Particle p = rope [i];
+				Particle p = Rope [i];
 				p.v = p.v + p.m_inv * fc [i] + dt * p.m_inv * p.f;
 				p.x = p.x + dt * p.v;
 			}
@@ -256,7 +245,7 @@ namespace PE
 
 		private void SpheresUpdate (double dt)
 		{
-			if (spheres == null)
+			if (Spheres == null)
 				return;
 
 			var contactObjects = new List<Entity> ();
@@ -266,8 +255,8 @@ namespace PE
 			/* Build up broad phase collision hash grid */
 			var hgridObjects = AddSpheresToHGrid ();
 
-			for (int i = 0; i < spheres.Count; i++) {
-				Sphere sphere = spheres [i];
+			for (int i = 0; i < Spheres.Count; i++) {
+				Sphere sphere = Spheres [i];
 
 				// Add gravity and take a half timestep
 				sphere.f.Set (sphere.m * g);
@@ -441,27 +430,27 @@ namespace PE
 			}
 
 			// Finally, integrate
-			foreach (var sphere in spheres) {
+			foreach (var sphere in Spheres) {
 				sphere.x.Add (dt * sphere.v);
 			}
 		}
 
 		private void ParticleUpdate (double dt)
 		{
-			if (particleSystem == null)
+			if (ParticleSystem == null)
 				return;
 			
 			// Clear forces
-			foreach (var p in particleSystem) {
+			foreach (var p in ParticleSystem) {
 				p.f.SetZero ();
 			}
 
 			// Create particles at emitter
-			particleSystem.Update ();
+			ParticleSystem.Update ();
 
 			// Accumulate external forces from e.g.gravity.
 			// Accumulate dissipative forces, e.g.drag and viscous drag.
-			foreach (var p in particleSystem) {
+			foreach (var p in ParticleSystem) {
 				/* Gravity */
 				p.f.Add (p.m * g);
 				p.v.Add (0.5 * dt * p.m_inv * p.f);
@@ -474,11 +463,11 @@ namespace PE
 			}
 				
 			// Find contact sets with external boundaries
-			CheckCollisions (particleSystem);
+			CheckCollisions (ParticleSystem);
 			HandleCollisions ();
 
 			// Take a timestep and integrate
-			foreach (var p in particleSystem) {
+			foreach (var p in ParticleSystem) {
 				p.v.Add (0.5 * dt * p.m_inv * p.f);
 				p.x.Add (dt * p.v);
 			}
@@ -524,7 +513,7 @@ namespace PE
 		{
 			List<HGridObject> objects = new List<HGridObject> ();
 
-			foreach (var sphere in spheres) {
+			foreach (var sphere in Spheres) {
 				HGridObject obj = new HGridObject (sphere, sphere.x, (float)sphere.r);
 				hgrid.AddObject (obj);
 				objects.Add (obj);

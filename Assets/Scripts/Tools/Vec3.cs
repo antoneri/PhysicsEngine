@@ -76,7 +76,7 @@ namespace PE
 
 		public double Length {
 			get {
-				return Math.Sqrt (Dot (this, this));
+				return Math.Sqrt (SqLength);
 			}
 		}
 
@@ -137,6 +137,7 @@ namespace PE
 
 		public static Vec3 operator* (Vec3 lhs, Vec3 rhs)
 		{
+			// Elementwise multiplication
 			return new Vec3 (lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
 		}
 
@@ -241,7 +242,6 @@ namespace PE
 
 		public override bool Equals (object obj)
 		{
-
 			Vec3 v = obj as Vec3;
 			if (v == null) {
 				return false;
@@ -251,7 +251,6 @@ namespace PE
 				if (Math.Abs (v [i] - this [i]) > 0.0000001) {
 					return false;
 				}
-
 			}
 
 			return true;

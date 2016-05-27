@@ -6,12 +6,11 @@ namespace PE
 {
 	public class Vector<T>: IEnumerable<T>
 	{
-		int size;
 		T[] items;
 
 		public Vector (int size)
 		{
-			this.size = size;
+			Size = size;
 			items = new T[size];
 
 			for (int i = 0; i < items.Length; i++) {
@@ -29,9 +28,8 @@ namespace PE
 		}
 
 		public int Size {
-			get {
-				return size;
-			}
+			get;
+			private set;
 		}
 
 		public int Length {
@@ -67,8 +65,8 @@ namespace PE
 
 		public static Vec3Vector operator * (Vector<T> v1, Vec3Vector v2)
 		{
-			Vec3Vector nv = new Vec3Vector (v1.size);
-			for (int i = 0; i < v1.size; i++) {
+			Vec3Vector nv = new Vec3Vector (v1.Size);
+			for (int i = 0; i < v1.Size; i++) {
 				nv [i] = (double)(object)v1 [i] * v2 [i];
 			}
 			return nv;
@@ -76,8 +74,8 @@ namespace PE
 
 		public static Vector<double> operator * (double k, Vector<T> v)
 		{
-			Vector<double> nv = new Vector<double> (v.size);
-			for (int i = 0; i < v.size; i++) {
+			Vector<double> nv = new Vector<double> (v.Size);
+			for (int i = 0; i < v.Size; i++) {
 				nv [i] = k * (double)(object)v [i];
 			}
 			return nv;
@@ -90,7 +88,6 @@ namespace PE
 			foreach (var e in items) {
 				sb.Append (e.ToString () + "\n");
 			}
-			;
 			sb.Append ("]");
 			return sb.ToString ();
 		}
@@ -123,7 +120,6 @@ namespace PE
 	{
 		public Vec3Vector (int size) : base (size)
 		{
-
 		}
 
 		public Vec3Vector (Vec3Vector v) : base (v.Size)

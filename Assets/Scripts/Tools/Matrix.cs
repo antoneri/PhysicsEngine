@@ -7,15 +7,13 @@ namespace PE
 {
 	public class Matrix<T> : IEnumerable<T>
 	{
-		protected int rows;
-		protected int cols;
-		protected bool diagonal = true;
 		protected T[] items;
 
 		public Matrix (int rows, int cols)
 		{
-			this.rows = rows;
-			this.cols = cols;
+			Rows = rows;
+			Cols = cols;
+			Diagonal = true;
 			items = new T[rows * cols];
 
 			for (int i = 0; i < items.Length; i++) {
@@ -29,7 +27,7 @@ namespace PE
 			}
 			set {
 				if (i != j)
-					diagonal = false;
+					Diagonal = false;
 
 				items [i * Cols + j] = value;
 			}
@@ -41,7 +39,7 @@ namespace PE
 				return items [i];
 			}
 			set {
-				diagonal = false;
+				Diagonal = false;
 				items [i] = value;
 			}
 		}
@@ -61,9 +59,8 @@ namespace PE
 		}
 
 		public bool Diagonal {
-			get {
-				return diagonal;	
-			}
+			get;
+			private set;
 		}
 
 		public int Size {
@@ -73,15 +70,13 @@ namespace PE
 		}
 
 		public int Rows {
-			get {
-				return rows;
-			}
+			get;
+			private set;
 		}
 
 		public int Cols {
-			get {
-				return cols;	
-			}
+			get;
+			private set;
 		}
 
 		public void ForEach (Action<T> action)
@@ -369,61 +364,45 @@ namespace PE
 			return M;
 		}
 
-        public static Vec3Matrix operator *(Vec3Matrix M1, Mat3Matrix M2)
-        {
-            if (M1.Cols != M2.Rows)
-            {
-                throw new InvalidOperationException("Invalid dimensions");
-            }
+		public static Vec3Matrix operator * (Vec3Matrix M1, Mat3Matrix M2)
+		{
+			if (M1.Cols != M2.Rows) {
+				throw new InvalidOperationException ("Invalid dimensions");
+			}
 
-            Vec3Matrix M = new Vec3Matrix(M1.Rows, M2.Cols);
+			Vec3Matrix M = new Vec3Matrix (M1.Rows, M2.Cols);
 
-            if (M1.Diagonal && M2.Diagonal)
-            {
-                for (int i = 0; i < M1.Rows; i++)
-                {
-                    M[i, i] = M1[i, i] * M2[i, i];
-                }
-            }
-            else if (M1.Diagonal)
-            {
-                for (int i = 0; i < M1.Rows; i++)
-                {
-                    for (int j = 0; j < M2.Cols; j++)
-                    {
-                        M[i, j] = M1[i, i] * M2[i, j];
-                    }
-                }
-            }
-            else if (M2.Diagonal)
-            {
-                for (int i = 0; i < M1.Rows; i++)
-                {
-                    for (int j = 0; j < M2.Cols; j++)
-                    {
-                        M[i, j] = M1[i, j] * M2[j, j];
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < M1.Rows; i++)
-                {
-                    for (int j = 0; j < M2.Cols; j++)
-                    {
-                        var e = new Vec3();
-                        for (int k = 0; k < M1.Cols; k++)
-                        {
-                            e.Add(M1[i, k] * M2[k, j]);
-                        }
-                        M[i, j] = e;
-                    }
-                }
-            }
+			if (M1.Diagonal && M2.Diagonal) {
+				for (int i = 0; i < M1.Rows; i++) {
+					M [i, i] = M1 [i, i] * M2 [i, i];
+				}
+			} else if (M1.Diagonal) {
+				for (int i = 0; i < M1.Rows; i++) {
+					for (int j = 0; j < M2.Cols; j++) {
+						M [i, j] = M1 [i, i] * M2 [i, j];
+					}
+				}
+			} else if (M2.Diagonal) {
+				for (int i = 0; i < M1.Rows; i++) {
+					for (int j = 0; j < M2.Cols; j++) {
+						M [i, j] = M1 [i, j] * M2 [j, j];
+					}
+				}
+			} else {
+				for (int i = 0; i < M1.Rows; i++) {
+					for (int j = 0; j < M2.Cols; j++) {
+						var e = new Vec3 ();
+						for (int k = 0; k < M1.Cols; k++) {
+							e.Add (M1 [i, k] * M2 [k, j]);
+						}
+						M [i, j] = e;
+					}
+				}
+			}
 
-            return M;
-        }
-    }
+			return M;
+		}
+	}
 
 }
 

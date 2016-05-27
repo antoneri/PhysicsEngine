@@ -4,11 +4,11 @@ namespace PE
 {
 	public class Mat3
 	{
-		private bool diagonal = true;
 		private double[,] items = new double[3, 3];
 
 		public Mat3 ()
 		{
+			Diagonal = true;
 		}
 
 		public double this [int i, int j] {
@@ -17,19 +17,15 @@ namespace PE
 			}
 			set {
 				if (i != j)
-					diagonal = false;
+					Diagonal = false;
 				
 				items [i, j] = value;
 			}
 		}
 
 		public bool Diagonal {
-			get {
-				return diagonal;
-			}
-			set {
-				diagonal = value;
-			}
+			get;
+			private set;
 		}
 
 		public double Determinant {
@@ -281,7 +277,7 @@ namespace PE
 				}
 			}
 
-			this.Diagonal = other.Diagonal;
+			Diagonal = other.Diagonal;
 		}
 
 		public override string ToString ()
