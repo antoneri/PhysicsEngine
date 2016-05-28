@@ -6,7 +6,7 @@ namespace PE
 {
 	public class Rope : MonoBehaviour
 	{
-		public int numParticles = 20;
+		public int numParticles = 10;
 
 		public double massOfLastParticle = 1;
 		public double springK = 1000;

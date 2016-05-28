@@ -446,9 +446,6 @@ namespace PE
 				p.f.SetZero ();
 			}
 
-			// Create particles at emitter
-			ParticleSystem.Update ();
-
 			// Accumulate external forces from e.g.gravity.
 			// Accumulate dissipative forces, e.g.drag and viscous drag.
 			foreach (var p in ParticleSystem) {

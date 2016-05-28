@@ -32,6 +32,7 @@ public class Emitter : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+        ps.Update ();
 		EmitParticles ();
 		UpdateUnityParticleSystem ();
 	}
