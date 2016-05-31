@@ -193,15 +193,15 @@ namespace PE
 
         int ComputeHashBucketIndex(Cell cellPos)
         {
-            int h1 = Convert.ToInt32("8da6b343", 16); // Large multiplicative constants;
-            int h2 = Convert.ToInt32("d8163841", 16); // here arbitrarily chosen primes
-            int h3 = Convert.ToInt32("cb1ab31f", 16);
+            uint h1 = 2376512323; // 0x8da6b343 Large multiplicative constants;
+            uint h2 = 3625334849; // 0xd8163841 here arbitrarily chosen primes
+            uint h3 = 3407524639; // 0xcb1ab31f
 
-            int n = h1 * cellPos.x + h2 * cellPos.y + h3 * cellPos.z;
+            long n = h1 * cellPos.x + h2 * cellPos.y + h3 * cellPos.z;
             n = n % NUM_BUCKETS;
             if (n < 0) n += NUM_BUCKETS;
 
-            return n;
+            return (int)n;
         }
 
     }
