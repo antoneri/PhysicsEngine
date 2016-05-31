@@ -10,8 +10,8 @@ public class FpsDisplay : MonoBehaviour
         style.normal.textColor = new Color (1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    void Update () {
-        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+    void FixedUpdate () {
+        deltaTime += (Time.fixedDeltaTime - deltaTime) * 0.1f;
     }
 
     void OnGUI () {
