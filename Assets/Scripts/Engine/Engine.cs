@@ -10,7 +10,7 @@ namespace PE
 	{
 		public static Engine instance = null;
 
-		private const float clothFrameRate = 300f;
+		public float clothFrameRate = 300f;
 		private int clothTimeSteps;
 		private double clothDeltaTime;
 
