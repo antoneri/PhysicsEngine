@@ -18,19 +18,13 @@ public class CameraController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (Input.GetMouseButtonDown (1)) {
-			lastMouse = Input.mousePosition;
-		}
+		Vector3 delta = Input.mousePosition - lastMouse;
 
-		if (Input.GetMouseButton (1)) {
-			Vector3 delta = Input.mousePosition - lastMouse;
+		delta *= sensitivity;
+        Vector3 rot = new Vector3 (transform.eulerAngles.x - delta.y, transform.eulerAngles.y + delta.x, 0);
+        transform.eulerAngles = rot;
 
-			delta *= sensitivity;
-            Vector3 rot = new Vector3 (transform.eulerAngles.x - delta.y, transform.eulerAngles.y + delta.x, 0);
-            transform.eulerAngles = rot;
-
-			lastMouse = Input.mousePosition;
-		}
+		lastMouse = Input.mousePosition;
 
 		float forward = 0; //Input.GetAxis ("Vertical");
 		float side = 0; // Input.GetAxis ("Horizontal");
