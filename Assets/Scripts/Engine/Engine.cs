@@ -46,8 +46,11 @@ namespace PE
 		 */
 		string ropeDataFile = "rope-convergence.txt";
 		StreamWriter ropeData;
-		int timesteps = 0;
-		const int timestepLimit = 500;
+        string sphereDataFile = "sphere-convergence.txt";
+        StreamWriter sphereData;
+		int ropeTimeSteps = 0;
+        int sphereTimeSteps = 0;
+        const int timestepLimit = 500;
 
 		void Awake ()
 		{
@@ -67,14 +70,16 @@ namespace PE
 			clothTimeSteps = Mathf.CeilToInt (Time.fixedDeltaTime * clothFrameRate);
 			clothDeltaTime = Time.fixedDeltaTime / clothTimeSteps;
 
-			File.Create (ropeDataFile).Close ();
-			ropeData = File.AppendText (ropeDataFile);
-		}
+            File.Create (ropeDataFile).Close ();
+            ropeData = File.AppendText (ropeDataFile);
+            File.Create (sphereDataFile).Close ();
+            sphereData = File.AppendText (sphereDataFile);
+        }
 
-		/*
+        /*
 		 * Properties
 		 */
-		public void AddEntity (Entity entity)
+        public void AddEntity (Entity entity)
 		{
 			entities.Add (entity);
 		}
@@ -169,11 +174,11 @@ namespace PE
 				return;
 
 			// Data collection
-			if (timesteps < timestepLimit)
-				timesteps++;
-			else if (timesteps == timestepLimit) {
-				timesteps++;
-				Debug.Log ("Sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
+			if (ropeTimeSteps < timestepLimit)
+				ropeTimeSteps++;
+			else if (ropeTimeSteps == timestepLimit) {
+				ropeTimeSteps++;
+				Debug.Log ("Rope sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
 				ropeData.Close ();
 				ropeData = null;
 			}
@@ -230,7 +235,7 @@ namespace PE
 
 			Vec3Vector B = -a * q - b * (G * W) - dt * (G * (M_inv * f));
 
-			Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations, iterationDirection, ropeData);
+			Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations, iterationDirection, logFile: ropeData);
             
 			Vec3Vector fc = G.Transpose * lambda;
 
@@ -411,7 +416,17 @@ namespace PE
 
 				Vec3Vector B = -a * q - b * (G * W) - dt * (G * dW);
 
-				Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations);
+                // Data collection
+                if (sphereTimeSteps < timestepLimit)
+                    sphereTimeSteps++;
+                else if (sphereTimeSteps == timestepLimit) {
+                    sphereTimeSteps++;
+                    Debug.Log ("Spheres sample complete! Timestep: " + 1 / Time.fixedDeltaTime + "Hz");
+                    sphereData.Close ();
+                    sphereData = null;
+                }
+
+                Vec3Vector lambda = Solver.GaussSeidel (S, B, maxSolverIterations, logFile: sphereData);
 
 				/* If lambda has negative values, clamp to zero */
 				foreach (Vec3 elem in lambda) {
